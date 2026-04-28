@@ -14,6 +14,14 @@ This repository contains Jupyter notebooks that analyse a 2D Cerpa et al. Fluidi
 
 The math, preprint, and source-of-truth analysis for this framework live in `/Users/DSAND/projects/pyvista/trench_pull_force/`. Cross-reference that codebase when rederiving or adding diagnostics.
 
+## Source data
+
+Cerpa Fluidity outputs are from: Cerpa, N. G., Sigloch, K., Garel, F., Heuret, A., Davies, D. R., Mihalynuk, M. *The effect of a weak asthenospheric layer on surface kinematics, subduction dynamics and slab morphology in the lower mantle.* JGR Solid Earth. Data archive: <https://zenodo.org/records/6817177>. The original Fluidity input file, parameter file (`constants_weakasth2.py`), and README from the archive are kept verbatim in `orig_scripts/`.
+
+- `STD_RefModel` — standard case. `WAL_RefModel` — weak-asthenospheric-layer case (viscosity factor 0.5, depth range 0–220 km, T_LAB = 1373 K).
+- **Box geometry:** 8000 km wide × 2900 km deep. Initial trench at x = 4000 km; subducting plate x ∈ [0, 4000] km, overriding plate x ∈ [4000, 8000] km. Lower-mantle interface at z = 660 km. Initial slab dip α = π/14.3 ≈ 12.6°, bending radius R = 250 km.
+- **Reference constants used in the simulation:** ρ = 3300 kg/m³, g = 9.8 m/s², T_surface = 273 K, T_mantle = 1573 K (1300 °C), viscosity bounds 10¹⁸–10²⁵ Pa·s. Composite rheology: Byerlee + diffusion + dislocation + Peierls creep.
+
 ## Conda env
 
 `pyvista-env` (numpy, pyvista, matplotlib, scipy, natsort).
@@ -33,6 +41,7 @@ notebooks/
   figures/                      — analysis-produced PNGs (canonical home)
   outputs/                      — npz cache files
 archive/                        — superseded notebooks
+orig_scripts/                   — original Cerpa parameter file + README from the data archive
 papers/                         — references
 scratch/                        — exploratory work, not committed/published
 ```
