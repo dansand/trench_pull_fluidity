@@ -1,0 +1,12 @@
+# macOS Finder metadata
+.DS_Store
+
+# Jupyter autosaves
+**/.ipynb_checkpoints/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Exploratory work — kept on disk, not in git (see CLAUDE.md "scratch/")
+scratch/
