@@ -2,54 +2,50 @@
 
 Force-balance analysis of 2D Cerpa et al. Fluidity subduction models, with a focus on the role of trench topography in coupling the slab to the trailing plate.
 
-Companion to the EGU2026 talk: [Re-examining slab pull and trench topography in numerical subduction models](https://meetingorganizer.copernicus.org/EGU26/EGU26-2649.html).
+Analysis presented in the EGU2026 talk: [Re-examining slab pull and trench topography in numerical subduction models](https://meetingorganizer.copernicus.org/EGU26/EGU26-2649.html).
+
+![Trailing-plate force balance, WAL model, time evolution](notebooks/figures/force_balance_FD_abs_WAL.gif)
 
 ---
 
 ## The mathematics
 
-Two integrations of the 2D Stokes equations are the workhorse of every figure in this repo.
-
-**Vertical balance — what holds up the topography.**  Integrating $\partial_x \sigma_{xz} + \partial_z \sigma_{zz} = -\rho g$ from the free surface to a fixed integration depth $z_c$, with $\sigma_{zz}(\text{surface}) \approx 0$, gives
-
-$$
-\sigma_{zz}(z_c, x) \;=\; -\rho g\,[z_c - z_s(x)] \;-\; \frac{\partial V}{\partial x}\bigg|_x ,
-$$
-
-where $V(x) = \int_0^{z_c} \sigma_{xz}\,dz$ is the depth-integrated shear stress.  When $\sigma_{zz}$ is approximately uniform on the equipotential at $z_c$ (i.e. *hydrostatic at depth $z_c$*), the surface deflection $w(x)$ relative to a reference column at $x_I$ satisfies $w(x) = (1/\rho_m g)\,\partial_x V$.  The trench-pull figures test this empirically by overlaying $w_\mathrm{actual}(x)$ from the free-surface field against $w_\tau(x) = (1/\rho_m g)\,\partial_x V$.
+Two integrations of the 2D stress equilibrium equations (Stokes equations) underpin every figure in this repo: a horizontal integration that yields the trailing-plate force balance, and a vertical integration that links surface topography to depth-integrated shear stress.
 
 **Horizontal balance — driving the trailing plate.**  Integrating $\partial_x \sigma_{xx} + \partial_z \sigma_{xz} = 0$ from surface to $z_c$ and from the trench column $x_T$ outward to a column at $x$ gives the trailing-plate balance
 
 $$
-\Delta F_D(x) \;-\; \Delta\mathrm{GPE}^*(x) \;+\; F_B(x) \;\approx\; 0 ,
+\Delta F_D(x) \;-\; \Delta\mathrm{GPE}^{*}(x) \;+\; F_B(x) \;\approx\; 0 ,
 $$
 
 with the three resultants
 
 $$
 F_D(x) \;=\; \int_0^{z_c} (\tau_{xx} - \tau_{zz})\,dz, \quad
-\mathrm{GPE}^*(x) \;=\; -\int_0^{z_c} \sigma_{zz}\,dz, \quad
-F_B(x) \;=\; \int_{x_T}^{x} \sigma_{xz}\big|_{z_c}\,dx',
+\mathrm{GPE}^{*}(x) \;=\; -\int_0^{z_c} \sigma_{zz}\,dz, \quad
+F_B(x) \;=\; \int_{x_T}^{x} \sigma_{xz}(x', z_c)\,dx',
 $$
 
-and the column-difference operator $\Delta f(x) \equiv f(x) - f(x_T)$.  $F_D$ measures whether the column is tension-like ($F_D > 0$) or compression-like ($F_D < 0$); $\mathrm{GPE}^*$ is minus the column-integrated vertical stress (positive for heavier columns); $F_B$ is the cumulative basal-shear traction integrated outward from the trench.
+and the column-difference operator $\Delta f(x) \equiv f(x) - f(x_T)$.  $F_D$ measures whether the column is tension-like ($F_D > 0$) or compression-like ($F_D < 0$); $\mathrm{GPE}^{*}$ is minus the column-integrated vertical stress (positive for heavier columns); $F_B$ is the cumulative basal-shear traction integrated outward from the trench.
+
+**Vertical balance — what holds up the topography.**  Integrating $\partial_x \sigma_{xz} + \partial_z \sigma_{zz} = -\rho g$ from the free surface to a fixed integration depth $z_c$, with $\sigma_{zz}(\text{surface}) \approx 0$, gives
+
+$$
+\sigma_{zz}(z_c, x) \;=\; -\rho g\,[z_c - z_s(x)] \;-\; \frac{\partial V}{\partial x} ,
+$$
+
+where $V(x) = \int_0^{z_c} \sigma_{xz}\,dz$ is the depth-integrated shear stress.  When $\sigma_{zz}$ is approximately uniform on the equipotential at $z_c$ (i.e. *hydrostatic at depth $z_c$*), the surface deflection $w(x)$ relative to a reference column at $x_I$ satisfies $w(x) = (1/\rho_m g)\,\partial_x V$.  The trench-pull figures test this empirically by overlaying $w_\mathrm{actual}(x)$ from the free-surface field against $w_\tau(x) = (1/\rho_m g)\,\partial_x V$.
 
 ---
 
-## The key figures
-
-### The three-term force balance
-
-The headline panel.  $\Delta F_D$, $-\Delta \mathrm{GPE}^*$, $F_B$, and their residual $\Delta F_D - \Delta\mathrm{GPE}^* + F_B$ plotted against $x - x_T$ across the trailing plate.  The residual hugging zero shows the closure holds; the three terms' relative magnitudes show *which* mechanism is doing what work along the plate.
-
-### Two reference-point conventions
+## Two reference-point conventions
 
 Same equation, two ways to anchor it on the plot:
 
-- **§8.2 form** — both $\Delta F_D$ and $\Delta\mathrm{GPE}^*$ anchored to zero at the trench:
+- **§8.2 form** — both $\Delta F_D$ and $\Delta\mathrm{GPE}^{*}$ anchored to zero at the trench:
 
 $$
-\Delta F_D(x) \;-\; \Delta\mathrm{GPE}^*(x) \;+\; F_B(x) \;\approx\; 0 .
+\Delta F_D(x) \;-\; \Delta\mathrm{GPE}^{*}(x) \;+\; F_B(x) \;\approx\; 0 .
 $$
 
   Easy to read the *shape* of the balance.  But $F_D$'s absolute value disappears — every column is plotted relative to the trench.
@@ -57,21 +53,12 @@ $$
 - **§8.3 form** — $F_D(x)$ at its absolute value, with the constant $F_D(x_T)$ absorbed into the GPE bracket:
 
 $$
-F_D(x) \;-\; \Big[\Delta\mathrm{GPE}^*(x) + F_D(x_T)\Big] \;+\; F_B(x) \;\approx\; 0 .
+F_D(x) \;-\; \left[\Delta\mathrm{GPE}^{*}(x) + F_D(x_T)\right] \;+\; F_B(x) \;\approx\; 0 .
 $$
 
   Algebraically identical to §8.2.  $F_D(x)$ now reads at its objective per-column value: positive in tension-like columns, negative in compression-like columns, with the zero line carrying physical meaning.  The cost is that the GPE bracket no longer asymptotes to zero — it carries $F_D(x_T)$ as an offset.
 
 The two forms produce closures that differ only by a constant; the residual shape (and the basal-drag term) is identical.  The §8.2 form is better when you want to read the *shape* of the closure off the plot; §8.3 is better when you want $F_D(x)$ itself to convey physical meaning.
-
-### Time-evolution figures
-
-Multi-model panels (STD vs WAL) generated from cached `.npz` records produced by the time loop:
-
-- $F_D(x_T)$ vs model time — the headline tension-to-compression secular trend at the trench column.
-- $\Delta\mathrm{GPE}^*(x_R, x_T)$ and $\Delta F_D(x_R, x_T)$ ridge-to-trench differences vs time, with the basal-drag residual $F_B(x_R) = \Delta\mathrm{GPE}^* - \Delta F_D$.
-- GPE decomposition into a trench-pull regime $\Delta\mathrm{GPE}^*(x_I, x_T)$ and a ridge-push regime $\Delta\mathrm{GPE}^*(x_R, x_I)$, with their sum.
-- Per-snapshot force-balance frames (one PNG per timestep) for movie assembly.
 
 ---
 
@@ -104,8 +91,8 @@ All knobs live in §2 of each notebook (single source of truth), with per-cell o
 | `DATA_ROOT` | path to PVTU directory | `/Users/.../OUTPUTS/` |
 | `MODEL_KEY` | `STD` or `WAL` | `'WAL'` |
 | `TIMESTEP_INDEX` | 0-indexed snapshot | `10` |
-| `DX` | grid spacing (m) | `200` (single-step), `500` (secondary) |
-| `Z_MAX` | grid depth (m) | `100_000` (= 100 km) |
+| `DX` | grid spacing (m) | `200` (main notebooks), `500` (`further_analysis/`) |
+| `Z_MAX` | grid depth (m) | `75_000` (= 75 km) |
 | `Y_SURFACE` | y-coord of model top (m) | `2_900_000` |
 | `MIRROR_X` | apply x-mirror | `True` |
 
@@ -113,7 +100,7 @@ All knobs live in §2 of each notebook (single source of truth), with per-cell o
 
 | name | meaning | default |
 |---|---|---|
-| `INTEGRATION_DEPTH_KM` | depth to which $\sigma_{zz}$ integrals are taken | `100` |
+| `INTEGRATION_DEPTH_KM` | depth to which $\sigma_{zz}$ integrals are taken | `75` |
 | `SMOOTHWIN` | $\pm$ grid columns averaged around picked columns | `10` |
 | `TRENCH_REF_HW_KM` | half-width [km] of the trench-reference average | `10` |
 | `WIN_T` | derived: `int(TRENCH_REF_HW_KM * 1000 / DX)` | — |
@@ -145,9 +132,9 @@ The notebooks are the build pipeline.  Workflow:
 1. **Point `DATA_ROOT`** in each notebook's §2 at your local copy of the Cerpa data archive.
 2. **Time-evolution caches** — run `cerpa_time_evolution.ipynb` once with `MODEL_KEY = 'STD'`, then once with `'WAL'`.  Each populates `notebooks/outputs/time_evolution_<MODEL_KEY>.npz`.  Multi-model figures in §7 then load both caches and don't need the time loop re-run.
 3. **Single-step figures** — run `cerpa_single_step.ipynb` at `TIMESTEP_INDEX = 5`, `10`, and `30` to cover all snapshot-specific figures (the talk uses all three).
-4. **Per-snapshot frames for the GIF** — `cerpa_time_evolution.ipynb` §9 contains two per-snapshot loops; the §8.3-form loop writes to `figures/force_balance_FD_abs_evolution_<MODEL_KEY>/`.  Convert to a GIF with the Pillow snippet in `readme_assets/`.
+4. **Per-snapshot frames for the GIF** — `cerpa_time_evolution.ipynb` §9 contains two per-snapshot loops; the §8.3-form loop writes to `figures/force_balance_FD_abs_evolution_<MODEL_KEY>/`.  Convert to a GIF with Pillow or ImageMagick.
 
-The `secondary/` notebooks (`cerpa_basal_drag.ipynb`, `cerpa_slab_normal_FD.ipynb`) are approximation-equivalence tests, not part of the talk's main narrative — run them if you want to verify that integration on an isotherm or on a slab-normal plane gives the same answer as the simple horizontal/vertical convention.
+The `further_analysis/` notebooks (`cerpa_basal_drag.ipynb`, `cerpa_slab_normal_FD.ipynb`) are not part of the talk's main narrative — run them if you want to verify approximations or simplifications, such as resultants on a slab-normal plane beneath the trench versus on a vertical plane.
 
 ---
 
@@ -164,7 +151,6 @@ notebooks/
   figures/                       — analysis-produced PNGs (canonical home)
   outputs/                       — npz time-evolution caches
 zenodo_materials/                — original Cerpa input file + parameter file + README
-papers/                          — references
 ```
 
 The `further_analysis/` notebooks reach `cerpa_helpers.py` one level up via a small `sys.path.insert(0, "..")` block at the top of their import cell — this is necessary because Jupyter only auto-adds the notebook's own directory to `sys.path`.
@@ -173,11 +159,15 @@ The `further_analysis/` notebooks reach `cerpa_helpers.py` one level up via a sm
 
 ## Conda environment
 
-Built and tested in `pyvista-env` (numpy, pyvista, matplotlib, scipy, natsort).  An `environment.yml` is forthcoming; for now, on a clean machine:
+Built and tested in `pyvista-env` (numpy, pyvista, matplotlib, scipy, natsort, jupyterlab).  Reproduce with the bundled [`environment.yml`](environment.yml):
 
 ```bash
-conda create -n pyvista-env python=3.11 numpy scipy matplotlib pyvista natsort -c conda-forge
+conda env create -f environment.yml
+conda activate pyvista-env
+python -m ipykernel install --user --name pyvista-env --display-name "Python (pyvista-env)"
 ```
+
+The `ipykernel install` step is what makes the env visible in JupyterLab's kernel menu; without it, an existing Jupyter installation will silently fall back to whichever kernel it already knows about.  Inside the notebook, select **Kernel → Change Kernel → Python (pyvista-env)**.
 
 ---
 
