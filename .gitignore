@@ -8,5 +8,6 @@
 __pycache__/
 *.pyc
 
-# Exploratory work — kept on disk, not in git (see CLAUDE.md "scratch/")
+# Exploratory work — kept on disk, not in git
 scratch/
+notebooks/WIP/

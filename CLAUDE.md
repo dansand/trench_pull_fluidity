@@ -46,6 +46,3 @@ papers/                         — references
 scratch/                        — exploratory work, not committed/published
 ```
 
-## User
-
-Manager of the AuScope Subsurface Observatory at UniMelb; geodynamicist.
