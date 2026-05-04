@@ -4,6 +4,9 @@
 # Jupyter autosaves
 **/.ipynb_checkpoints/
 
+# JupyterLab LSP / virtual-document mirrors
+.virtual_documents/
+
 # Python bytecode
 __pycache__/
 *.pyc
