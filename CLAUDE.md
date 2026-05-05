@@ -34,9 +34,9 @@ Analysis writes only to `notebooks/figures/` and `notebooks/outputs/`. The prese
 
 ```
 notebooks/
-  cerpa_single_step.ipynb       — main force-balance analysis (single timestep + time loop)
-  cerpa_slab_normal_FD.ipynb    — F_D on a slab-normal plane vs vertical
-  cerpa_basal_drag.ipynb        — basal drag on horizontal plane vs along an isotherm
+  fluidity_single_step.ipynb       — main force-balance analysis (single timestep + time loop)
+  fluidity_slab_normal_FD.ipynb    — F_D on a slab-normal plane vs vertical
+  fluidity_basal_drag.ipynb        — basal drag on horizontal plane vs along an isotherm
   subduction_schematic.ipynb    — synthetic schematic figure for the talk
   figures/                      — analysis-produced PNGs (canonical home)
   outputs/                      — npz cache files

@@ -114,7 +114,7 @@ All knobs live in §2 of each notebook (single source of truth), with per-cell o
 
 `DEPTH_LIM` is *purely* a plot-axis range — it never enters integration math.  Per-cell overrides are allowed for figures that need a different visual depth window.
 
-**Time-evolution-specific** (in `cerpa_time_evolution.ipynb` only)
+**Time-evolution-specific** (in `fluidity_time_evolution.ipynb` only)
 
 | name | meaning | default |
 |---|---|---|
@@ -130,11 +130,11 @@ All knobs live in §2 of each notebook (single source of truth), with per-cell o
 The notebooks are the build pipeline.  Workflow:
 
 1. **Point `DATA_ROOT`** in each notebook's §2 at your local copy of the Cerpa data archive.
-2. **Time-evolution caches** — run `cerpa_time_evolution.ipynb` once with `MODEL_KEY = 'STD'`, then once with `'WAL'`.  Each populates `notebooks/outputs/time_evolution_<MODEL_KEY>.npz`.  Multi-model figures in §7 then load both caches and don't need the time loop re-run.
-3. **Single-step figures** — run `cerpa_single_step.ipynb` at `TIMESTEP_INDEX = 5`, `10`, and `30` to cover all snapshot-specific figures (the talk uses all three).
-4. **Per-snapshot frames for the GIF** — `cerpa_time_evolution.ipynb` §9 contains two per-snapshot loops; the §8.3-form loop writes to `figures/force_balance_FD_abs_evolution_<MODEL_KEY>/`.  Convert to a GIF with Pillow or ImageMagick.
+2. **Time-evolution caches** — run `fluidity_time_evolution.ipynb` once with `MODEL_KEY = 'STD'`, then once with `'WAL'`.  Each populates `notebooks/outputs/time_evolution_<MODEL_KEY>.npz`.  Multi-model figures in §7 then load both caches and don't need the time loop re-run.
+3. **Single-step figures** — run `fluidity_single_step.ipynb` at `TIMESTEP_INDEX = 5`, `10`, and `30` to cover all snapshot-specific figures (the talk uses all three).
+4. **Per-snapshot frames for the GIF** — `fluidity_time_evolution.ipynb` §9 contains two per-snapshot loops; the §8.3-form loop writes to `figures/force_balance_FD_abs_evolution_<MODEL_KEY>/`.  Convert to a GIF with Pillow or ImageMagick.
 
-The `further_analysis/` notebooks (`cerpa_basal_drag.ipynb`, `cerpa_slab_normal_FD.ipynb`) are not part of the talk's main narrative — run them if you want to verify approximations or simplifications, such as resultants on a slab-normal plane beneath the trench versus on a vertical plane.
+The `further_analysis/` notebooks (`fluidity_basal_drag.ipynb`, `fluidity_slab_normal_FD.ipynb`) are not part of the talk's main narrative — run them if you want to verify approximations or simplifications, such as resultants on a slab-normal plane beneath the trench versus on a vertical plane.
 
 ---
 
@@ -142,12 +142,12 @@ The `further_analysis/` notebooks (`cerpa_basal_drag.ipynb`, `cerpa_slab_normal_
 
 ```
 notebooks/
-  cerpa_single_step.ipynb        — main analysis, single timestep
-  cerpa_time_evolution.ipynb     — main analysis, time evolution + npz cache
+  fluidity_single_step.ipynb        — main analysis, single timestep
+  fluidity_time_evolution.ipynb     — main analysis, time evolution + npz cache
   cerpa_helpers.py               — shared functions (importable from any notebook)
   further_analysis/
-    cerpa_basal_drag.ipynb       — approximation test: isotherm vs horizontal plane
-    cerpa_slab_normal_FD.ipynb   — approximation test: slab-normal vs vertical plane
+    fluidity_basal_drag.ipynb       — approximation test: isotherm vs horizontal plane
+    fluidity_slab_normal_FD.ipynb   — approximation test: slab-normal vs vertical plane
   figures/                       — analysis-produced PNGs (canonical home)
   outputs/                       — npz time-evolution caches
 zenodo_materials/                — original Cerpa input file + parameter file + README
