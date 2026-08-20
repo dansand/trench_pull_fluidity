@@ -24,7 +24,7 @@ Cerpa Fluidity outputs are from: Cerpa, N. G., Sigloch, K., Garel, F., Heuret, A
 
 ## Conda env
 
-`pyvista-env` (numpy, pyvista, matplotlib, scipy, natsort, jupyterlab). Reproducible via the bundled [`environment.yml`](environment.yml) at repo root. After `conda env create`, a `python -m ipykernel install --user --name pyvista-env` step is required to register the env as a Jupyter kernel — without it, notebooks fall back silently to the base anaconda kernel.
+`pyvista-env` — the **shared base environment for the whole trench-pull analysis suite** (one env runs this repo, `trench_pull_force`, and future per-model repos). Reproducible via the bundled [`environment.yml`](environment.yml) at repo root, an identical copy of the canonical one in `trench_pull_force/`; keep them in sync. After `conda env create`, a `python -m ipykernel install --user --name pyvista-env` step is required to register the env as a Jupyter kernel — without it, notebooks fall back silently to the base anaconda kernel.
 
 Two compatibility notes:
 - All four notebooks include `if not hasattr(np, 'trapz'): np.trapz = np.trapezoid` after `import numpy as np`. This is a forward-compat shim for numpy ≥ 2.0 (which removed `np.trapz` in favour of `np.trapezoid`). Original env had numpy 1.26 + scipy 1.13 where `np.trapz` and `scipy.integrate.cumtrapz` still existed; the shim keeps the notebooks running on both old and new env.

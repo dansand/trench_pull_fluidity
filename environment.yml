@@ -1,12 +1,32 @@
+# Shared base environment for the trench-pull model-analysis suite.
+# One environment runs every analysis repo (trench_pull_force, trench_pull_fluidity,
+# and future per-model repos — the suite is one repository per published numerical
+# model, all on this same base environment). Canonical copy:
+# trench_pull_force/environment.yml — keep the copies in the other analysis repos
+# identical to it.
+#
+# After creating, register the kernel — without this, notebooks fall back silently
+# to the base anaconda kernel:
+#   conda env create -f environment.yml
+#   conda run -n pyvista-env python -m ipykernel install --user --name pyvista-env
+#
+# Pins are the verified working set (all suite notebooks execute top-to-bottom,
+# 2026-08-21). The notebooks carry a numpy trapz/trapezoid shim, so numpy >= 2
+# also works, but 1.26 is what the committed outputs were generated with.
 name: pyvista-env
 channels:
   - conda-forge
 dependencies:
-  - python=3.11
-  - numpy
-  - scipy
-  - matplotlib
-  - pyvista
-  - natsort
-  - jupyterlab
+  - python=3.12
+  - numpy=1.26
+  - scipy=1.13
+  - matplotlib=3.9
+  - pyvista=0.46
+  - h5py=3.11       # MDOODZ HDF5 outputs (trench_pull_force)
+  - pandas=2.3
+  - natsort=8.4
+  - contourpy=1.2   # slab-top contour extraction (fluidity further_analysis)
+  - cmcrameri=1.9
+  - jupyterlab=4.2
   - ipykernel
+  - nbconvert       # headless notebook execution
