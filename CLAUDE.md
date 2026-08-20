@@ -42,7 +42,7 @@ notebooks/
   fluidity_time_evolution.ipynb            — time-evolution analysis with npz cache
   cerpa_helpers.py                         — shared helpers (importable from any notebook)
   further_analysis/
-    fluidity_slab_normal_FD.ipynb          — F_D on a slab-normal plane vs vertical (+ §12 slab-top FD wip)
+    fluidity_slab_normal_FD.ipynb          — N_D on a slab-normal plane vs vertical (+ §12 slab-top FD wip)
     fluidity_basal_drag.ipynb              — basal drag on horizontal plane vs along an isotherm
     fluidity_viscosity_evolution.ipynb     — 6-panel slab viscosity figure (Cerpa-style)
   figures/                                 — analysis-produced PNGs (canonical home)
@@ -52,7 +52,7 @@ zenodo_materials/                          — original Cerpa parameter file + R
 
 ## Down-dip force balance — shelved on the `downdip-force-balance` branch
 
-§12 of `fluidity_slab_normal_FD.ipynb` ("$F_D$ along the slab-top SP boundary") — the multi-plane slab-top F_D diagnostic with SP-fraction masking and a depth-decoupled transition to T-only masking at ~125 km — is finished as committed and **stays on `main`** (decided 2026-08-20; see `BRANCHING_PLAN.md` on the `downdip-force-balance` branch).
+§12 of `fluidity_slab_normal_FD.ipynb` ("$N_D$ along the slab-top SP boundary") — the multi-plane slab-top N_D diagnostic with SP-fraction masking and a depth-decoupled transition to T-only masking at ~125 km — is finished as committed and **stays on `main`** (decided 2026-08-20; see `BRANCHING_PLAN.md` on the `downdip-force-balance` branch).
 
 The open investigation built on top of it — cumulative down-dip buoyancy (W_cum), the analytical interface-shear term (F_int), the unbent-slab visualisation, and the roadmap (cell 39 of the notebook) — lives only on the `downdip-force-balance` branch. That branch rewrites §12's central pipeline cell, so it will conflict with `main` inside §12: treat it as a reference to read from, not a branch to merge back blind. The repository is the source of truth for all of this — there are no external roadmap or script files.
 

@@ -15,18 +15,18 @@ Two integrations of the 2D stress equilibrium equations (Stokes equations) under
 **Horizontal balance — driving the trailing plate.**  Integrating $\partial_x \sigma_{xx} + \partial_z \sigma_{xz} = 0$ from surface to $z_c$ and from the trench column $x_T$ outward to a column at $x$ gives the trailing-plate balance
 
 $$
-\Delta F_D(x) \;-\; \Delta\mathrm{GPE}^{*}(x) \;+\; F_B(x) \;\approx\; 0 ,
+\Delta N_D(x) \;-\; \Delta\mathrm{GPE}^{*}(x) \;+\; F_B(x) \;\approx\; 0 ,
 $$
 
 with the three resultants
 
 $$
-F_D(x) \;=\; \int_0^{z_c} (\tau_{xx} - \tau_{zz})\,dz, \quad
+N_D(x) \;=\; \int_0^{z_c} (\tau_{xx} - \tau_{zz})\,dz, \quad
 \mathrm{GPE}^{*}(x) \;=\; -\int_0^{z_c} \sigma_{zz}\,dz, \quad
 F_B(x) \;=\; \int_{x_T}^{x} \sigma_{xz}(x', z_c)\,dx',
 $$
 
-and the column-difference operator $\Delta f(x) \equiv f(x) - f(x_T)$.  $F_D$ measures whether the column is tension-like ($F_D > 0$) or compression-like ($F_D < 0$); $\mathrm{GPE}^{*}$ is minus the column-integrated vertical stress (positive for heavier columns); $F_B$ is the cumulative basal-shear traction integrated outward from the trench.
+and the column-difference operator $\Delta f(x) \equiv f(x) - f(x_T)$.  $N_D$ measures whether the column is tension-like ($N_D > 0$) or compression-like ($N_D < 0$); $\mathrm{GPE}^{*}$ is minus the column-integrated vertical stress (positive for heavier columns); $F_B$ is the cumulative basal-shear traction integrated outward from the trench.
 
 **Vertical balance — what holds up the topography.**  Integrating $\partial_x \sigma_{xz} + \partial_z \sigma_{zz} = -\rho g$ from the free surface to a fixed integration depth $z_c$, with $\sigma_{zz}(\text{surface}) \approx 0$, gives
 
@@ -42,23 +42,23 @@ where $V(x) = \int_0^{z_c} \sigma_{xz}\,dz$ is the depth-integrated shear stress
 
 Same equation, two ways to anchor it on the plot:
 
-- **§8.2 form** — both $\Delta F_D$ and $\Delta\mathrm{GPE}^{*}$ anchored to zero at the trench:
+- **§8.2 form** — both $\Delta N_D$ and $\Delta\mathrm{GPE}^{*}$ anchored to zero at the trench:
 
 $$
-\Delta F_D(x) \;-\; \Delta\mathrm{GPE}^{*}(x) \;+\; F_B(x) \;\approx\; 0 .
+\Delta N_D(x) \;-\; \Delta\mathrm{GPE}^{*}(x) \;+\; F_B(x) \;\approx\; 0 .
 $$
 
-  Easy to read the *shape* of the balance.  But $F_D$'s absolute value disappears — every column is plotted relative to the trench.
+  Easy to read the *shape* of the balance.  But $N_D$'s absolute value disappears — every column is plotted relative to the trench.
 
-- **§8.3 form** — $F_D(x)$ at its absolute value, with the constant $F_D(x_T)$ absorbed into the GPE bracket:
+- **§8.3 form** — $N_D(x)$ at its absolute value, with the constant $N_D(x_T)$ absorbed into the GPE bracket:
 
 $$
-F_D(x) \;-\; \left[\Delta\mathrm{GPE}^{*}(x) + F_D(x_T)\right] \;+\; F_B(x) \;\approx\; 0 .
+N_D(x) \;-\; \left[\Delta\mathrm{GPE}^{*}(x) + N_D(x_T)\right] \;+\; F_B(x) \;\approx\; 0 .
 $$
 
-  Algebraically identical to §8.2.  $F_D(x)$ now reads at its objective per-column value: positive in tension-like columns, negative in compression-like columns, with the zero line carrying physical meaning.  The cost is that the GPE bracket no longer asymptotes to zero — it carries $F_D(x_T)$ as an offset.
+  Algebraically identical to §8.2.  $N_D(x)$ now reads at its objective per-column value: positive in tension-like columns, negative in compression-like columns, with the zero line carrying physical meaning.  The cost is that the GPE bracket no longer asymptotes to zero — it carries $N_D(x_T)$ as an offset.
 
-The two forms produce closures that differ only by a constant; the residual shape (and the basal-drag term) is identical.  The §8.2 form is better when you want to read the *shape* of the closure off the plot; §8.3 is better when you want $F_D(x)$ itself to convey physical meaning.
+The two forms produce closures that differ only by a constant; the residual shape (and the basal-drag term) is identical.  The §8.2 form is better when you want to read the *shape* of the closure off the plot; §8.3 is better when you want $N_D(x)$ itself to convey physical meaning.
 
 ---
 
@@ -70,7 +70,7 @@ The two forms produce closures that differ only by a constant; the residual shap
 
 **Mirror.**  `MIRROR_X = True` flips the model along $x$ via `mirror_fields_in_x` so the subducting plate sits on the right and the slab descends leftward — matches the MDOODZ convention used in the companion `trench_pull_force` repo.  Sign-flips on $\sigma_{xz}$ and $v_x$ are bundled into the helper.
 
-**Quadrature.**  Vertical depth integrals (`F_D`, `Σ_zz`, `V`, `GPE*`) use `numpy.trapz` over the full $[0, Z_\mathrm{MAX}]$ range.  Cumulative basal drag uses `scipy.integrate.cumulative_trapezoid` left-to-right and is then anchored to zero at the trench column (`F_B = FB_ - FB_[tindx]`).
+**Quadrature.**  Vertical depth integrals (`N_D`, `Σ_zz`, `V`, `GPE*`) use `numpy.trapz` over the full $[0, Z_\mathrm{MAX}]$ range.  Cumulative basal drag uses `scipy.integrate.cumulative_trapezoid` left-to-right and is then anchored to zero at the trench column (`F_B = FB_ - FB_[tindx]`).
 
 **Trench picker** (`pick_trench_3step`).  Three steps: (1) coarse pressure-min anchor; (2) refined velocity sign-change in a window; (3) directional pressure-min refinement on the subducting-plate side.  Step 2 is mirror-aware: in `MIRROR_X = True` runs the picker selects the *rightmost* zero-crossing of $v_x$ (subducting-plate side), in non-mirrored runs the *leftmost*.
 
