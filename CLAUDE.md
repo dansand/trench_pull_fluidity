@@ -1,12 +1,12 @@
 # Cerpa trench-pull analysis
 
-This repository contains Jupyter notebooks that analyse a 2D Cerpa et al. Fluidity subduction model. The framework is the vertically integrated horizontal force balance ΔF_D − ΔGPE* + F_B = 0 with a focus on the role of trench topography in coupling the slab to the trailing plate.
+This repository contains Jupyter notebooks that analyse a 2D Cerpa et al. Fluidity subduction model. The framework is the vertically integrated horizontal force balance $\Delta N_D - \Delta\mathrm{GPE}^* + F_B = 0$ with a focus on the role of trench topography in coupling the slab to the trailing plate.
 
 ## Conventions
 
 - Coordinates: x rightward positive, z downward positive (z-down), z = Y_SURFACE − y.
 - The model is mirrored along x at extraction so that subduction matches the MDOODZ / trench_pull_force orientation: subducting plate on the right, vx < 0 in the trailing plate, slab descending leftward. The mirror is wired through `MIRROR_X`, `SUBDUCTING_SIDE`, and `SEAWARD_SIGN` in §2 of each notebook, with a `mirror_fields_in_x` helper in §3.
-- Off-diagonal stress sign flip (σ_xz_zdown = −σ_xy_yup) is applied at extraction, not buried inside V's formula.
+- Off-diagonal stress sign flip (σ_zx_zdown = −σ_xy_yup) is applied at extraction, not buried inside V's formula.
 - Diagonal stress components (σ_xx, σ_zz) are invariant under both the y→z flip and the x-mirror — no sign change, only `np.flip` for the spatial reordering.
 - All stress resultants (Fd, GPE, V, FB) are *resultants*, not directional tractions. Their sign only acquires physical meaning once paired with the outward normal of a chosen plane.
 
@@ -58,11 +58,11 @@ The open investigation built on top of it — cumulative down-dip buoyancy (W_cu
 
 Key methodological decisions already made on this thread (don't re-litigate when restarting):
 - Slab geometry tracker is the SP=0.5 contour, not an isotherm (isotherms have two-branch ambiguity at depth).
-- Walk the contour in both directions from a seed at `(tloc, 5 km)`; no synthetic z=0 extension.
+- Walk the contour in both directions from a seed at `(x_trench, 5 km)`; no synthetic z=0 extension.
 - Gaussian-filter the polyline (sigma ~ 15–20 pts) before fitting the spline.
 - Slab-normal lines are bilateral (`SLAB_NORMAL_UP_KM ≈ 10–20`, `SLAB_NORMAL_DOWN_KM ≈ 120`).
 - Mask: `SP > 0.5 & T < T_MAX_K` above `DECOUPLING_DEPTH_KM` (≈125 km), `T < T_MAX_K` only below — handles the thermal halo that develops on top of the deep slab.
 - Reference density for buoyancy: lowest unmasked density on each slab-normal line (adapts with depth).
 - Analytical interface shear: constant τ ≈ 10 MPa, applied down-dip of trench, capped at decoupling depth.
-- Curvature coupling for the slab-parallel force balance: $V \cdot \Delta\theta$ summed between consecutive eval points (no explicit κ computation needed); $V = \int\sigma_{\xi\eta}\,d\eta$ is the *transverse-stress resultant*, the down-dip analog of $V(x) = \int\sigma_{xz}\,dz$ from the trailing-plate balance.
+- Curvature coupling for the slab-parallel force balance: $V \cdot \Delta\theta$ summed between consecutive eval points (no explicit κ computation needed); $V = \int\sigma_{\xi\eta}\,d\eta$ is the *transverse-stress resultant*, the down-dip analog of $V(x) = \int\sigma_{zx}\,dz$ from the trailing-plate balance.
 

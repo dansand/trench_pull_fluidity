@@ -12,7 +12,7 @@ Analysis presented in the EGU2026 talk: [Re-examining slab pull and trench topog
 
 Two integrations of the 2D stress equilibrium equations (Stokes equations) underpin every figure in this repo: a horizontal integration that yields the trailing-plate force balance, and a vertical integration that links surface topography to depth-integrated shear stress.
 
-**Horizontal balance — driving the trailing plate.**  Integrating $\partial_x \sigma_{xx} + \partial_z \sigma_{xz} = 0$ from surface to $z_c$ and from the trench column $x_T$ outward to a column at $x$ gives the trailing-plate balance
+**Horizontal balance — driving the trailing plate.**  Integrating $\partial_x \sigma_{xx} + \partial_z \sigma_{zx} = 0$ from surface to $z_c$ and from the trench column $x_T$ outward to a column at $x$ gives the trailing-plate balance
 
 $$
 \Delta N_D(x) \;-\; \Delta\mathrm{GPE}^{*}(x) \;+\; F_B(x) \;\approx\; 0 ,
@@ -23,18 +23,18 @@ with the three resultants
 $$
 N_D(x) \;=\; \int_0^{z_c} (\tau_{xx} - \tau_{zz})\,dz, \quad
 \mathrm{GPE}^{*}(x) \;=\; -\int_0^{z_c} \sigma_{zz}\,dz, \quad
-F_B(x) \;=\; \int_{x_T}^{x} \sigma_{xz}(x', z_c)\,dx',
+F_B(x) \;=\; \int_{x_T}^{x} \sigma_{zx}(x', z_c)\,dx',
 $$
 
 and the column-difference operator $\Delta f(x) \equiv f(x) - f(x_T)$.  $N_D$ measures whether the column is tension-like ($N_D > 0$) or compression-like ($N_D < 0$); $\mathrm{GPE}^{*}$ is minus the column-integrated vertical stress (positive for heavier columns); $F_B$ is the cumulative basal-shear traction integrated outward from the trench.
 
-**Vertical balance — what holds up the topography.**  Integrating $\partial_x \sigma_{xz} + \partial_z \sigma_{zz} = -\rho g$ from the free surface to a fixed integration depth $z_c$, with $\sigma_{zz}(\text{surface}) \approx 0$, gives
+**Vertical balance — what holds up the topography.**  Integrating $\partial_x \sigma_{zx} + \partial_z \sigma_{zz} = -\rho g$ from the free surface to a fixed integration depth $z_c$, with $\sigma_{zz}(\text{surface}) \approx 0$, gives
 
 $$
 \sigma_{zz}(z_c, x) \;=\; -\rho g\,[z_c - z_s(x)] \;-\; \frac{\partial V}{\partial x} ,
 $$
 
-where $V(x) = \int_0^{z_c} \sigma_{xz}\,dz$ is the depth-integrated shear stress.  When $\sigma_{zz}$ is approximately uniform on the equipotential at $z_c$ (i.e. *hydrostatic at depth $z_c$*), the surface deflection $w(x)$ relative to a reference column at $x_I$ satisfies $w(x) = (1/\rho_m g)\,\partial_x V$.  The trench-pull figures test this empirically by overlaying $w_\mathrm{actual}(x)$ from the free-surface field against $w_\tau(x) = (1/\rho_m g)\,\partial_x V$.
+where $V(x) = \int_0^{z_c} \sigma_{zx}\,dz$ is the depth-integrated shear stress.  When $\sigma_{zz}$ is approximately uniform on the equipotential at $z_c$ (i.e. *hydrostatic at depth $z_c$*), the surface deflection $w(x)$ relative to a reference column at $x_I$ satisfies $w(x) = (1/\rho_m g)\,\partial_x V$.  The trench-pull figures test this empirically by overlaying $w_\mathrm{actual}(x)$ from the free-surface field against $w_\tau(x) = (1/\rho_m g)\,\partial_x V$.
 
 ---
 
@@ -66,11 +66,11 @@ The two forms produce closures that differ only by a constant; the residual shap
 
 **Stress interpolation onto a regular grid.**  PVTU node-centred fields are sampled onto a uniform cell-centred grid with `pyvista.StructuredGrid.sample(vtk_data)`.  The grid spans $[x_\min, x_\max] \times [0, Z_\mathrm{MAX}]$ with cell spacing $DX$ in both directions.  Cells outside the model domain are flagged via `interp["vtkValidPointMask"]` and set to NaN.
 
-**Coordinate convention.**  $x$ rightward positive, $z$ downward positive ($z = Y_\mathrm{SURFACE} - y$).  Off-diagonal stress sign flip $\sigma_{xz}^{\,z\text{-down}} = -\sigma_{xy}^{\,y\text{-up}}$ applied at extraction in each notebook's load cell, not buried in any helper.
+**Coordinate convention.**  $x$ rightward positive, $z$ downward positive ($z = Y_\mathrm{SURFACE} - y$).  Off-diagonal stress sign flip $\sigma_{zx}^{\,z\text{-down}} = -\sigma_{xy}^{\,y\text{-up}}$ applied at extraction in each notebook's load cell, not buried in any helper.
 
-**Mirror.**  `MIRROR_X = True` flips the model along $x$ via `mirror_fields_in_x` so the subducting plate sits on the right and the slab descends leftward — matches the MDOODZ convention used in the companion `trench_pull_force` repo.  Sign-flips on $\sigma_{xz}$ and $v_x$ are bundled into the helper.
+**Mirror.**  `MIRROR_X = True` flips the model along $x$ via `mirror_fields_in_x` so the subducting plate sits on the right and the slab descends leftward — matches the MDOODZ convention used in the companion `trench_pull_force` repo.  Sign-flips on $\sigma_{zx}$ and $v_x$ are bundled into the helper.
 
-**Quadrature.**  Vertical depth integrals (`N_D`, `Σ_zz`, `V`, `GPE*`) use `numpy.trapz` over the full $[0, Z_\mathrm{MAX}]$ range.  Cumulative basal drag uses `scipy.integrate.cumulative_trapezoid` left-to-right and is then anchored to zero at the trench column (`F_B = FB_ - FB_[tindx]`).
+**Quadrature.**  Vertical depth integrals (`N_D`, `Σ_zz`, `V`, $\mathrm{GPE}^*$) use `numpy.trapz` over the full $[0, Z_\mathrm{MAX}]$ range.  Cumulative basal drag uses `scipy.integrate.cumulative_trapezoid` left-to-right and is then anchored to zero at the trench column (`F_B = FB_ - FB_[tindx]`).
 
 **Trench picker** (`pick_trench_3step`).  Three steps: (1) coarse pressure-min anchor; (2) refined velocity sign-change in a window; (3) directional pressure-min refinement on the subducting-plate side.  Step 2 is mirror-aware: in `MIRROR_X = True` runs the picker selects the *rightmost* zero-crossing of $v_x$ (subducting-plate side), in non-mirrored runs the *leftmost*.
 

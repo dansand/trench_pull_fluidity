@@ -173,7 +173,7 @@ def pick_trench_3step(x, z, p, vx,
     return trench_x, info
 
 
-def find_first_isostatic_column(x, fs_top, tloc, tindx, DX,
+def find_first_isostatic_column(x, fs_top, x_trench, tindx, DX,
                                 buffer_km=30, window_km=500,
                                 regional_ref_km=500, seaward_sign=+1):
     """Walk seaward of the trench (with a buffer) and return the first index
@@ -182,7 +182,7 @@ def find_first_isostatic_column(x, fs_top, tloc, tindx, DX,
 
     Returns (i_first_isostatic, i_far_reference).
     """
-    i_far = int(np.argmin(np.abs(x - (tloc + seaward_sign * regional_ref_km * 1000.0))))
+    i_far = int(np.argmin(np.abs(x - (x_trench + seaward_sign * regional_ref_km * 1000.0))))
     target = float(fs_top[i_far])
 
     buffer_grid = int(buffer_km * 1000.0 / DX)
@@ -197,7 +197,7 @@ def find_first_isostatic_column(x, fs_top, tloc, tindx, DX,
     return i_end, i_far
 
 
-def find_ridge_x(x, fs_top, tloc, seaward_sign=+1,
+def find_ridge_x(x, fs_top, x_trench, seaward_sign=+1,
                  buffer_km=200, smooth_km=50):
     """Locate the mid-ocean ridge as the highest point of the free-surface
     field, restricted to columns seaward of the trench.
@@ -210,9 +210,9 @@ def find_ridge_x(x, fs_top, tloc, seaward_sign=+1,
 
     buf_m = buffer_km * 1000.0
     if seaward_sign > 0:
-        seaward = x > (tloc + buf_m)
+        seaward = x > (x_trench + buf_m)
     else:
-        seaward = x < (tloc - buf_m)
+        seaward = x < (x_trench - buf_m)
 
     if not seaward.any():
         raise RuntimeError("No columns seaward of trench (after buffer)")
