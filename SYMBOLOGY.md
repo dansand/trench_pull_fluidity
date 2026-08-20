@@ -1,5 +1,5 @@
 <!-- GENERATED — do not edit. Canonical: trench_pull_force/SYMBOLOGY.md
-     Synced from commit 2788b3c on 2026-08-20. Edit there and re-run /symbology-sync. -->
+     Synced from commit 216195f on 2026-08-21. Edit there and re-run /symbology-sync. -->
 # Symbology — canonical specification
 
 **Status:** ACTIVE — all five decisions in §1 closed 2026-08-20. D1–D4 were set by the
@@ -17,9 +17,12 @@ repo. Synced verbatim into `trench_pull_fluidity/SYMBOLOGY.md` and
 here.
 
 **Upstream source of truth:** `/Users/DSAND/projects/mypapers/trench_pull_force/2026_version/`
-(`main.tex`, `si.tex`, `POLICY_reference_values.md`). Read-only. Where this file and the
-manuscript disagree, the manuscript wins and this file is wrong — fix it here, do not
-edit the manuscript to match.
+(`main.tex`, `si.tex`, `POLICY_reference_values.md`, and — authoritative for symbols
+since 2026-08-21 — **`POLICY_symbols.md`**, the manuscript's own symbol register).
+Read-only. Where this file and the upstream register disagree, the register wins and
+this file is wrong — fix it here, do not edit the manuscript to match. Symbols this
+project needs that the register does not define are *reported upstream* (§7 below)
+before being swept — per the register's own change procedure.
 
 **Companion policy:** numbers, uncertainties and significant figures are governed by
 `2026_version/POLICY_reference_values.md`, not by this file. This file governs *how a
@@ -151,22 +154,26 @@ All decisions in §1 are closed; every row is now enforced.
 
 | Canonical (LaTeX) | Python identifier | Deprecated / variants | Meaning | Units |
 |---|---|---|---|---|
-| `N_D` | `n_d` | `F_D`, `F_{D}` | in-plane resultant of the deviatoric normal stress | N/m |
+| `N_D` | `n_d` | `F_D`, `F_{D}`, `\tau_{xx} - \tau_{zz}`, `\tau_{xx}-\tau_{zz}` | in-plane differential resultant, $N_D=\int(\sigma_{xx}-\sigma_{zz})\,dz$ — rendered with **σ**, per POLICY_symbols rule 2 (the difference equals the deviatoric one; standalone deviatoric components in decomposition prose are pending upstream, §7) | N/m |
 | `\mathrm{GPE}^*` | `gpe_star` | `GPE*`, `GPE^*` | corrected GPE: columnwise resultant of the true vertical normal stress | N/m |
 | `\Delta\mathrm{GPE}^*` | `delta_gpe_star` | `Delta GPE`, `ΔGPE` | between-column difference of $\mathrm{GPE}^*$ | N/m |
 | `\mathrm{GPE}` | `gpe` | — | lithostatic GPE: columnwise resultant of the lithostatic pressure — distinct quantity, never starred by a sweep | N/m |
 | `F_B` | `f_b` | — | basal traction resultant | N/m |
-| `V` | `v_resultant` | — | transverse (shear) stress resultant, $V=\int\tau_{zx}\,dz$ | N/m |
+| `V` | `v_resultant` | — | vertical shear resultant, $V=\int\tau_{zx}\,dz$ — never `Q` or `P` for this quantity (POLICY_symbols retires both) | N/m |
+| `w_\tau` | `w_tau` | `h_\tau` | shear-stress-supported deflection, $w_\tau=-(1/\Delta\rho g)\,dV/dx$ — *proposed upstream, not yet in the register (§7)* | m |
 | `\tau_{zx}` | `tau_zx` | `\tau_{xz}`, `tau_xz` | shear stress component, deviatoric register (default) | Pa |
 | `\sigma_{zx}` | `sigma_zx` | `\sigma_{xz}`, `sigma_xz` | same component, total-stress register ($=\tau_{zx}$ off-diagonal); index order `zx` binding | Pa |
 | `\tau_{zx,x}` | `dtau_zx_dx` | — | along-strike gradient of shear stress | Pa/m |
 | `w` | `w` | — | vertical deflection, positive downward | m |
 | `w_T` | `w_trench` | — | trench deflection | m |
-| `h_m` | `h_mech` | — | mechanical thickness | m |
-| `z_c` | `z_core` | — | depth of the elastic core boundary | m |
+| `h` | `h_plate` | — | model plate thickness (definite, discrete base) | m |
+| `h_m` | `h_mech` | `z'_m` | mechanical thickness of the lithosphere | m |
+| `h_t` | `h_therm` | `z'_t` | thermal thickness | m |
+| `h_{np}` | `h_np` | `z_{np}`, `z'_{np}`, `z'_np` | neutral-plane depth, $\approx h_m/2$ | m |
+| `z_c` | `z_core` | — | compensation depth (integration limit) | m |
 | `x_T` | `x_trench` | `tloc` | trench position | m |
-| `x_I` | `x_inflect` | — | inflection point | m |
-| `\hat\rho` | `rho_hat` | — | equivalent density, $\hat\rho=\tau_{zx,x}/g$ | kg/m³ |
+| `x_I` | `x_inflect` | `first zero crossing` | **first isostatic column** (defined by the first zero-crossing of $dV/dx$ seaward of the trench — the definition may be stated, the *name* is "first isostatic column") | m |
+| `\hat\rho` | `rho_hat` | `pseudo-density` | equivalent density, $\hat\rho=\tau_{zx,x}/g$ — the word is "equivalent density"; "pseudo-density" is banned (POLICY_symbols) | kg/m³ |
 | `\rho^*` | `rho_star` | — | corrected density, $\rho+\hat\rho$ | kg/m³ |
 | `\Delta P_T` | `delta_p_trench` | — | trench pressure deficit | Pa |
 | `\sigma_Y` | `sigma_y` | — | yield stress | Pa |
@@ -221,9 +228,11 @@ Derived from `2026_version/HOW_TO_READ.md` and `POLICY_reference_values.md`.
    panel shows *and* the claim it supports, without requiring the body text.
 3. **Caption structure:** one lead sentence naming the quantity and geometry; then panel
    letters in order; then the punchline number if there is one.
-4. **Locked vocabulary** (from the manuscript's own comments — do not silently substitute
-   synonyms): *topographic pressure anomaly*, *equilibration*, *quantified robustness*,
-   *in-plane resultant*, *mechanical thickness*, *corrected density*.
+4. **Locked vocabulary** (from the manuscript's own comments and POLICY_symbols — do not
+   silently substitute synonyms): *topographic pressure anomaly*, *equilibration*,
+   *quantified robustness*, *in-plane differential resultant* (the name of $N_D$),
+   *mechanical thickness*, *corrected density*, *equivalent density* (for $\hat\rho$),
+   *first isostatic column* (the name of $x_I$), *trench pull* (unhyphenated as a noun).
 5. **Banned phrasings:** "net force" where `dN_D = -d\bar\sigma_{zz}` is meant; "walls" of
    a column (use *vertical planes*); free-floating "horizontal forces" without an
    integrated-traction register.
@@ -253,8 +262,18 @@ component must preserve them.
   flip and the $x$-mirror — no sign change, only `np.flip` for spatial reordering.
 - **Slab frame (D5, ratified 2026-08-20):** $\xi$ slab-parallel, $\eta$ slab-normal,
   $\theta$ the local dip taken from the spline tangent to the SP = 0.5 slab-top contour.
-  Rotation of the deviatoric stress into this frame:
-  $\tau_{\xi\xi}-\tau_{\eta\eta} = (\tau_{xx}-\tau_{zz})\cos 2\theta + 2\tau_{zx}\sin 2\theta$.
+  Rotation into this frame, normal-stress differences written with $\sigma$ per
+  POLICY_symbols rule 2 (the isotropic part cancels in every difference):
+  $\sigma_{\xi\xi}-\sigma_{\eta\eta} = (\sigma_{xx}-\sigma_{zz})\cos 2\theta + 2\tau_{zx}\sin 2\theta$.
+  **⚠ Collision reported upstream:** POLICY_symbols (2026-08-21) assigns $\xi$ as the
+  integration dummy for absolute-depth integrals. The slab-parallel $\xi$ predates the
+  register and is in live use in `fluidity_slab_normal_FD.ipynb` §12; see §7. Until
+  ruled on, the slab frame keeps $\xi/\eta/\theta$ and no depth integral in this
+  project may use $\xi$ as its dummy variable.
+- **Δ operator:** POLICY_symbols fixes $\Delta(\cdot)\equiv(\cdot)(x_I)-(\cdot)(x_T)$.
+  The notebooks additionally use an *incremental* form $\Delta f(x)=f(x)-f(x_T)$ (a
+  function of $x$); the register has no symbol for it — reported upstream (§7). Until
+  ruled on, notebooks must define the incremental form explicitly at first use.
 
 ---
 
@@ -272,6 +291,30 @@ follows deliberately.
 
 ---
 
-*Last updated: 2026-08-20 — all five §1 decisions closed (D1–D4 from the manuscript,
-D5 ratified) and swept across all four repos the same day. `/symbology-audit` clean,
-14 rules. Figures/PDF builds regenerate in the sweep's final step.*
+## 7. Reported upstream — awaiting a POLICY_symbols ruling
+
+Per the register's change procedure ("report it against this document **before**
+choosing a symbol"), the following are reported, not decided here:
+
+1. **$\xi$ collision.** Register: $\xi$ = integration dummy for absolute-depth
+   integrals. This project (D5, pre-register): $\xi$ = slab-parallel coordinate,
+   ratified and in live use in `fluidity_slab_normal_FD.ipynb` §12. Two readings of
+   one symbol. Downstream keeps the slab frame and avoids $\xi$-as-dummy meanwhile.
+2. **Incremental $\Delta$.** Register fixes $\Delta$ to the $(x_I)-(x_T)$ column
+   difference. The notebooks' force-balance plots need the $x$-varying form
+   $f(x)-f(x_T)$; no register symbol exists for it.
+3. **Deviatoric normal components.** The register writes normal components $\sigma$
+   and gives no symbol for deviatoric normal stresses, but the model-analysis
+   decomposition prose ($\sigma_{xx}=-p+\tau_{xx}$, tectonic overpressure) and the
+   raw model fields genuinely need them. Rendered *differences* are swept to
+   $\sigma$; standalone deviatoric uses are left as $\tau_{xx},\tau_{zz}$ pending.
+4. **$w_\tau$.** Shear-stress-supported deflection, used across the project's
+   figures; proposed for the register's h/w family.
+
+---
+
+*Last updated: 2026-08-21 — reconciled against `POLICY_symbols.md` (upstream symbol
+register): h-family adopted (`h_m`, `h_t`, `h_{np}`; primed-z forms retired), $N_D$
+integrand rendered with $\sigma$, $x_I$ named "first isostatic column",
+"pseudo-density" banned, V never Q/P. Four items reported upstream (§7). Previous
+milestone: 2026-08-20, D1–D5 closed and swept, audit clean.*
