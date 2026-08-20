@@ -21,7 +21,7 @@ $$
 with the three resultants
 
 $$
-N_D(x) \;=\; \int_0^{z_c} (\tau_{xx} - \tau_{zz})\,dz, \quad
+N_D(x) \;=\; \int_0^{z_c} (\sigma_{xx} - \sigma_{zz})\,dz, \quad
 \mathrm{GPE}^{*}(x) \;=\; -\int_0^{z_c} \sigma_{zz}\,dz, \quad
 F_B(x) \;=\; \int_{x_T}^{x} \sigma_{zx}(x', z_c)\,dx',
 $$
