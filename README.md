@@ -10,7 +10,7 @@ Analysis presented in the EGU2026 talk: [Re-examining slab pull and trench topog
 
 ## The mathematics
 
-Two integrations of the 2D stress equilibrium equations (Stokes equations) underpin every figure in this repo: a horizontal integration that yields the trailing-plate force balance, and a vertical integration that links surface topography to depth-integrated shear stress.
+Everything in this repo is one **horizontal force balance**, post-processed from the model's stress fields. The balance is decomposed so that one term is the between-column difference of the vertically integrated vertical normal stress, $\Delta\bar\sigma_{zz} = -\Delta\mathrm{GPE}^*$ — and that term **is the pressure-gradient force**. This is the point of the exercise: topography links through to pressure gradients, and $\Delta\bar\sigma_{zz}$ is a consistent representation of the pressure-gradient force so long as the *true* vertical normal stress is used — which is exactly what a numerical model supplies, and exactly what solves static equilibrium. At depth the pressure gradients equilibrate: beneath **isostatic** topography by density differences, beneath **non-isostatic** topography (the trench) by vertical shear-stress gradients — which is where shear stresses couple in, and the only role the vertical integration plays. The notebooks are then a post-processing exercise in how much of the topography is translated into $\Delta\bar\sigma_{zz}$ — across the entire plate, because topography rises from the trench all the way to the ridge and provides a driving force the whole way along.
 
 **Horizontal balance — driving the trailing plate.**  Integrating $\partial_x \sigma_{xx} + \partial_z \sigma_{zx} = 0$ from surface to $z_c$ and from the trench column $x_T$ outward to a column at $x$ gives the trailing-plate balance
 
@@ -28,7 +28,7 @@ $$
 
 and the **incremental** difference operator $\Delta f(x) \equiv f(x) - f(x_T)$ (a function of $x$; the manuscript's fixed $\Delta \equiv (\cdot)(x_I) - (\cdot)(x_T)$ is its value at $x = x_I$).  $N_D$ measures whether the column is tension-like ($N_D > 0$) or compression-like ($N_D < 0$); $\mathrm{GPE}^{*}$ is minus the column-integrated vertical stress (positive for heavier columns); $F_B$ is the cumulative basal-shear traction integrated outward from the trench.
 
-**Vertical balance — what holds up the topography.**  Integrating the vertical component of equilibrium downward from the surface gives the manuscript's decomposition of the vertical normal stress,
+**Vertical structure — how the pressure gradients equilibrate at depth.**  Integrating the vertical component of equilibrium downward from the surface decomposes the vertical normal stress into the two equilibration channels — density structure (lithostatic) and vertical shear-stress gradients (the shear function),
 
 $$
 -\sigma_{zz}(z) \;=\; \underbrace{\int_0^{z}\rho g\,d\xi}_{P_L(z)\ \text{lithostatic}} \;+\; \underbrace{\int_0^{z}\tau_{zx,x}\,d\xi}_{Q(z)\ \text{shear function}}
