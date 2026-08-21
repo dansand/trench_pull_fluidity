@@ -52,6 +52,11 @@ extraction:
      (matches the MDOODZ analysis frame); mirror flips signs of vx and the
      off-diagonal stress — bundled in mirror_fields_in_x"
   - "no water layer: rho_w = 0 in Delta-rho expressions"
+  - "SIGN SENSE: the extracted tau_zx MATCHES the register's sense (verified:
+     int tau_zx dz > 0 at the trench). The notebooks' code variable V is
+     defined as -int tau_zx dz — i.e. the NEGATIVE of the register's V — and
+     figures plot -V (the register's V, positive at the trench). The register
+     closure dV/dx = -(rho_m - rho_w) g w holds for the plotted V."
 
 field_map:
   - {native: p,   location: points, canonical: "dynamic pressure (see native_frame.pressure)",

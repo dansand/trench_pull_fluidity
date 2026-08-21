@@ -23,18 +23,26 @@ with the three resultants
 $$
 N_D(x) \;=\; \int_0^{z_c} (\sigma_{xx} - \sigma_{zz})\,dz, \quad
 \mathrm{GPE}^{*}(x) \;=\; -\int_0^{z_c} \sigma_{zz}\,dz, \quad
-F_B(x) \;=\; \int_{x_T}^{x} \sigma_{zx}(x', z_c)\,dx',
+F_B(x) \;=\; \int_{x_T}^{x} \tau_{zx}(x', z_c)\,dx',
 $$
 
-and the column-difference operator $\Delta f(x) \equiv f(x) - f(x_T)$.  $N_D$ measures whether the column is tension-like ($N_D > 0$) or compression-like ($N_D < 0$); $\mathrm{GPE}^{*}$ is minus the column-integrated vertical stress (positive for heavier columns); $F_B$ is the cumulative basal-shear traction integrated outward from the trench.
+and the **incremental** difference operator $\Delta f(x) \equiv f(x) - f(x_T)$ (a function of $x$; the manuscript's fixed $\Delta \equiv (\cdot)(x_I) - (\cdot)(x_T)$ is its value at $x = x_I$).  $N_D$ measures whether the column is tension-like ($N_D > 0$) or compression-like ($N_D < 0$); $\mathrm{GPE}^{*}$ is minus the column-integrated vertical stress (positive for heavier columns); $F_B$ is the cumulative basal-shear traction integrated outward from the trench.
 
-**Vertical balance — what holds up the topography.**  Integrating $\partial_x \sigma_{zx} + \partial_z \sigma_{zz} = -\rho g$ from the free surface to a fixed integration depth $z_c$, with $\sigma_{zz}(\text{surface}) \approx 0$, gives
+**Vertical balance — what holds up the topography.**  Integrating the vertical component of equilibrium downward from the surface gives the manuscript's decomposition of the vertical normal stress,
 
 $$
-\sigma_{zz}(z_c, x) \;=\; -\rho g\,[z_c - z_s(x)] \;-\; \frac{\partial V}{\partial x} ,
+-\sigma_{zz}(z) \;=\; \underbrace{\int_0^{z}\rho g\,d\xi}_{P_L(z)\ \text{lithostatic}} \;+\; \underbrace{\int_0^{z}\tau_{zx,x}\,d\xi}_{Q(z)\ \text{shear function}}
 $$
 
-where $V(x) = \int_0^{z_c} \sigma_{zx}\,dz$ is the depth-integrated shear stress.  When $\sigma_{zz}$ is approximately uniform on the equipotential at $z_c$ (i.e. *hydrostatic at depth $z_c$*), the surface deflection $w(x)$ relative to a reference column at $x_I$ satisfies $w(x) = (1/\rho_m g)\,\partial_x V$.  The trench-pull figures test this empirically by overlaying $w_\mathrm{actual}(x)$ from the free-surface field against $w_\tau(x) = (1/\rho_m g)\,\partial_x V$.
+The shear function evaluated at the compensation depth is the gradient of the vertical shear resultant, $Q(z_c) = dV/dx$ with $V(x) = \int_0^{z_c}\tau_{zx}\,dz$.  Requiring every column to reach the same vertical normal stress at $z_c$ (hydrostatic at the compensation depth) gives the closure
+
+$$
+\frac{dV}{dx} \;=\; -(\rho_m - \rho_w)\,g\,w(x)
+$$
+
+— deflection $w$ positive downward, and $\rho_w = 0$ for the no-water Cerpa setup.  The trench-pull figures test this empirically by overlaying $w(x)$ from the free-surface field against $w_\tau(x) = -\frac{1}{(\rho_m-\rho_w)\,g}\frac{dV}{dx}$.
+
+*Sign bookkeeping.*  The notebooks' code variable `V` is formed as $-\int\tau_{zx}^{\rm extracted}\,dz$; the extraction sign chain per model is specified in `MODEL.md`, and the plotted resultant is the $V$ of the equations above (positive at the trench, where the shear traction pulls the column down).
 
 ---
 
