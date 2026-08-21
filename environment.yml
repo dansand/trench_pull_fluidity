@@ -1,8 +1,8 @@
 # Shared base environment for the trench-pull model-analysis suite.
-# One environment runs every analysis repo (trench_pull_force, trench_pull_fluidity,
+# One environment runs every analysis repo (trench_pull_mdoodz, trench_pull_fluidity,
 # and future per-model repos — the suite is one repository per published numerical
 # model, all on this same base environment). Canonical copy:
-# trench_pull_force/environment.yml — keep the copies in the other analysis repos
+# trench_pull_mdoodz/environment.yml — keep the copies in the other analysis repos
 # identical to it.
 #
 # After creating, register the kernel — without this, notebooks fall back silently
@@ -22,7 +22,7 @@ dependencies:
   - scipy=1.13
   - matplotlib=3.9
   - pyvista=0.46
-  - h5py=3.11       # MDOODZ HDF5 outputs (trench_pull_force)
+  - h5py=3.11       # MDOODZ HDF5 outputs (trench_pull_mdoodz)
   - pandas=2.3
   - natsort=8.4
   - contourpy=1.2   # slab-top contour extraction (fluidity further_analysis)

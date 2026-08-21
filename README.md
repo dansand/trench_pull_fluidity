@@ -68,7 +68,7 @@ The two forms produce closures that differ only by a constant; the residual shap
 
 **Coordinate convention.**  $x$ rightward positive, $z$ downward positive ($z = Y_\mathrm{SURFACE} - y$).  Off-diagonal stress sign flip $\sigma_{zx}^{\,z\text{-down}} = -\sigma_{xy}^{\,y\text{-up}}$ applied at extraction in each notebook's load cell, not buried in any helper.
 
-**Mirror.**  `MIRROR_X = True` flips the model along $x$ via `mirror_fields_in_x` so the subducting plate sits on the right and the slab descends leftward — matches the MDOODZ convention used in the companion `trench_pull_force` repo.  Sign-flips on $\sigma_{zx}$ and $v_x$ are bundled into the helper.
+**Mirror.**  `MIRROR_X = True` flips the model along $x$ via `mirror_fields_in_x` so the subducting plate sits on the right and the slab descends leftward — matches the MDOODZ convention used in the companion `trench_pull_mdoodz` repo.  Sign-flips on $\sigma_{zx}$ and $v_x$ are bundled into the helper.
 
 **Quadrature.**  Vertical depth integrals (`N_D`, `Σ_zz`, `V`, $\mathrm{GPE}^*$) use `numpy.trapz` over the full $[0, Z_\mathrm{MAX}]$ range.  Cumulative basal drag uses `scipy.integrate.cumulative_trapezoid` left-to-right and is then anchored to zero at the trench column (`F_B = FB_ - FB_[tindx]`).
 
@@ -176,7 +176,7 @@ The `ipykernel install` step is what makes the env visible in JupyterLab's kerne
 **This work**
 
 - **EGU2026 talk** — [EGU26-2649](https://meetingorganizer.copernicus.org/EGU26/EGU26-2649.html).
-- **Companion repository** — [`trench_pull_force`](https://github.com/dansand/trench_pull_force) — MDOODZ analysis and preprint source for the same force-balance framework, applied to the AnneloreSubduction setup.
+- **Companion repository** — [`trench_pull_mdoodz`](https://github.com/dansand/trench_pull_mdoodz) — MDOODZ analysis and preprint source for the same force-balance framework, applied to the AnneloreSubduction setup.
 - **Preprint** — *Re-examining slab pull and trench topography*, ESS Open Archive — [doi.org/10.22541/essoar.174413825.53806221/v1](https://essopenarchive.org/doi/full/10.22541/essoar.174413825.53806221/v1).
 
 **Source data and reference paper**

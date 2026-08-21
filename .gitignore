@@ -17,3 +17,6 @@ notebooks/WIP/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Claude project context — session-local, not repo content
+CLAUDE.md

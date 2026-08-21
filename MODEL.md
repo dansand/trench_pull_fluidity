@@ -2,7 +2,7 @@
 
 Structured model description and raw-field disambiguation for this repo's analysis.
 Schema: `trench-pull-model/1` (defined in the umbrella project,
-`tools/MODEL_SCHEMA.md`); symbols follow `SYMBOLOGY.md` in this repo.
+`tools/MODEL_SCHEMA.md`); symbols follow the trench-pull umbrella project's `SYMBOLOGY.md`.
 
 ```yaml
 schema: trench-pull-model/1
@@ -76,6 +76,5 @@ field_map:
 ```
 
 Reference constants used in the simulations (rho = 3300 kg/m3, g = 9.8 m/s2,
-T bounds, viscosity bounds, box geometry) are recorded in `CLAUDE.md` and kept
-verbatim in `zenodo_materials/`; reference-value policy follows the manuscript's
+T bounds, viscosity bounds, box geometry) are kept verbatim in `zenodo_materials/`; reference-value policy follows the manuscript's
 `POLICY_reference_values.md`.
