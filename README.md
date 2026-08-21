@@ -12,37 +12,37 @@ Analysis presented in the EGU2026 talk: [Re-examining slab pull and trench topog
 
 Everything in this repo is one **horizontal force balance**, post-processed from the model's stress fields. The balance is decomposed so that one term is the between-column difference of the vertically integrated vertical normal stress, $\Delta\bar\sigma_{zz} = -\Delta\mathrm{GPE}^*$ — and that term **is the pressure-gradient force**. This is the point of the exercise: topography links through to pressure gradients, and $\Delta\bar\sigma_{zz}$ is a consistent representation of the pressure-gradient force so long as the *true* vertical normal stress is used — which is exactly what a numerical model supplies, and exactly what solves static equilibrium. At depth the pressure gradients equilibrate: beneath **isostatic** topography by density differences, beneath **non-isostatic** topography (the trench) by vertical shear-stress gradients — which is where shear stresses couple in, and the only role the vertical integration plays. The notebooks are then a post-processing exercise in how much of the topography is translated into $\Delta\bar\sigma_{zz}$ — across the entire plate, because topography rises from the trench all the way to the ridge and provides a driving force the whole way along.
 
-**Horizontal balance — driving the trailing plate.**  Integrating $\partial_x \sigma_{xx} + \partial_z \sigma_{zx} = 0$ from surface to $z_c$ and from the trench column $x_T$ outward to a column at $x$ gives the trailing-plate balance
+**Horizontal balance — driving the trailing plate.** Integrating $\partial_x \sigma_{xx} + \partial_z \sigma_{zx} = 0$ from surface to $z_c$ and from the trench column $x_T$ outward to a column at $x$ gives the trailing-plate balance
 
 $$
-\Delta N_D(x) \;-\; \Delta\mathrm{GPE}^{*}(x) \;+\; F_B(x) \;\approx\; 0 ,
+\Delta N_D(x) - \Delta\mathrm{GPE}^{*}(x) + F_B(x) \approx 0
 $$
 
 with the three resultants
 
 $$
-N_D(x) \;=\; \int_0^{z_c} (\sigma_{xx} - \sigma_{zz})\,dz, \quad
-\mathrm{GPE}^{*}(x) \;=\; -\int_0^{z_c} \sigma_{zz}\,dz, \quad
-F_B(x) \;=\; \int_{x_T}^{x} \tau_{zx}(x', z_c)\,dx',
+N_D(x) = \int_0^{z_c} (\sigma_{xx} - \sigma_{zz})\,dz, \quad
+\mathrm{GPE}^{*}(x) = -\int_0^{z_c} \sigma_{zz}\,dz, \quad
+F_B(x) = \int_{x_T}^{x} \tau_{zx}(x', z_c)\,dx'
 $$
 
-and the **incremental** difference operator $\Delta f(x) \equiv f(x) - f(x_T)$ (a function of $x$; the manuscript's fixed $\Delta \equiv (\cdot)(x_I) - (\cdot)(x_T)$ is its value at $x = x_I$).  $N_D$ measures whether the column is tension-like ($N_D > 0$) or compression-like ($N_D < 0$); $\mathrm{GPE}^{*}$ is minus the column-integrated vertical stress (positive for heavier columns); $F_B$ is the cumulative basal-shear traction integrated outward from the trench.
+and the **incremental** difference operator $\Delta f(x) \equiv f(x) - f(x_T)$ (a function of $x$; the manuscript's fixed $\Delta \equiv (\cdot)(x_I) - (\cdot)(x_T)$ is its value at $x = x_I$). $N_D$ measures whether the column is tension-like ($N_D > 0$) or compression-like ($N_D < 0$); $\mathrm{GPE}^{*}$ is minus the column-integrated vertical stress (positive for heavier columns); $F_B$ is the cumulative basal-shear traction integrated outward from the trench.
 
-**Vertical structure — how the pressure gradients equilibrate at depth.**  Integrating the vertical component of equilibrium downward from the surface decomposes the vertical normal stress into the two equilibration channels — density structure (lithostatic) and vertical shear-stress gradients (the shear function),
-
-$$
--\sigma_{zz}(z) \;=\; \underbrace{\int_0^{z}\rho g\,d\xi}_{P_L(z)\ \text{lithostatic}} \;+\; \underbrace{\int_0^{z}\tau_{zx,x}\,d\xi}_{Q(z)\ \text{shear function}}
-$$
-
-The shear function evaluated at the compensation depth is the gradient of the vertical shear resultant, $Q(z_c) = dV/dx$ with $V(x) = \int_0^{z_c}\tau_{zx}\,dz$.  Requiring every column to reach the same vertical normal stress at $z_c$ (hydrostatic at the compensation depth) gives the closure
+**Vertical structure — how the pressure gradients equilibrate at depth.** Integrating the vertical component of equilibrium downward from the surface decomposes the vertical normal stress into the two equilibration channels — density structure (lithostatic) and vertical shear-stress gradients (the shear function)
 
 $$
-\frac{dV}{dx} \;=\; -(\rho_m - \rho_w)\,g\,w(x)
+-\sigma_{zz}(z) = \underbrace{\int_0^{z}\rho g\,d\xi}_{P_L(z)\ \text{lithostatic}} + \underbrace{\int_0^{z}\tau_{zx,x}\,d\xi}_{Q(z)\ \text{shear function}}
 $$
 
-— deflection $w$ positive downward, and $\rho_w = 0$ for the no-water Cerpa setup.  The trench-pull figures test this empirically by overlaying $w(x)$ from the free-surface field against $w_\tau(x) = -\frac{1}{(\rho_m-\rho_w)\,g}\frac{dV}{dx}$.
+The shear function evaluated at the compensation depth is the gradient of the vertical shear resultant, $Q(z_c) = dV/dx$ with $V(x) = \int_0^{z_c}\tau_{zx}\,dz$. Requiring every column to reach the same vertical normal stress at $z_c$ (hydrostatic at the compensation depth) gives the closure
 
-*Sign bookkeeping.*  The notebooks' code variable `V` is formed as $-\int\tau_{zx}^{\rm extracted}\,dz$; the extraction sign chain per model is specified in `MODEL.md`, and the plotted resultant is the $V$ of the equations above (positive at the trench, where the shear traction pulls the column down).
+$$
+\frac{dV}{dx} = -(\rho_m - \rho_w)\,g\,w(x)
+$$
+
+— deflection $w$ positive downward, and $\rho_w = 0$ for the no-water Cerpa setup. The trench-pull figures test this empirically by overlaying $w(x)$ from the free-surface field against $w_\tau(x) = -\frac{1}{(\rho_m-\rho_w)\,g}\frac{dV}{dx}$.
+
+*Sign bookkeeping.* The notebooks' code variable `V` is formed as $-\int\tau_{zx}^{\mathrm{extracted}}\,dz$; the extraction sign chain per model is specified in `MODEL.md`, and the plotted resultant is the $V$ of the equations above (positive at the trench, where the shear traction pulls the column down).
 
 ---
 
@@ -50,41 +50,41 @@ $$
 
 Same equation, two ways to anchor it on the plot:
 
-- **§8.2 form** — both $\Delta N_D$ and $\Delta\mathrm{GPE}^{*}$ anchored to zero at the trench:
+- **§9.2 form** — both $\Delta N_D$ and $\Delta\mathrm{GPE}^{*}$ anchored to zero at the trench:
 
 $$
-\Delta N_D(x) \;-\; \Delta\mathrm{GPE}^{*}(x) \;+\; F_B(x) \;\approx\; 0 .
+\Delta N_D(x) - \Delta\mathrm{GPE}^{*}(x) + F_B(x) \approx 0
 $$
 
-  Easy to read the *shape* of the balance.  But $N_D$'s absolute value disappears — every column is plotted relative to the trench.
+  Easy to read the *shape* of the balance. But $N_D$'s absolute value disappears — every column is plotted relative to the trench.
 
-- **§8.3 form** — $N_D(x)$ at its absolute value, with the constant $N_D(x_T)$ absorbed into the GPE bracket:
+- **§9.3 form** — $N_D(x)$ at its absolute value, with the constant $N_D(x_T)$ absorbed into the GPE bracket:
 
 $$
-N_D(x) \;-\; \left[\Delta\mathrm{GPE}^{*}(x) + N_D(x_T)\right] \;+\; F_B(x) \;\approx\; 0 .
+N_D(x) - \left[\Delta\mathrm{GPE}^{*}(x) + N_D(x_T)\right] + F_B(x) \approx 0
 $$
 
-  Algebraically identical to §8.2.  $N_D(x)$ now reads at its objective per-column value: positive in tension-like columns, negative in compression-like columns, with the zero line carrying physical meaning.  The cost is that the GPE bracket no longer asymptotes to zero — it carries $N_D(x_T)$ as an offset.
+  Algebraically identical to §9.2. $N_D(x)$ now reads at its objective per-column value: positive in tension-like columns, negative in compression-like columns, with the zero line carrying physical meaning. The cost is that the GPE bracket no longer asymptotes to zero — it carries $N_D(x_T)$ as an offset.
 
-The two forms produce closures that differ only by a constant; the residual shape (and the basal-drag term) is identical.  The §8.2 form is better when you want to read the *shape* of the closure off the plot; §8.3 is better when you want $N_D(x)$ itself to convey physical meaning.
+The two forms produce closures that differ only by a constant; the residual shape (and the basal-drag term) is identical. The §9.2 form is better when you want to read the *shape* of the closure off the plot; §9.3 is better when you want $N_D(x)$ itself to convey physical meaning.
 
 ---
 
 ## Implementation
 
-**Stress interpolation onto a regular grid.**  PVTU node-centred fields are sampled onto a uniform cell-centred grid with `pyvista.StructuredGrid.sample(vtk_data)`.  The grid spans $[x_\min, x_\max] \times [0, Z_\mathrm{MAX}]$ with cell spacing $DX$ in both directions.  Cells outside the model domain are flagged via `interp["vtkValidPointMask"]` and set to NaN.
+**Stress interpolation onto a regular grid.** PVTU node-centred fields are sampled onto a uniform cell-centred grid with `pyvista.StructuredGrid.sample(vtk_data)`. The grid spans $[x_\min, x_\max] \times [0, Z_\mathrm{MAX}]$ with cell spacing $DX$ in both directions. Cells outside the model domain are flagged via `interp["vtkValidPointMask"]` and set to NaN.
 
-**Coordinate convention.**  $x$ rightward positive, $z$ downward positive ($z = Y_\mathrm{SURFACE} - y$).  Off-diagonal stress sign flip $\sigma_{zx}^{\,z\text{-down}} = -\sigma_{xy}^{\,y\text{-up}}$ applied at extraction in each notebook's load cell, not buried in any helper.
+**Coordinate convention.** $x$ rightward positive, $z$ downward positive ($z = Y_\mathrm{SURFACE} - y$). Off-diagonal stress sign flip $\sigma_{zx}^{\,z\text{-down}} = -\sigma_{xy}^{\,y\text{-up}}$ applied at extraction in each notebook's load cell, not buried in any helper.
 
-**Mirror.**  `MIRROR_X = True` flips the model along $x$ via `mirror_fields_in_x` so the subducting plate sits on the right and the slab descends leftward — matches the MDOODZ convention used in the companion `trench_pull_mdoodz` repo.  Sign-flips on $\sigma_{zx}$ and $v_x$ are bundled into the helper.
+**Mirror.** `MIRROR_X = True` flips the model along $x$ via `mirror_fields_in_x` so the subducting plate sits on the right and the slab descends leftward — matches the MDOODZ convention used in the companion `trench_pull_mdoodz` repo. Sign-flips on $\sigma_{zx}$ and $v_x$ are bundled into the helper.
 
-**Quadrature.**  Vertical depth integrals (`N_D`, `Σ_zz`, `V`, $\mathrm{GPE}^*$) use `numpy.trapz` over the full $[0, Z_\mathrm{MAX}]$ range.  Cumulative basal drag uses `scipy.integrate.cumulative_trapezoid` left-to-right and is then anchored to zero at the trench column (`F_B = FB_ - FB_[tindx]`).
+**Quadrature.** Vertical depth integrals (`N_D`, `Σ_zz`, `V`, $\mathrm{GPE}^*$) use `numpy.trapz` over the full $[0, Z_\mathrm{MAX}]$ range. Cumulative basal drag uses `scipy.integrate.cumulative_trapezoid` left-to-right and is then anchored to zero at the trench column (`F_B = FB_ - FB_[tindx]`).
 
-**Trench picker** (`pick_trench_3step`).  Three steps: (1) coarse pressure-min anchor; (2) refined velocity sign-change in a window; (3) directional pressure-min refinement on the subducting-plate side.  Step 2 is mirror-aware: in `MIRROR_X = True` runs the picker selects the *rightmost* zero-crossing of $v_x$ (subducting-plate side), in non-mirrored runs the *leftmost*.
+**Trench picker** (`pick_trench_3step`). Three steps: (1) coarse pressure-min anchor; (2) refined velocity sign-change in a window; (3) directional pressure-min refinement on the subducting-plate side. Step 2 is mirror-aware: in `MIRROR_X = True` runs the picker selects the *rightmost* zero-crossing of $v_x$ (subducting-plate side), in non-mirrored runs the *leftmost*.
 
-**Ridge picker** (`find_ridge_x`).  Argmax of the lightly-smoothed surface field, restricted to columns seaward of the trench with a buffer to skip the outer-rise bulge.
+**Ridge picker** (`find_ridge_x`). Argmax of the lightly-smoothed surface field, restricted to columns seaward of the trench with a buffer to skip the outer-rise bulge.
 
-**Shared helpers** all live in [`notebooks/cerpa_helpers.py`](notebooks/cerpa_helpers.py): `make_field_extractor`, `mirror_fields_in_x`, `pick_trench_3step`, `find_first_isostatic_column`, `find_ridge_x`, `col_avg`, `norm01`, `norm_TR`, `load_records`.  Each notebook's §3 collapses to a single import block.
+**Shared helpers** all live in [`notebooks/cerpa_helpers.py`](notebooks/cerpa_helpers.py): `make_field_extractor`, `mirror_fields_in_x`, `pick_trench_3step`, `find_first_isostatic_column`, `find_ridge_x`, `col_avg`, `norm01`, `norm_TR`, `load_records`. Each notebook's §3 collapses to a single import block.
 
 ---
 
@@ -120,7 +120,7 @@ All knobs live in §2 of each notebook (single source of truth), with per-cell o
 |---|---|---|
 | `DEPTH_LIM` | axis ylim for depth panels | `(INTEGRATION_DEPTH_KM, 0)` |
 
-`DEPTH_LIM` is *purely* a plot-axis range — it never enters integration math.  Per-cell overrides are allowed for figures that need a different visual depth window.
+`DEPTH_LIM` is *purely* a plot-axis range — it never enters integration math. Per-cell overrides are allowed for figures that need a different visual depth window.
 
 **Time-evolution-specific** (in `fluidity_time_evolution.ipynb` only)
 
@@ -135,12 +135,12 @@ All knobs live in §2 of each notebook (single source of truth), with per-cell o
 
 ## Reproducing the figures
 
-The notebooks are the build pipeline.  Workflow:
+The notebooks are the build pipeline. Workflow:
 
 1. **Point `DATA_ROOT`** in each notebook's §2 at your local copy of the Cerpa data archive.
-2. **Time-evolution caches** — run `fluidity_time_evolution.ipynb` once with `MODEL_KEY = 'STD'`, then once with `'WAL'`.  Each populates `notebooks/outputs/time_evolution_<MODEL_KEY>.npz`.  Multi-model figures in §7 then load both caches and don't need the time loop re-run.
+2. **Time-evolution caches** — run `fluidity_time_evolution.ipynb` once with `MODEL_KEY = 'STD'`, then once with `'WAL'`. Each populates `notebooks/outputs/time_evolution_<MODEL_KEY>.npz`. Multi-model figures in §7 then load both caches and don't need the time loop re-run.
 3. **Single-step figures** — run `fluidity_single_step.ipynb` at `TIMESTEP_INDEX = 5`, `10`, and `30` to cover all snapshot-specific figures (the talk uses all three).
-4. **Per-snapshot frames for the GIF** — `fluidity_time_evolution.ipynb` §9 contains two per-snapshot loops; the §8.3-form loop writes to `figures/force_balance_FD_abs_evolution_<MODEL_KEY>/`.  Convert to a GIF with Pillow or ImageMagick.
+4. **Per-snapshot frames for the GIF** — `fluidity_time_evolution.ipynb` §9 contains two per-snapshot loops; the §9.3-form loop writes to `figures/force_balance_FD_abs_evolution_<MODEL_KEY>/`. Convert to a GIF with Pillow or ImageMagick.
 
 The `further_analysis/` notebooks (`fluidity_basal_drag.ipynb`, `fluidity_slab_normal_FD.ipynb`) are not part of the talk's main narrative — run them if you want to verify approximations or simplifications, such as resultants on a slab-normal plane beneath the trench versus on a vertical plane.
 
@@ -150,15 +150,15 @@ The `further_analysis/` notebooks (`fluidity_basal_drag.ipynb`, `fluidity_slab_n
 
 ```
 notebooks/
-  fluidity_single_step.ipynb        — main analysis, single timestep
-  fluidity_time_evolution.ipynb     — main analysis, time evolution + npz cache
-  cerpa_helpers.py               — shared functions (importable from any notebook)
+  fluidity_single_step.ipynb — main analysis, single timestep
+  fluidity_time_evolution.ipynb — main analysis, time evolution + npz cache
+  cerpa_helpers.py — shared functions (importable from any notebook)
   further_analysis/
-    fluidity_basal_drag.ipynb       — approximation test: isotherm vs horizontal plane
-    fluidity_slab_normal_FD.ipynb   — approximation test: slab-normal vs vertical plane
-  figures/                       — analysis-produced PNGs (canonical home)
-  outputs/                       — npz time-evolution caches
-zenodo_materials/                — original Cerpa input file + parameter file + README
+    fluidity_basal_drag.ipynb — approximation test: isotherm vs horizontal plane
+    fluidity_slab_normal_FD.ipynb — approximation test: slab-normal vs vertical plane
+  figures/ — analysis-produced PNGs (canonical home)
+  outputs/ — npz time-evolution caches
+zenodo_materials/ — original Cerpa input file + parameter file + README
 ```
 
 The `further_analysis/` notebooks reach `cerpa_helpers.py` one level up via a small `sys.path.insert(0, "..")` block at the top of their import cell — this is necessary because Jupyter only auto-adds the notebook's own directory to `sys.path`.
@@ -167,7 +167,7 @@ The `further_analysis/` notebooks reach `cerpa_helpers.py` one level up via a sm
 
 ## Conda environment
 
-Built and tested in `pyvista-env` (numpy, pyvista, matplotlib, scipy, natsort, jupyterlab).  Reproduce with the bundled [`environment.yml`](environment.yml):
+Built and tested in `pyvista-env` (numpy, pyvista, matplotlib, scipy, natsort, jupyterlab). Reproduce with the bundled [`environment.yml`](environment.yml):
 
 ```bash
 conda env create -f environment.yml
@@ -175,7 +175,7 @@ conda activate pyvista-env
 python -m ipykernel install --user --name pyvista-env --display-name "Python (pyvista-env)"
 ```
 
-The `ipykernel install` step is what makes the env visible in JupyterLab's kernel menu; without it, an existing Jupyter installation will silently fall back to whichever kernel it already knows about.  Inside the notebook, select **Kernel → Change Kernel → Python (pyvista-env)**.
+The `ipykernel install` step is what makes the env visible in JupyterLab's kernel menu; without it, an existing Jupyter installation will silently fall back to whichever kernel it already knows about. Inside the notebook, select **Kernel → Change Kernel → Python (pyvista-env)**.
 
 ---
 
@@ -190,4 +190,4 @@ The `ipykernel install` step is what makes the env visible in JupyterLab's kerne
 **Source data and reference paper**
 
 - **Cerpa et al. (2022) paper** — [doi.org/10.1029/2022JB024494](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2022JB024494) — *The effect of a weak asthenospheric layer on surface kinematics, subduction dynamics and slab morphology in the lower mantle.* JGR Solid Earth.
-- **Zenodo dataset** — [doi.org/10.5281/zenodo.6817177](https://doi.org/10.5281/zenodo.6817177) — Fluidity input file, parameter file, mesh, and reference STD / WAL outputs.  The parameter file and README from this archive are mirrored verbatim in `zenodo_materials/`.
+- **Zenodo dataset** — [doi.org/10.5281/zenodo.6817177](https://doi.org/10.5281/zenodo.6817177) — Fluidity input file, parameter file, mesh, and reference STD / WAL outputs. The parameter file and README from this archive are mirrored verbatim in `zenodo_materials/`.
