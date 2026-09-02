@@ -81,5 +81,11 @@ field_map:
 ```
 
 Reference constants used in the simulations (rho = 3300 kg/m3, g = 9.8 m/s2,
+alpha = 3e-5 /K nominal — NOT in the local parameter file; empirically
+recovered 2026-09-02 from the in-plate dynamic-pressure gradient as 3.2e-5
+(WAL) / 2.7e-5 (STD), which also pinned the density convention as
+SURFACE-referenced, rho = rho0(1 - alpha(T - T_s)) with rho0 = 3300 at
+T_s = 273 K; potential temperature = T_mantle = 1573 K, deep mantle
+isothermal (Boussinesq, no adiabat),
 T bounds, viscosity bounds, box geometry) are kept verbatim in `zenodo_materials/`; reference-value policy follows the manuscript's
 `POLICY_reference_values.md`.
