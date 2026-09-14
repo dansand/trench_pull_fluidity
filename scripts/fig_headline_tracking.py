@@ -8,7 +8,19 @@ means (conventions §4.1); pickers from cerpa_helpers (single implementation).
 
 Usage: python fig_headline_tracking.py [--recompute]
 Reads/writes cache ../notebooks/outputs/headline_time_agg.npz; writes
-../figures/fig_headline_tracking.png. Greyscale by design (Dan, 2026-09-14)."""
+../figures/fig_headline_tracking.png. Greyscale by design (Dan, 2026-09-14).
+
+Draft caption (2026-09-14): Normalised Delta-GPE* and surface topography along
+the subducting plate for the Fluidity models STD (left) and WAL (right). At
+each snapshot both quantities are rescaled so that the trench column is 0 and
+the ridge column is 1, and distance is rescaled by the trench-to-ridge span;
+solid and dashed curves are averages over 37 snapshots (t = 8-80 Myr), and
+grey bands show the full range through time of the topography (top row) and
+of Delta-GPE* (bottom row). The corrected potential-energy resultant tracks
+the topography across the entire plate and throughout the run: the driving
+topographic pressure gradient is carried jointly by the non-isostatic trench
+deflection (the steep rise within the first ~10 percent of the span) and the
+isostatic cooling topography that accumulates toward the ridge."""
 from pathlib import Path
 import sys, glob
 import numpy as np
