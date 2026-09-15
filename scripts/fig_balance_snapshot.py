@@ -6,15 +6,19 @@ Writes figures/fig_balance_snapshot.png. Reads the archive directly
 notebooks/fluidity_single_step.ipynb §§7–8 (single implementation of the
 resultants; the notebook remains freely re-runnable at any step).
 
-Layout: columns STD | WAL; rows:
-  1. topography w (positive downward), x_T / x_I / x_R marked
-  2. the fundamental form: Δσ̄_xx(x) against −F_B(x) — the vertically
-     integrated horizontal balance before any decomposition
-  3. the decomposed form: ΔN_D(x), ΔGPE*(x), F_B(x), and the closure
-     residual ΔN_D − ΔGPE* + F_B, PINNED over the declared
-     mid-subducting-plate window (conventions §2.3: x_T + 1000..2000 km;
-     the removed trench-anchor constant is printed and stated in the
-     caption — the near-trench noise is shown, not hidden).
+Rendering follows the NOTEBOOK's developed figures (Dan's directive
+2026-09-15: the notebook images are the starting point, never
+reinvented): panel styling, colours, labels, and axis limits lifted from
+fluidity_single_step.ipynb cells §8.1b (fundamental form: F_B red,
+Δσ̄_xx blue, sum green dashed) and §8.2/§9.3 (absolute form: N_D black,
+[ΔGPE* + N_D(x_T)] blue thick, residual green dashed), topography panel
+with the x_T (navy) / x_I / x_R annotations. SEAWARD SIDE ONLY
+(xlim −50..3500 km) — the landward side is distracting (Dan).
+
+Layout: columns STD | WAL; rows: topography · fundamental form ·
+absolute (decomposed) form. The conventions §2.3 pinning constant is
+computed and PRINTED (window x_T + 1000..2000 km) but the curves are the
+notebook's own — the residual is displayed trench-anchored as developed.
 
 All Δ curves are trench-referenced (±5 km window means, conventions
 §2.1/§4.1). Sign pin: ΔGPE* at x_I must reproduce the committed
@@ -122,46 +126,65 @@ def main():
               f'(window x_T+{PIN_KM[0]:.0f}..{PIN_KM[1]:.0f} km); '
               f'rms about pinned closure {res_pin[pin].std()/1e12:.3f} TN/m')
 
+        # notebook §8.2/§9.3 absolute-form quantities
+        Fd_T = ca(Fd, ti)                       # N_D(x_T) — scalar offset
+        bracket_term = d_gpe + Fd_T             # [ΔGPE* + N_D(x_T)]
+        residual = Fd - bracket_term + FB       # the notebook's §8.3 closure
+
+        # --- render: lifted from the notebook cells (§8.1b, §8.2/§9.3) ---
         xkm = (x - xT) / 1e3
-        span = (xkm > -400) & (x <= xR + 200e3)
-        marks = [0, (x[iI] - xT) / 1e3, (xR - xT) / 1e3]
-        ax = axes[0, col]
-        ax.plot(xkm[span], -fs_top[span], 'k-', lw=1.3)
-        ax.axhline(0, color='0.8', lw=0.6)
-        ax.set_ylim(2600, -1300)
-        ax.set_title(f'{key}  (t = {t_myr:.0f} Myr)', fontsize=10)
-        for xm, lab in zip(marks, ['$x_T$', '$x_I$', '$x_R$']):
-            ax.axvline(xm, color='0.6', lw=0.6, ls=':')
-            ax.text(xm, -1150, lab, fontsize=8, ha='center', color='0.35')
-        ax = axes[1, col]
-        ax.plot(xkm[span], d_Sxx[span] / 1e12, 'k-', lw=1.5,
-                label=r'$\Delta\bar{\sigma}_{xx}$')
-        ax.plot(xkm[span], -FB[span] / 1e12, '--', color='0.45', lw=1.3, label=r'$-F_B$')
-        ax.axhline(0, color='0.8', lw=0.6)
-        ax = axes[2, col]
-        ax.plot(xkm[span], d_Fd[span] / 1e12, 'k-', lw=1.5, label=r'$\Delta N_D$')
-        ax.plot(xkm[span], d_gpe[span] / 1e12, 'k--', lw=1.4,
-                label=r'$\Delta\mathrm{GPE}^*$')
-        ax.plot(xkm[span], FB[span] / 1e12, '-', color='0.45', lw=1.3, label=r'$F_B$')
-        ax.plot(xkm[span], res_pin[span] / 1e12, '-', color='0.75', lw=1.0,
-                label='residual (pinned)')
-        ax.axhline(0, color='0.8', lw=0.6)
-        ax.set_xlabel('Distance from trench [km]')
-        for row in (1, 2):
-            for xm in marks:
-                axes[row, col].axvline(xm, color='0.6', lw=0.6, ls=':')
+        xi_km, xr_km = (x[iI] - xT) / 1e3, (xR - xT) / 1e3
+
+        ax1 = axes[0, col]
+        ax1.plot(xkm, -fs_top, color='k', lw=1.5, label='$w$')
+        ax1.axhline(0, color='k', lw=0.5)
+        for xc in (0, xi_km, xr_km):
+            ax1.axvline(xc, color='k', lw=0.5)
+        ax1.set_ylim(3000, -1500)
+        ax1.set_title(f'{key},  $t = {t_myr:.1f}$ Myr\ntrailing-plate force balance',
+                      fontsize=12)
+        ax1.text(xi_km + 60, 1700,
+                 'first isostatic\ncolumn (' + r'$x_I$' + ')\n' + r'$dV/dx = 0$',
+                 fontsize=9)
+        for x_col, lab, c in [(0, r'$x_T$', '#002147'), (xi_km, r'$x_I$', 'k'),
+                              (xr_km, r'$x_R$', 'k')]:
+            ax1.annotate(lab, xy=(x_col, 1), xycoords=('data', 'axes fraction'),
+                         xytext=(5, -4), textcoords='offset points',
+                         ha='left', va='top', color=c, fontsize=11, fontweight='bold')
+
+        ax2 = axes[1, col]
+        ax2.plot(xkm, FB * 1e-12, color='red', lw=2, label=r'$F_B(x)$')
+        ax2.plot(xkm, d_Sxx * 1e-12, color='b', lw=2, label=r'$\Delta\bar\sigma_{xx}(x)$')
+        ax2.plot(xkm, (d_Sxx + FB) * 1e-12, color='g', ls='--', lw=3,
+                 label=r'$\Delta\bar\sigma_{xx}(x) + F_B(x)$')
+        ax2.axhline(0, color='k', lw=0.5)
+        for xc in (0, xi_km, xr_km):
+            ax2.axvline(xc, color='k', lw=0.5)
+        ax2.set_ylim(-2.5, 2.5)
+
+        ax3 = axes[2, col]
+        ax3.plot(xkm, residual * 1e-12, color='g', ls='--', lw=3,
+                 label=r'$N_D(x) - [\Delta\mathrm{GPE}^{*}(x) + N_D(x_T)] + F_B(x)$')
+        ax3.plot(xkm, FB * 1e-12, color='red', lw=2, label=r'$F_B(x)$')
+        ax3.plot(xkm, bracket_term * 1e-12, color='b', lw=4, alpha=0.6,
+                 label=r'$\Delta\mathrm{GPE}^{*}(x) + N_D(x_T)$')
+        ax3.plot(xkm, Fd * 1e-12, color='k', ls='-', lw=1.5, label=r'$N_D(x)$')
+        ax3.axhline(0, color='k', lw=0.5)
+        for xc in (0, xi_km, xr_km):
+            ax3.axvline(xc, color='k', lw=0.5)
+        ax3.set_ylim(-1.5, 2.5)
+        ax3.set_xlabel('Distance from trench [km]', fontsize=11)
+        ax3.set_xlim(-50, 3500)                 # SEAWARD ONLY (Dan, 2026-09-15)
         del v, g
 
-    axes[0, 0].set_ylabel('$w$ [m] (positive downward)', fontsize=9)
-    axes[1, 0].set_ylabel('Force per unit\ndistance [TN/m]', fontsize=9)
-    axes[2, 0].set_ylabel('Force per unit\ndistance [TN/m]', fontsize=9)
-    axes[1, 0].legend(fontsize=8, frameon=False, loc='lower right')
-    axes[2, 0].legend(fontsize=8, frameon=False, loc='lower right', ncol=2)
-    fig.suptitle('Trailing-plate force balance at the reference snapshot: fundamental form '
-                 '(middle) and decomposed form (bottom)', fontsize=10.5)
+    axes[0, 0].set_ylabel('$w$ [m] (positive downward)', fontsize=10)
+    axes[1, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
+    axes[2, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
+    axes[1, 0].legend(loc='lower right', fontsize=8)
+    axes[2, 0].legend(loc='lower right', fontsize=7, ncol=2)
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_balance_snapshot.png')
-    fig.savefig(out, dpi=200)
+    fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
 
 if __name__ == '__main__':
