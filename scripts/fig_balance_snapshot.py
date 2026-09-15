@@ -81,11 +81,13 @@ def draw_direction_glyph(ax):
     colour — positive ΔGPE* acts trench-ward (left), positive ΔN_D and
     F_B act seaward (right). Symbols at the arrow tips; no text box."""
     x0, L = 0.30, 0.09
-    ax.plot([x0, x0], [0.765, 0.975], color='0.5', lw=0.8,
+    ax.text(x0, 0.975, 'interpreting a change', transform=ax.transAxes,
+            fontsize=9, style='italic', color='0.25', ha='center', va='top')
+    ax.plot([x0, x0], [0.685, 0.895], color='0.5', lw=0.8,
             transform=ax.transAxes)
-    rows = [(0.95, 'b', -1, r'$+\Delta\mathrm{GPE}^{*}$', 3.0),
-            (0.87, 'k', +1, r'$+\Delta N_D$', 1.8),
-            (0.79, 'red', +1, r'$+F_B$', 1.8)]
+    rows = [(0.87, 'b', -1, r'$+\Delta\mathrm{GPE}^{*}$', 3.0),
+            (0.79, 'k', +1, r'$+\Delta N_D$', 1.8),
+            (0.71, 'red', +1, r'$+F_B$', 1.8)]
     for y, c, s, lab, lw in rows:
         ax.annotate('', xy=(x0 + s * L, y), xytext=(x0, y),
                     xycoords='axes fraction', textcoords='axes fraction',
