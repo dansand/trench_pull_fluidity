@@ -10,15 +10,23 @@ Rendering follows the NOTEBOOK's developed figures (Dan's directive
 2026-09-15: the notebook images are the starting point, never
 reinvented): panel styling, colours, labels, and axis limits lifted from
 fluidity_single_step.ipynb cells §8.1b (fundamental form: F_B red,
-Δσ̄_xx blue, sum green dashed) and §8.2/§9.3 (absolute form: N_D black,
-[ΔGPE* + N_D(x_T)] blue thick, residual green dashed), topography panel
-with the x_T (navy) / x_I / x_R annotations. SEAWARD SIDE ONLY
+Δσ̄_xx blue, sum green dashed) and §8.2 (decomposed form: ΔN_D black,
+ΔGPE* blue thick, F_B red, residual green dashed), topography panel with
+the x_T (navy) / x_I / x_R annotations. SEAWARD SIDE ONLY
 (xlim −50..3500 km) — the landward side is distracting (Dan).
 
+Decomposed panel in the PURE Δ FORM (Dan's simplification 2026-09-15):
+every term zero at the trench — no renormalised/absolute-anchored
+variant in this figure; the trench VALUES are communicated separately by
+fig_nd_trench_ridge. Because ΔN_D and ΔGPE* nearly coincide (F_B is
+small), the panel carries a direction box: positive ΔGPE* = force to the
+left; positive ΔN_D = force to the right; positive F_B = force to the
+right. The displayed residual is the conventions §2.3 PINNED closure
+(constant removed over x_T + 1000..2000 km, printed) — the near-trench
+anchor noise is shown, not hidden.
+
 Layout: columns STD | WAL; rows: topography · fundamental form ·
-absolute (decomposed) form. The conventions §2.3 pinning constant is
-computed and PRINTED (window x_T + 1000..2000 km) but the curves are the
-notebook's own — the residual is displayed trench-anchored as developed.
+decomposed (Δ) form.
 
 All Δ curves are trench-referenced (±5 km window means, conventions
 §2.1/§4.1). Sign pin: ΔGPE* at x_I must reproduce the committed
@@ -126,12 +134,7 @@ def main():
               f'(window x_T+{PIN_KM[0]:.0f}..{PIN_KM[1]:.0f} km); '
               f'rms about pinned closure {res_pin[pin].std()/1e12:.3f} TN/m')
 
-        # notebook §8.2/§9.3 absolute-form quantities
-        Fd_T = ca(Fd, ti)                       # N_D(x_T) — scalar offset
-        bracket_term = d_gpe + Fd_T             # [ΔGPE* + N_D(x_T)]
-        residual = Fd - bracket_term + FB       # the notebook's §8.3 closure
-
-        # --- render: lifted from the notebook cells (§8.1b, §8.2/§9.3) ---
+        # --- render: lifted from the notebook cells (§8.1b, §8.2) ---
         xkm = (x - xT) / 1e3
         xi_km, xr_km = (x[iI] - xT) / 1e3, (xR - xT) / 1e3
 
@@ -162,19 +165,33 @@ def main():
             ax2.axvline(xc, color='k', lw=0.5)
         ax2.set_ylim(-2.5, 2.5)
 
+        # Δ form (Dan, 2026-09-15): everything zero at the trench — the pure
+        # communication of the balance; trench VALUES live in
+        # fig_nd_trench_ridge, not here. ΔN_D and ΔGPE* plot nearly on top
+        # of each other (F_B is small): the direction box carries the sign
+        # reading so the coincidence is not misread as one curve.
         ax3 = axes[2, col]
-        ax3.plot(xkm, residual * 1e-12, color='g', ls='--', lw=3,
-                 label=r'$N_D(x) - [\Delta\mathrm{GPE}^{*}(x) + N_D(x_T)] + F_B(x)$')
+        ax3.plot(xkm, res_pin * 1e-12, color='g', ls='--', lw=3,
+                 label=r'$\Delta N_D - \Delta\mathrm{GPE}^{*} + F_B$')
         ax3.plot(xkm, FB * 1e-12, color='red', lw=2, label=r'$F_B(x)$')
-        ax3.plot(xkm, bracket_term * 1e-12, color='b', lw=4, alpha=0.6,
-                 label=r'$\Delta\mathrm{GPE}^{*}(x) + N_D(x_T)$')
-        ax3.plot(xkm, Fd * 1e-12, color='k', ls='-', lw=1.5, label=r'$N_D(x)$')
+        ax3.plot(xkm, d_gpe * 1e-12, color='b', lw=4, alpha=0.6,
+                 label=r'$\Delta\mathrm{GPE}^{*}(x)$')
+        ax3.plot(xkm, d_Fd * 1e-12, color='k', ls='-', lw=1.5,
+                 label=r'$\Delta N_D(x)$')
         ax3.axhline(0, color='k', lw=0.5)
         for xc in (0, xi_km, xr_km):
             ax3.axvline(xc, color='k', lw=0.5)
         ax3.set_ylim(-1.5, 2.5)
         ax3.set_xlabel('Distance from trench [km]', fontsize=11)
         ax3.set_xlim(-50, 3500)                 # SEAWARD ONLY (Dan, 2026-09-15)
+        if col == 0:
+            ax3.text(0.03, 0.96,
+                     'positive $\\Delta\\mathrm{GPE}^{*}$: force to the left\n'
+                     'positive $\\Delta N_D$: force to the right\n'
+                     'positive $F_B$: force to the right',
+                     transform=ax3.transAxes, fontsize=8, va='top',
+                     bbox=dict(boxstyle='round,pad=0.4', fc='white',
+                               ec='0.6', lw=0.6))
         del v, g
 
     axes[0, 0].set_ylabel('$w$ [m] (positive downward)', fontsize=10)
