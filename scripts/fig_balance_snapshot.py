@@ -52,6 +52,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.integrate import cumulative_trapezoid
+from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cerpa_helpers import (make_field_extractor, mirror_fields_in_x, pick_trench_3step,
@@ -61,6 +62,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.expanduser('~/DATA/numerical_models/OUTPUTS/')
 DX, ZC, Y, W = 1000.0, 75e3, 2_900_000.0, 5
 T_REF_MYR = 40.0                      # conventions §4b (mid-run rule)
+TOPO_SMOOTH_KM = 10.0                 # display smoothing of w (short-wavelength noise)
 PIN_KM = (1000.0, 2000.0)             # closure pinning window rel. x_T (conventions §2.3)
 COMMITTED_TP_T40 = {'STD': 1.98e12, 'WAL': 1.75e12}   # N/m, time-evolution cache at t=40
 
@@ -73,11 +75,32 @@ def load_snapshot(key):
         del v
     raise SystemExit(f'{key}: no snapshot within 1 Myr of t = {T_REF_MYR}')
 
+def draw_direction_glyph(ax):
+    """Colour-matched force-direction glyph (Dan, 2026-09-15): arrows
+    diverging from a common origin line, one per term in its own curve
+    colour — positive ΔGPE* acts trench-ward (left), positive ΔN_D and
+    F_B act seaward (right). Symbols at the arrow tips; no text box."""
+    x0, L = 0.30, 0.09
+    ax.plot([x0, x0], [0.765, 0.975], color='0.5', lw=0.8,
+            transform=ax.transAxes)
+    rows = [(0.95, 'b', -1, r'$+\Delta\mathrm{GPE}^{*}$', 3.0),
+            (0.87, 'k', +1, r'$+\Delta N_D$', 1.8),
+            (0.79, 'red', +1, r'$+F_B$', 1.8)]
+    for y, c, s, lab, lw in rows:
+        ax.annotate('', xy=(x0 + s * L, y), xytext=(x0, y),
+                    xycoords='axes fraction', textcoords='axes fraction',
+                    arrowprops=dict(arrowstyle='-|>', color=c, lw=lw,
+                                    mutation_scale=14))
+        ax.text(x0 + s * (L + 0.015), y, lab, transform=ax.transAxes,
+                fontsize=9, color=c, va='center',
+                ha='right' if s < 0 else 'left')
+
 def main():
     if not hasattr(np, 'trapz'):
         np.trapz = np.trapezoid
     fig, axes = plt.subplots(3, 2, figsize=(10.5, 8.6), sharex=True,
                              gridspec_kw={'height_ratios': [1, 1.4, 1.8]})
+    lims = {0: [], 1: [], 2: []}          # per-row plotted data, for axis limits
     for col, key in enumerate(('STD', 'WAL')):
         v, t_myr = load_snapshot(key)
         v.point_data['p'] = v['NormalSP::Pressure']
@@ -137,23 +160,38 @@ def main():
         # --- render: lifted from the notebook cells (§8.1b, §8.2) ---
         xkm = (x - xT) / 1e3
         xi_km, xr_km = (x[iI] - xT) / 1e3, (xR - xT) / 1e3
+        vis = (xkm >= -50) & (xkm <= 3500)      # the displayed span
+
+        # topography: display-smoothed SEAWARD OF x_I ONLY — the
+        # trailing-plate short-wavelength content otherwise dominates
+        # visually (Dan), but the narrow trench is REAL structure and
+        # filtering shaves hundreds of metres off w_T (the aspect lesson):
+        # raw through the trench zone, blended into the smoothed curve
+        # over 100 km beyond x_I.
+        topo_raw = -fs_top
+        topo_sm = -gaussian_filter1d(fs_top, TOPO_SMOOTH_KM * 1e3 / DX)
+        wgt = np.clip(((x - x[iI]) / 1e3 - 50.0) / 100.0, 0.0, 1.0)
+        topo_disp = topo_raw * (1 - wgt) + topo_sm * wgt
 
         ax1 = axes[0, col]
-        ax1.plot(xkm, -fs_top, color='k', lw=1.5, label='$w$')
+        ax1.plot(xkm, topo_disp, color='k', lw=1.5, label='$w$')
         ax1.axhline(0, color='k', lw=0.5)
         for xc in (0, xi_km, xr_km):
             ax1.axvline(xc, color='k', lw=0.5)
-        ax1.set_ylim(3000, -1500)
+        lims[0].append(topo_disp[vis])
         ax1.set_title(f'{key},  $t = {t_myr:.1f}$ Myr\ntrailing-plate force balance',
                       fontsize=12)
-        ax1.text(xi_km + 60, 1700,
+        ax1.text(xi_km + 60, 0.75 * topo_disp[vis].max(),
                  'first isostatic\ncolumn (' + r'$x_I$' + ')\n' + r'$dV/dx = 0$',
                  fontsize=9)
-        for x_col, lab, c in [(0, r'$x_T$', '#002147'), (xi_km, r'$x_I$', 'k'),
-                              (xr_km, r'$x_R$', 'k')]:
+        for x_col, lab, c, side in [(0, r'$x_T$', '#002147', 'right'),
+                                    (xi_km, r'$x_I$', 'k', 'left'),
+                                    (xr_km, r'$x_R$', 'k', 'left')]:
             ax1.annotate(lab, xy=(x_col, 1), xycoords=('data', 'axes fraction'),
-                         xytext=(5, -4), textcoords='offset points',
-                         ha='left', va='top', color=c, fontsize=11, fontweight='bold')
+                         xytext=(5 if side == 'left' else -5, -4),
+                         textcoords='offset points',
+                         ha=side, va='top', color=c, fontsize=11,
+                         fontweight='bold')
 
         ax2 = axes[1, col]
         ax2.plot(xkm, FB * 1e-12, color='red', lw=2, label=r'$F_B(x)$')
@@ -163,7 +201,7 @@ def main():
         ax2.axhline(0, color='k', lw=0.5)
         for xc in (0, xi_km, xr_km):
             ax2.axvline(xc, color='k', lw=0.5)
-        ax2.set_ylim(-2.5, 2.5)
+        lims[1] += [FB[vis] * 1e-12, d_Sxx[vis] * 1e-12, (d_Sxx + FB)[vis] * 1e-12]
 
         # Δ form (Dan, 2026-09-15): everything zero at the trench — the pure
         # communication of the balance; trench VALUES live in
@@ -181,23 +219,29 @@ def main():
         ax3.axhline(0, color='k', lw=0.5)
         for xc in (0, xi_km, xr_km):
             ax3.axvline(xc, color='k', lw=0.5)
-        ax3.set_ylim(-1.5, 2.5)
+        lims[2] += [res_pin[vis] * 1e-12, FB[vis] * 1e-12,
+                    d_gpe[vis] * 1e-12, d_Fd[vis] * 1e-12]
         ax3.set_xlabel('Distance from trench [km]', fontsize=11)
         ax3.set_xlim(-50, 3500)                 # SEAWARD ONLY (Dan, 2026-09-15)
         if col == 0:
-            ax3.text(0.03, 0.96,
-                     'positive $\\Delta\\mathrm{GPE}^{*}$: force to the left\n'
-                     'positive $\\Delta N_D$: force to the right\n'
-                     'positive $F_B$: force to the right',
-                     transform=ax3.transAxes, fontsize=8, va='top',
-                     bbox=dict(boxstyle='round,pad=0.4', fc='white',
-                               ec='0.6', lw=0.6))
+            draw_direction_glyph(ax3)
         del v, g
+
+    # data-driven axis limits, shared across the two model columns per row
+    for row, arrs in lims.items():
+        lo = min(a.min() for a in arrs)
+        hi = max(a.max() for a in arrs)
+        pad = 0.10 * (hi - lo)
+        for c in (0, 1):
+            if row == 0:
+                axes[row, c].set_ylim(hi + pad, lo - pad)   # w positive down
+            else:
+                axes[row, c].set_ylim(lo - pad, hi + pad)
 
     axes[0, 0].set_ylabel('$w$ [m] (positive downward)', fontsize=10)
     axes[1, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
     axes[2, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
-    axes[1, 0].legend(loc='lower right', fontsize=8)
+    axes[1, 0].legend(loc='lower left', fontsize=8)
     axes[2, 0].legend(loc='lower right', fontsize=7, ncol=2)
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_balance_snapshot.png')
