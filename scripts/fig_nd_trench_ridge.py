@@ -90,6 +90,51 @@ def main():
     out = os.path.join(ROOT, 'figures', 'fig_nd_trench_ridge.png')
     fig.savefig(out, dpi=200)
     print('written:', out)
+    write_stats()
+
+def write_stats():
+    """Verifiable-numbers table for this figure (tables/nd_trench_ridge.csv).
+
+    The quotable statistics: how large N_D at the ridge ever gets, and that
+    maximum as a fraction of the average and maximum magnitudes of N_D at
+    the trench — per model and pooled. All values TN/m unless 'fraction'
+    or 'ratio'; t >= T_MIN_MYR throughout.
+    """
+    rows = [('model', 'quantity', 'value')]
+    pool_r, pool_t = [], []
+    for k in ('STD', 'WAL'):
+        d = np.load(os.path.join(ROOT, 'notebooks', 'outputs', f'time_evolution_{k}.npz'))
+        m = d['t_yr'] / 1e6 >= T_MIN_MYR
+        nd_t = d['Fd_xT'][m] / 1e12
+        nd_r = (d['Fd_xT'][m] + d['delta_Fd_R'][m]) / 1e12
+        diff = nd_t - nd_r
+        gpe_diff = -d['delta_GPE_R'][m] / 1e12
+        pool_r.append(nd_r); pool_t.append(nd_t)
+        rows += [
+            (k, 'nd_ridge_max', f'{nd_r.max():.3f}'),
+            (k, 'nd_ridge_median', f'{np.median(nd_r):.3f}'),
+            (k, 'nd_ridge_always_tension_like', str(bool((nd_r > 0).all()))),
+            (k, 'nd_trench_median', f'{np.median(nd_t):.3f}'),
+            (k, 'nd_trench_mean_abs', f'{np.abs(nd_t).mean():.3f}'),
+            (k, 'nd_trench_max_abs', f'{np.abs(nd_t).max():.3f}'),
+            (k, 'nd_trench_tension_like_fraction', f'{(nd_t > 0).mean():.3f}'),
+            (k, 'ratio_ridge_max_over_trench_mean_abs', f'{nd_r.max()/np.abs(nd_t).mean():.3f}'),
+            (k, 'ratio_ridge_max_over_trench_max_abs', f'{nd_r.max()/np.abs(nd_t).max():.3f}'),
+            (k, 'nd_diff_trench_minus_ridge_median', f'{np.median(diff):.3f}'),
+            (k, 'nd_diff_driving_fraction', f'{(diff > 0).mean():.3f}'),
+            (k, 'ratio_nd_diff_over_gpe_diff_max', f'{(np.abs(diff)/np.abs(gpe_diff)).max():.3f}'),
+        ]
+    pr, pt = np.concatenate(pool_r), np.concatenate(pool_t)
+    rows += [
+        ('POOLED', 'nd_ridge_max', f'{pr.max():.3f}'),
+        ('POOLED', 'ratio_ridge_max_over_trench_mean_abs', f'{pr.max()/np.abs(pt).mean():.3f}'),
+        ('POOLED', 'ratio_ridge_max_over_trench_max_abs', f'{pr.max()/np.abs(pt).max():.3f}'),
+    ]
+    os.makedirs(os.path.join(ROOT, 'tables'), exist_ok=True)
+    tab = os.path.join(ROOT, 'tables', 'nd_trench_ridge.csv')
+    with open(tab, 'w') as f:
+        f.write('\n'.join(','.join(r) for r in rows) + '\n')
+    print('written:', tab)
 
 if __name__ == '__main__':
     main()
