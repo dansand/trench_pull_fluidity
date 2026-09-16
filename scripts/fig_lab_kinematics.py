@@ -9,11 +9,18 @@ Four panels, mid-run average (36–44 Myr), models overlaid in the brand
 colours per FIGURE_STYLE.md:
   1. sigma_zz anomaly (ridge − x_I), pressure register — the zero
      crossing (dotted) is the candidate base-of-lithosphere level
-  2. v_x − v_plate — the dynamical LAB in the sense of Garel et al.:
-     the base of the coherently translating ("constant-velocity") plate
-  3. log10 strain-rate invariant — plate interior vs asthenosphere; the
-     x-range excludes zero deliberately (the structure lives at
-     10^-19..10^-14, Dan 2026-09-16)
+  2. ABSOLUTE horizontal velocity v_x about a bold zero line, so both
+     transitions are visible: the coherently translating plate at the
+     top and the depth at which the mantle flow REVERSES (Dan,
+     2026-09-16 — a plate-relative velocity hides the reversal)
+  3. log10 of the SHEAR strain rate |eps_xz| = |dv_x/dz|/2 (Dan: the
+     shear component is the quantity of interest). The second invariant
+     is drawn faint for comparison: they agree to 0.06 (STD) / 0.15
+     (WAL) decade BELOW 100 km — the asthenosphere deforms in simple
+     shear — but diverge by up to 2.4 decades within the lithosphere,
+     where the invariant is dominated by flexural normal strains near
+     x_I rather than by plate-parallel shear. x-range excludes zero
+     deliberately (the structure lives at 10^-19..10^-14)
   4. d<tau_zx>/dz against the independently measured plate-wide
      dP/dx (dashed). Averaging horizontal momentum across the span gives
      d<tau_zx>/dz = −Δσ̄_xx/span, so in the channel these must agree —
@@ -34,10 +41,11 @@ column to the ridge, mid-run (36–44 Myr), for STD (navy) and WAL
 (magenta). (a) Vertical normal stress anomaly of the ridge column
 relative to the first isostatic column; its zero crossing (dotted) marks
 the change from a topographic pressure gradient that drives the plate to
-an adverse gradient that drives return flow. (b) Horizontal velocity
-relative to the plate: the crossing lies just above the base of the
-coherently translating plate. (c) Strain-rate invariant: at the crossing
-the material already deforms at rates approaching asthenospheric values.
+an adverse gradient that drives return flow. (b) Absolute horizontal velocity: the plate
+translates coherently above the crossing, shear occupies the transition
+below it, and the flow reverses only at about 200 km. (c) Shear strain rate (faint: second invariant, which they track below
+100 km): at the crossing the material already deforms at rates
+approaching asthenospheric values.
 (d) Vertical gradient of the plate-averaged shear stress; below the
 crossing it matches the independently measured plate-wide pressure
 gradient (dashed), confirming that the deep anomaly is the channel
@@ -83,12 +91,19 @@ def main():
         v_rel = vx - v_plate
         j = np.where(np.abs(v_rel) > LAB_FRAC * abs(v_plate))[0]
         z_lab = zk[j[0]] if len(j) else np.nan
+        sgn = np.where(np.sign(vx[:-1]) != np.sign(vx[1:]))[0]
+        z_rev = zk[sgn[0]] if len(sgn) else np.nan
         dtxz = np.gradient(txz, k['z'])                                 # Pa/m
         dPdx = c['dP'][m].mean() / span                                 # Pa/m, measured
 
         axes[0].plot(p_r, zp, color=col, lw=1.9, label=key)
-        axes[1].plot(v_rel, zk, color=col, lw=1.9, label=key)
-        axes[2].plot(eii, zk, color=col, lw=1.9)
+        axes[1].plot(vx, zk, color=col, lw=1.9, label=key)
+        # shear strain rate from the velocity gradient; invariant for comparison
+        vx_ms = vx * 1e-2 / 3.15576e7                                   # cm/yr -> m/s
+        exz = np.abs(np.gradient(vx_ms, k['z'])) / 2.0                  # 1/s
+        log_exz = np.log10(np.clip(exz, 1e-22, None))
+        axes[2].plot(eii, zk, color=col, lw=1.2, alpha=0.30)
+        axes[2].plot(log_exz, zk, color=col, lw=1.9)
         above = zk <= z_cross
         axes[3].plot(dtxz[above], zk[above], color=col, lw=1.4, alpha=0.25)
         axes[3].plot(dtxz[~above], zk[~above], color=col, lw=1.9)
@@ -99,12 +114,16 @@ def main():
         print(f'{key}: sigma_zz crossing {z_cross:.0f} km | dynamical LAB {z_lab:.0f} km | '
               f'v_plate {v_plate:+.2f} cm/yr | log10 eII: plate {eii[zk < 60].min():.1f}, '
               f'crossing {np.interp(z_cross, zk, eii):.1f}, asth {eii[(zk > 150) & (zk < 250)].mean():.1f}')
+        dev = np.abs(log_exz - eii)[(zk > 40) & (zk < 250)].max()
+        print(f'   flow reversal (v_x = 0) at {z_rev:.0f} km; shear-rate vs invariant '
+              f'agree to {dev:.2f} decade below 40 km')
         print(f'   d<tau_zx>/dz (120–220 km) {dtxz[ch].mean():+.2f} Pa/m vs measured dP/dx '
               f'{dPdx:+.2f} Pa/m  -> ratio {dtxz[ch].mean() / dPdx:.2f}')
 
     for ax, lab in zip(axes, [r'$\sigma_{zz}$ anomaly, ridge $-\,x_I$ [MPa]',
-                              r'$v_x - v_{\rm plate}$ [cm/yr]',
-                              r'$\log_{10}\dot\varepsilon_{II}$ [s$^{-1}$]',
+                              r'$v_x$ [cm/yr]  (negative = plate motion)',
+                              r'$\log_{10}|\dot\varepsilon_{xz}|$ [s$^{-1}$]'
+                              '\n(faint: second invariant)',
                               r'$\partial\langle\tau_{zx}\rangle/\partial z$ [Pa/m]'
                               '\n(dashed: measured $\\partial P/\\partial x$)']):
         ax.set_xlabel(lab, fontsize=10)
@@ -112,7 +131,7 @@ def main():
     # bold zero lines — but NOT on the strain-rate panel (its structure
     # lives far from zero; including the axis squashes it)
     for ax in (axes[0], axes[1], axes[3]):
-        ax.axvline(0, color='k', lw=1.4)
+        ax.axvline(0, color='k', lw=1.8)
     axes[2].set_xlim(-19.5, -14.2)
     axes[3].set_xlim(-6, 6)
     axes[0].set_ylabel('Depth [km]', fontsize=11)
