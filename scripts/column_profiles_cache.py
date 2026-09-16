@@ -4,7 +4,7 @@ Per snapshot (t >= T_MIN_MYR), STD and WAL: vertical profiles to 250 km of
 the full vertical normal stress sigma_zz, the horizontal normal stress
 sigma_xx (so the fibre stress sigma_xx - sigma_zz is available for the
 mechanical-thickness analysis), density and temperature at the
-trench, first-isostatic and ridge columns (+-5 km window means,
+trench, first-isostatic, ridge AND maximum-bending-moment columns (+-5 km window means,
 conventions §4.1), plus the picks. Raw per-column profiles are stored so
 downstream scripts form their own differences.
 
@@ -40,6 +40,7 @@ import os, sys, glob
 import numpy as np
 import natsort
 import pyvista as pv
+from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cerpa_helpers import (make_field_extractor, pick_trench_3step,
@@ -94,17 +95,31 @@ def build():
             iI, _ = find_first_isostatic_column(x, fs_top, xT, ti, DX, seaward_sign=+1)
             xR, iR = find_ridge_x(x, fs_top, xT, seaward_sign=+1)
             ca = lambda f, j: f[..., max(0, j - W):j + W + 1].mean(axis=-1)
-            rows.append(dict(t=t_myr,
+            # column of MAXIMUM BENDING MOMENT (Dan, 2026-09-16): the
+            # flexure-based thickness definitions belong here, not at the
+            # trench. Fixed pivot = the trench neutral plane; searched over
+            # x_T .. x_T + 500 km, smoothed 5 km before the argmax.
+            fib = sxx - szz
+            Ccol = np.cumsum(ca(fib, ti)) * DX
+            wnp = (z >= 5e3) & (z <= 60e3)
+            z_np0 = z[wnp][int(np.argmax(np.abs(Ccol[wnp])))]
+            shallow = z <= 80e3
+            Mx = np.trapz(fib[shallow] * (z[shallow, None] - z_np0), z[shallow], axis=0)
+            sea = np.where((x >= xT - 50e3) & (x <= xT + 500e3))[0]
+            iM = sea[int(np.argmax(np.abs(gaussian_filter1d(Mx[sea], 5))))]
+            rows.append(dict(t=t_myr, xM=x[iM], M_max=Mx[iM],
+                             szz_M=ca(szz, iM), sxx_M=ca(sxx, iM), temp_M=ca(T, iM),
                              szz_T=ca(szz, ti), szz_I=ca(szz, iI), szz_R=ca(szz, iR),
                              sxx_T=ca(sxx, ti), sxx_I=ca(sxx, iI), sxx_R=ca(sxx, iR),
                              rho_T=ca(rho, ti), rho_I=ca(rho, iI), rho_R=ca(rho, iR),
                              temp_T=ca(T, ti), temp_I=ca(T, iI), temp_R=ca(T, iR),
                              xT=xT, xI=x[iI], xR=xR))
             print(f'{KEY} t={t_myr:6.2f} Myr  xT={xT/1e3:7.1f} xI={x[iI]/1e3:7.1f} '
-                  f'xR={xR/1e3:7.1f}', flush=True)
+                  f'xR={xR/1e3:7.1f}  xM-xT={(x[iM]-xT)/1e3:+6.1f}', flush=True)
             del v, g
         out[KEY] = rows
-    keys = ('t', 'szz_T', 'szz_I', 'szz_R', 'sxx_T', 'sxx_I', 'sxx_R',
+    keys = ('t', 'xM', 'M_max', 'szz_M', 'sxx_M', 'temp_M',
+            'szz_T', 'szz_I', 'szz_R', 'sxx_T', 'sxx_I', 'sxx_R',
             'rho_T', 'rho_I', 'rho_R',
             'temp_T', 'temp_I', 'temp_R', 'xT', 'xI', 'xR')
     np.savez(OUT,

@@ -23,20 +23,20 @@ Three length scales, per snapshot:
                   this is a direct restatement of the trench-pull scaling.
   ridge, dynamic  the x_I-to-ridge term that enters the force balance,
                   divided by the ridge surface anomaly
-  ridge, static   the same for the static ridge push (back-tilt removed,
-                  read from the plateau of the cumulative integral)
+  ridge, static   the same for the static ridge push — COMPUTED AND
+                  TABULATED but deliberately not plotted: it distracts
+                  from the near-identity of the two measured conversions
 
-The comparison is the point: isostatically compensated topography
-converts to force inefficiently (the compensating mass cancels most of
-the column difference), whereas the trench's non-isostatic deficit
-converts over most of the mechanical thickness.
+The comparison is the point: the trench's non-isostatic deficit and the
+plate-wide isostatic topography convert to driving force at almost
+exactly the same rate — about 33 km, i.e. 1.07-1.08 GN/m per metre of
+relief — despite arising by completely different mechanisms.
 
 DRAFT CAPTION. The force delivered per unit of surface topography,
 expressed as a length scale, through the runs for STD (navy) and WAL
-(magenta): the trench (solid), the ridge term that enters the force
-balance (dashed), and the static ridge push with the back-tilt removed
-(dotted). A larger length scale means topography that converts to
-driving force more efficiently.
+(magenta): the trench (solid) and the ridge term that enters the force balance
+(dashed). A larger length scale means topography that converts to driving
+force more efficiently; the two track each other closely throughout.
 """
 import os, sys
 import numpy as np
@@ -77,7 +77,8 @@ def main():
         ax.plot(t, L_T, '-o', color=col, lw=2.0, ms=4.5, markeredgecolor='white',
                 markeredgewidth=0.5, label=f'{key}  trench')
         ax.plot(t, L_Rd, '--', color=col, lw=1.6, label=f'{key}  ridge (in the balance)')
-        ax.plot(t, L_Rs, ':', color=col, lw=1.8, label=f'{key}  ridge (static)')
+        # the static line is NOT plotted (Dan, 2026-09-16): it distracts from
+        # the near-identity of the two measured conversions. Still tabulated.
         print(f'{key}: length scale [km] — trench {np.median(L_T):.1f} '
               f'(IQR {np.percentile(L_T,25):.0f}–{np.percentile(L_T,75):.0f}); '
               f'ridge dynamic {np.median(L_Rd):.1f}; ridge static {np.median(L_Rs):.1f}')

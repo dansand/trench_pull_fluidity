@@ -2,9 +2,11 @@
 thickness, how they evolve, and what trench pull does as a function of it.
 
 Writes figures/fig_mechanical_thickness.png and tables/mechanical_thickness.csv
-from the committed column-profile cache (+ the bending cache for the
-flexural route). All definitions are evaluated at the TRENCH column, where
-the bending moment is largest.
+from the committed column-profile cache. The FLEXURE-based definitions
+(neutral plane, yield envelope, thermal) are evaluated at the column of
+MAXIMUM BENDING MOMENT, which sits ~20-25 km seaward of the trench; the
+deficit-based ones (triangle, TP-90 %, moment arm) are referenced to the
+trench, where the force balance is taken.
 
 The definitions (Dan's list, 2026-09-16, plus two of our own):
 
@@ -63,8 +65,12 @@ def thicknesses(d, key):
     p = cpc.partition(d, key)
     z = c['z']
     sm = lambda a: gaussian_filter1d(a, 2)
-    fib = d[f'{key}_sxx_T'] - d[f'{key}_szz_T']        # fibre stress, Pa
-    temp = d[f'{key}_temp_T'] - 273.0
+    # Flexure-based definitions are evaluated at the MAXIMUM-BENDING-MOMENT
+    # column (Dan, 2026-09-16), which sits ~20-25 km seaward of the trench;
+    # the deficit-based ones (triangle, TP-90 %, arm) stay at the trench,
+    # where the force balance is referenced.
+    fib = d[f'{key}_sxx_M'] - d[f'{key}_szz_M']        # fibre stress, Pa
+    temp = d[f'{key}_temp_M'] - 273.0
     out = {k: [] for k in ('thermal', 'np2', 'yield10', 'yield50', 'tp90',
                            'triangle', 'arm', 'trench_pull', 'h_strength',
                            'T_strength')}
@@ -207,12 +213,15 @@ def main():
     ax_p.set_xlabel('mechanical thickness $h$ [km]  (span: spread of estimates)',
                     fontsize=10.5)
     ax_p.set_ylabel('trench pull [TN/m]', fontsize=10.5)
+    ax_p.set_xlim(36, 100)
+    ax_p.set_ylim(0.8, 3.6)
+    ax_p.set_box_aspect(1)
     ax_p.set_title('(b) trench pull vs mechanical thickness', fontsize=10.5)
     lim = np.array([18, 50])
     ax_a.plot(lim, lim, 'k-', lw=1.2, label='1:1')
     ax_a.plot(lim, 1.1 * lim, 'k:', lw=0.9, label=r'$0.55\,h$')
     ax_a.set_xlim(*lim); ax_a.set_ylim(*lim)
-    ax_a.set_aspect('equal', adjustable='box')
+    ax_a.set_box_aspect(1)
     ax_a.set_xlabel('$h/2$ [km]  (span: spread of estimates)', fontsize=10.5)
     ax_a.set_ylabel('$L$ = trench pull / deficit [km]', fontsize=10.5)
     ax_a.set_title('(c) the $h/2$ scaling test', fontsize=10.5)
