@@ -122,11 +122,14 @@ def main():
     d = cpc.load()
     if f'STD_sxx_T' not in d.files:
         raise SystemExit('cache lacks sigma_xx — rebuild column_profiles_cache.py')
-    fig = plt.figure(figsize=(12.5, 8.4))
-    gs = fig.add_gridspec(2, 2, height_ratios=[1.25, 1])
+    # 3-row grid: the time-series panel spans two columns and ONE row, each
+    # lower panel takes one column and TWO rows, so the squares fill their
+    # column width instead of being cramped by the row height (Dan, 2026-09-16)
+    fig = plt.figure(figsize=(12.5, 10.2))
+    gs = fig.add_gridspec(3, 2, height_ratios=[1, 1, 1], hspace=0.30, wspace=0.22)
     ax_t = fig.add_subplot(gs[0, :])
-    ax_p = fig.add_subplot(gs[1, 0])
-    ax_a = fig.add_subplot(gs[1, 1])
+    ax_p = fig.add_subplot(gs[1:, 0])
+    ax_a = fig.add_subplot(gs[1:, 1])
     # Trimmed to the four informative definitions (Dan, 2026-09-16);
     # yield-50 MPa and the 90 %-equilibration depth remain in the table.
     styles = [('np2', '-o', r'$2\,h_{np}$  (lower bound, nearly constant)'),
@@ -199,9 +202,9 @@ def main():
 
     ax_t.set_ylabel('Thickness [km]', fontsize=11)
     ax_t.set_xlabel('Model time [Myr]', fontsize=11)
-    ax_t.set_title('(a) definitions of the mechanical thickness at the trench '
-                   '(navy STD, magenta WAL); the strength-based mean matches '
-                   'the 900 $^\\circ$C isotherm', fontsize=10.5)
+    ax_t.set_title('(a) definitions of the mechanical thickness at the max-moment '
+                   'column\n(navy STD, magenta WAL); the strength-based mean '
+                   'matches the 900 $^\\circ$C isotherm', fontsize=10.5)
     ax_t.grid(alpha=0.25, color=C_RULE, lw=0.6)
     ax_t.set_ylim(20, 110)
     for _, ls, lab in styles:
@@ -228,7 +231,6 @@ def main():
     for ax in (ax_p, ax_a):
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
         ax.legend(frameon=False, fontsize=9)
-    fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_mechanical_thickness.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
