@@ -28,7 +28,8 @@ Left: the trench pull (solid) converges by about 60 km, while the
 first-isostatic-column-to-ridge part (dashed) peaks near the vertical
 normal stress zero crossing (dotted) and then declines as the
 asthenospheric pressure gradient takes over. Right: their ratio is flat
-across the 60–100 km window (grey band), so the partition between trench
+across the depth range in which the cumulative maximum falls (shaded,
+interquartile range through the run), so the partition between trench
 pull and the plate-wide term does not depend materially on where the
 integration is stopped.
 """
@@ -46,7 +47,10 @@ from fig_lab_kinematics import crossing_depth
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 C = {'STD': '#002147', 'WAL': '#E5007D'}
 C_RULE = '#BFC3D1'
-WINDOW_KM = (60.0, 100.0)
+# The shaded band is the RUN RANGE (IQR) of the depth at which the
+# cumulative x_I-to-ridge curve is a MAXIMUM — i.e. of the depth where the
+# integrand changes sign. It is computed, not chosen: an earlier fixed
+# 60-100 km band was an eyeballed guess and is retired (Dan, 2026-09-16).
 
 def main():
     d = cpc.load()
@@ -67,8 +71,18 @@ def main():
         axes[0].plot(TP, zkm, color=col, lw=2.0, label=f'{key}   trench pull')
         axes[0].plot(RP, zkm, color=col, lw=1.5, ls='--', label=f'{key}   $x_I$ to ridge')
         axes[1].plot(ratio, zkm, color=col, lw=2.0, label=key)
+        # depth of the cumulative maximum, per snapshot -> IQR band
+        sel = (zkm > 30) & (zkm < 200)
+        zmax_all = []
+        for pr, pt in zip(c['p_R'], c['p_T']):
+            rr = cum(gaussian_filter1d(pr, 2))
+            zmax_all.append(zkm[sel][int(np.argmax(rr[sel]))])
+        q1, q3 = np.percentile(zmax_all, [25, 75])
         for ax in axes:
+            ax.axhspan(q1, q3, color=col, alpha=0.10, zorder=0)
             ax.axhline(z_cross, color=col, lw=0.9, ls=':')
+        print(f'   depth of cumulative maximum: median {np.median(zmax_all):.0f} km, '
+              f'IQR {q1:.0f}-{q3:.0f}, full {min(zmax_all):.0f}-{max(zmax_all):.0f}')
         at = lambda a, zz: float(np.interp(zz, zkm, a))
         print(f'{key}: trench pull {at(TP, 75):.2f} TN/m (60 km {at(TP, 60):.2f}, '
               f'100 km {at(TP, 100):.2f}); x_I-to-ridge {at(RP, 75):.2f} '
@@ -76,7 +90,6 @@ def main():
               f'ratio {at(ratio, 60):.2f}/{at(ratio, 75):.2f}/{at(ratio, z_cross):.2f} '
               f'(60 / 75 / crossing)')
     for ax in axes:
-        ax.axhspan(*WINDOW_KM, color='0.88', zorder=0)
         ax.axvline(0, color='k', lw=1.4)
         ax.grid(alpha=0.2, color=C_RULE, lw=0.6)
     axes[0].set_xlabel('Cumulative force per unit distance [TN/m]', fontsize=11)
@@ -87,7 +100,7 @@ def main():
     axes[0].legend(frameon=False, fontsize=9, loc='lower right')
     axes[1].legend(frameon=False, fontsize=10)
     fig.suptitle('Choosing the depth of integration: cumulative forces and their ratio\n'
-                 '(dotted: $\\sigma_{zz}$ zero crossing; grey band: 60–100 km)', fontsize=11)
+                 '(dotted: $\\sigma_{zz}$ zero crossing at mid-run; shaded: IQR of the depth of the cumulative maximum)', fontsize=11)
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_force_vs_depth.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
