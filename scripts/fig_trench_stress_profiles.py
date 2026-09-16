@@ -14,16 +14,11 @@ signal is strongest:
          flexural fibre stress. Its zero crossing is the neutral plane;
          the outer-fibre peaks bound the strong part of the plate.
   right  the DELTA SIGMA_ZZ profile, that column minus the first isostatic
-         column (pressure register) — the topographic pressure deficit —
-         with the TRIANGLE EQUIVALENT drawn as an actual triangle: the
-         same area as the measured deficit (integrated to the declared
-         depth Z_TP_KM = 120 km, by which the deficit is >99 % converged)
-         and the same peak amplitude, decaying linearly to zero at
-         h_triangle = 2 x area / peak.
+         column (pressure register) — the topographic pressure deficit.
 
-Overlaid on both, per model: the span of the four independent mechanical
-thickness estimates (2 h_np, yield-10 %, yield-50 MPa, thermal 900 C) as
-a shaded band, with the neutral plane h_np marked separately. Reading the
+Overlaid on both, per model: the span of the three mechanical thickness
+estimates (2 h_np, truncated yield envelope at 10 % of peak, thermal
+900 C) as a shaded band, with the neutral plane h_np marked separately. Reading the
 two panels together is the point — the same thickness has to make sense
 of the flexural envelope on the left and of the pressure deficit on the
 right, and it does: the deficit dies where the envelope does.
@@ -33,7 +28,7 @@ DRAFT CAPTION. Stress profiles at the column of maximum bending moment
 for STD (navy) and WAL (magenta). Left: the normal-stress difference
 (flexural fibre stress); the neutral plane (dotted) is its zero crossing.
 Right: the vertical normal stress difference between that column and the
-first isostatic column. Shaded bands span the four independent estimates
+first isostatic column. Shaded bands span the three estimates
 of the mechanical thickness; both the flexural envelope and the pressure
 deficit decay away within the same depth range.
 """
@@ -60,7 +55,6 @@ Z_TP_KM = 120.0    # declared integration depth for the trench-pull area.
 def main():
     d = cpc.load()
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 6.4), sharey=True)
-    tri_info = []
     for key in ('STD', 'WAL'):
         col = C[key]
         c = cpc.derive(d, key)
@@ -73,20 +67,7 @@ def main():
         dx_M = (d[f'{key}_xM'][m] - d[f'{key}_xT'][m]).mean() / 1e3
         axes[0].plot(fib, zkm, color=col, lw=2.0, label=key)
         axes[1].plot(dzz, zkm, color=col, lw=2.0, label=key)
-        # THE TRIANGLE EQUIVALENT, drawn as an actual triangle: same area as
-        # the measured deficit integrated to Z_TP_KM, same peak amplitude,
-        # decaying linearly to zero at h_triangle = 2 x area / peak.
-        dfc = -sm(c['p_T'][m].mean(axis=0))                 # deficit, positive, Pa
-        zc = z <= Z_TP_KM * 1e3
-        area = np.trapz(dfc[zc], z[zc])                      # = trench pull, N/m
-        peak = dfc[z <= 75e3].max()
-        h_tri = 2 * area / peak
-        axes[1].plot([-peak / 1e6, 0.0], [0.0, h_tri / 1e3], color=col, lw=1.4,
-                     ls='--', label=f'{key} triangle equiv. '
-                                    f'({h_tri/1e3:.0f} km, {area/1e12:.2f} TN/m)')
-        tri_info.append((key, col, h_tri, area, peak))
-        ests = np.array([r[k][m].mean() for k in ('np2', 'yield10', 'yield50',
-                                                  'thermal')]) / 1e3
+        ests = np.array([r[k][m].mean() for k in ('np2', 'yield10', 'thermal')]) / 1e3
         h_np = r['np2'][m].mean() / 2e3
         for ax in axes:
             ax.axhspan(ests.min(), ests.max(), color=col, alpha=0.10, lw=0)
@@ -103,13 +84,7 @@ def main():
                        '\n(pressure register)', fontsize=11)
     axes[0].set_ylabel('Depth [km]', fontsize=11)
     axes[0].set_ylim(Z_TP_KM, 0)
-    axes[1].text(0.03, 0.985,
-                 f'triangle area = deficit integrated to {Z_TP_KM:.0f} km\n'
-                 '(>99 % converged by 90 km; 98 % by 75 km)',
-                 transform=axes[1].transAxes, fontsize=8, color='0.3', va='top')
-    for key, col, h_tri, area, peak in tri_info:
-        print(f'{key}: triangle {h_tri/1e3:.1f} km x {peak/1e6:.0f} MPa, '
-              f'area {area/1e12:.2f} TN/m')
+
     for ax in axes:
         ax.axvline(0, color='k', lw=1.6)
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)

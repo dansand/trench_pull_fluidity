@@ -109,7 +109,10 @@ def thicknesses(d, key):
         out['arm'].append(np.trapz(dfc[zc] * z[zc], z[zc]) / total)
         # the isotherm that matches the mean of the three strength-based
         # definitions (Dan, 2026-09-16): 2 h_np, yield-10 %, triangle
-        h_bar = np.nanmean([out['np2'][-1], out['yield10'][-1], out['triangle'][-1]])
+        # the strength-based mean: the two definitions derived from the
+        # stress envelope (the thermal one is what it calibrates, the
+        # triangle is force-derived — neither belongs here)
+        h_bar = np.nanmean([out['np2'][-1], out['yield10'][-1]])
         out['h_strength'].append(h_bar)
         out['T_strength'].append(np.interp(h_bar, z, temp[i]))
     out = {k: np.array(v) for k, v in out.items()}
@@ -132,10 +135,14 @@ def main():
     ax_a = fig.add_subplot(gs[1:, 1])
     # Trimmed to the four informative definitions (Dan, 2026-09-16);
     # yield-50 MPa and the 90 %-equilibration depth remain in the table.
-    styles = [('np2', '-o', r'$2\,h_{np}$  (lower bound, nearly constant)'),
-              ('yield10', '--', 'yield envelope, 10 % of peak'),
-              ('triangle', (0, (3, 1, 1, 1)), 'triangle equivalent (GPE)'),
-              ('thermal', '-', 'thermal, 900 $^\\circ$C (upper bound, grows)')]
+    # Three estimates (Dan, 2026-09-16): the neutral plane, the truncated
+    # yield-stress envelope, and the 900 C isotherm. The triangle equivalent
+    # is NOT a fourth estimate — it is 2 L, i.e. the force-derived length
+    # being tested in panel (c), so including it would be circular. The
+    # 50 MPa envelope stays in the table only.
+    styles = [('np2', '-o', r'$2\,h_{np}$  (neutral plane; nearly constant)'),
+              ('yield10', '--', 'truncated yield-stress envelope (10 % of peak)'),
+              ('thermal', '-', 'thermal, 900 $^\\circ$C (grows)')]
     rows = [('model', 'quantity', 'value')]
     for key in ('STD', 'WAL'):
         col = C[key]
@@ -159,7 +166,7 @@ def main():
         #      EXCLUDED from the span: L = triangle/2 identically, so
         #      including it would make the test circular.
         L = r['triangle'] / 2
-        ests = np.vstack([r['np2'], r['yield10'], r['yield50'], r['thermal']]) / 2e3
+        ests = np.vstack([r['np2'], r['yield10'], r['thermal']]) / 2e3
         lo, hi = np.nanmin(ests, axis=0), np.nanmax(ests, axis=0)
         mid = np.nanmedian(ests, axis=0)
         # (b) trench pull against thickness, SAME span as (c) — the
