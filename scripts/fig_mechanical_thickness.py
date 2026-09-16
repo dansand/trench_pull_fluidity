@@ -48,7 +48,11 @@ import column_profiles_cache as cpc
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 C = {'STD': '#002147', 'WAL': '#E5007D'}
 C_RULE = '#BFC3D1'
-T_MECH_C = 950.0           # conventions §5.2 mechanical base isotherm
+T_MECH_C = 900.0           # the isotherm matching the strength-based definitions
+                           # (measured 898 STD / 892 WAL -> 900, Dan 2026-09-16).
+                           # The suite convention is 950 C (conventions §5.2), which
+                           # this analysis says is ~5 km too deep: it fails the h/2
+                           # scaling test at L/h = 0.46-0.47 where 900 C gives 0.51.
 YIELD_FRAC = 0.10          # Dan's scale-free threshold
 YIELD_ABS_MPA = 50.0       # McNutt & Menard
 TP_FRAC = 0.90             # trench-pull equilibration level
@@ -62,7 +66,8 @@ def thicknesses(d, key):
     fib = d[f'{key}_sxx_T'] - d[f'{key}_szz_T']        # fibre stress, Pa
     temp = d[f'{key}_temp_T'] - 273.0
     out = {k: [] for k in ('thermal', 'np2', 'yield10', 'yield50', 'tp90',
-                           'triangle', 'arm', 'trench_pull')}
+                           'triangle', 'arm', 'trench_pull', 'h_strength',
+                           'T_strength')}
     for i in range(len(c['t'])):
         f = sm(fib[i])
         # thermal
@@ -73,13 +78,17 @@ def thicknesses(d, key):
         w = (z >= 5e3) & (z <= 60e3)
         h_np = z[w][int(np.argmax(np.abs(cfib[w])))]
         out['np2'].append(2 * h_np)
-        # yield-envelope thresholds, below the neutral plane
+        # yield-envelope thresholds, evaluated FROM THE BOTTOM UP (Dan,
+        # 2026-09-16): the base is the DEEPEST level at which the envelope
+        # still exceeds the threshold. Searching downward from the neutral
+        # plane instead lands in the zero crossing of the envelope itself
+        # — a ~1 km window on this grid — and returns h_np, not the base.
         peak = np.abs(f[(z > 2e3) & (z < 80e3)]).max()
-        deep = z > h_np
-        k10 = np.where(deep & (np.abs(f) < YIELD_FRAC * peak))[0]
-        k50 = np.where(deep & (np.abs(f) < YIELD_ABS_MPA * 1e6))[0]
-        out['yield10'].append(z[k10[0]] if len(k10) else np.nan)
-        out['yield50'].append(z[k50[0]] if len(k50) else np.nan)
+        deep = z < 150e3
+        k10 = np.where(deep & (np.abs(f) >= YIELD_FRAC * peak))[0]
+        k50 = np.where(deep & (np.abs(f) >= YIELD_ABS_MPA * 1e6))[0]
+        out['yield10'].append(z[k10[-1]] if len(k10) else np.nan)
+        out['yield50'].append(z[k50[-1]] if len(k50) else np.nan)
         # trench-pull equilibration and the moment arm
         pT = sm(c['p_T'][i])                    # pressure register (deficit negative)
         dfc = -pT                                # deficit, positive
@@ -92,6 +101,11 @@ def thicknesses(d, key):
         dP_T = np.abs(dfc[z <= 75e3]).max()
         out['triangle'].append(2 * total / dP_T)
         out['arm'].append(np.trapz(dfc[zc] * z[zc], z[zc]) / total)
+        # the isotherm that matches the mean of the three strength-based
+        # definitions (Dan, 2026-09-16): 2 h_np, yield-10 %, triangle
+        h_bar = np.nanmean([out['np2'][-1], out['yield10'][-1], out['triangle'][-1]])
+        out['h_strength'].append(h_bar)
+        out['T_strength'].append(np.interp(h_bar, z, temp[i]))
     out = {k: np.array(v) for k, v in out.items()}
     out['t'] = c['t']
     return out
@@ -107,12 +121,12 @@ def main():
     ax_t = fig.add_subplot(gs[0, :])
     ax_p = fig.add_subplot(gs[1, 0])
     ax_a = fig.add_subplot(gs[1, 1])
-    styles = [('thermal', '-', 'thermal (950 $^\\circ$C)'),
-              ('np2', '-o', r'$2\,h_{np}$'),
+    # Trimmed to the four informative definitions (Dan, 2026-09-16);
+    # yield-50 MPa and the 90 %-equilibration depth remain in the table.
+    styles = [('np2', '-o', r'$2\,h_{np}$  (lower bound, nearly constant)'),
               ('yield10', '--', 'yield envelope, 10 % of peak'),
-              ('yield50', ':', 'yield envelope, 50 MPa'),
-              ('tp90', '-.', 'trench pull 90 % equilibrated'),
-              ('triangle', (0, (3, 1, 1, 1)), 'triangle equivalent')]
+              ('triangle', (0, (3, 1, 1, 1)), 'triangle equivalent (GPE)'),
+              ('thermal', '-', 'thermal, 900 $^\\circ$C (upper bound, grows)')]
     rows = [('model', 'quantity', 'value')]
     for key in ('STD', 'WAL'):
         col = C[key]
@@ -129,26 +143,47 @@ def main():
                      (key, f'h_{name}_q3_km', f'{np.nanpercentile(r[name], 75)/1e3:.1f}')]
         ax_p.plot(r['np2'] / 1e3, r['trench_pull'] / 1e12, 'o', color=col, ms=5,
                   markeredgecolor='white', markeredgewidth=0.5, label=key)
-        ax_a.plot(r['np2'] / 1e3, r['arm'] / 1e3, 'o', color=col, ms=5,
-                  markeredgecolor='white', markeredgewidth=0.5, label=key)
+        # (c) the effective moment arm against h/2 for the two bounds
+        ax_a.fill_between(r['t'], r['np2'] / 2e3, r['thermal'] / 2e3, color=col,
+                          alpha=0.15, lw=0,
+                          label=f'{key}  $h/2$, lower to upper bound')
+        L = r['triangle'] / 2                      # = trench pull / surface deficit
+        ax_a.plot(r['t'], L / 1e3, '-o', color=col, lw=1.8, ms=4,
+                  markeredgecolor='white', markeredgewidth=0.5,
+                  label=f'{key}  $L$ = trench pull / surface deficit')
         ratio = r['arm'] / r['np2']
-        rows += [(key, 'moment_arm_median_km', f'{np.nanmedian(r["arm"])/1e3:.1f}'),
+        rows += [(key, 'strength_mean_thickness_km', f'{np.nanmedian(r["h_strength"])/1e3:.1f}'),
+                 (key, 'matching_isotherm_C', f'{np.nanmedian(r["T_strength"]):.0f}'),
+                 (key, 'h_yield50_median_km', f'{np.nanmedian(r["yield50"])/1e3:.1f}'),
+                 (key, 'h_tp90_median_km', f'{np.nanmedian(r["tp90"])/1e3:.1f}'),
+                 (key, 'moment_arm_median_km', f'{np.nanmedian(r["arm"])/1e3:.1f}'),
                  (key, 'moment_arm_over_h_median', f'{np.nanmedian(ratio):.3f}'),
+                 (key, 'L_scaling_km_median', f'{np.nanmedian(r["triangle"]/2)/1e3:.2f}'),
+                 (key, 'L_over_h_np2', f'{np.nanmedian(r["triangle"]/2/r["np2"]):.3f}'),
+                 (key, 'L_over_h_yield10', f'{np.nanmedian(r["triangle"]/2/r["yield10"]):.3f}'),
+                 (key, 'L_over_h_thermal900', f'{np.nanmedian(r["triangle"]/2/r["thermal"]):.3f}'),
+                 (key, 'L_over_h_strengthmean', f'{np.nanmedian(r["triangle"]/2/r["h_strength"]):.3f}'),
                  (key, 'trench_pull_median_TNm', f'{np.nanmedian(r["trench_pull"])/1e12:.3f}')]
         print(f'=== {key} === (run medians, km)')
         for name, _, lab in styles:
             print(f'   {lab:34s} {np.nanmedian(r[name])/1e3:5.1f}  '
                   f'(IQR {np.nanpercentile(r[name],25)/1e3:.0f}–{np.nanpercentile(r[name],75)/1e3:.0f})')
-        print(f'   effective moment arm               {np.nanmedian(r["arm"])/1e3:5.1f} km '
-              f'= {np.nanmedian(ratio):.2f} x (2 h_np)')
-    hh = np.linspace(30, 110, 50)
-    ax_a.plot(hh, hh / 3, 'k--', lw=1.0, label='$h/3$ (linear deficit)')
+        Lk = r['triangle'] / 2
+        print(f'   L (trench pull / surface deficit)  {np.nanmedian(Lk)/1e3:5.1f} km')
+        print(f'   h/2 scaling test  L/h: 2h_np {np.nanmedian(Lk/r["np2"]):.3f}, '
+              f'yield10 {np.nanmedian(Lk/r["yield10"]):.3f}, '
+              f'thermal900 {np.nanmedian(Lk/r["thermal"]):.3f}, '
+              f'strength-mean {np.nanmedian(Lk/r["h_strength"]):.3f}')
+        print(f'   centroid of the deficit (a different quantity) '
+              f'{np.nanmedian(r["arm"])/1e3:.1f} km')
+
     ax_t.set_ylabel('Thickness [km]', fontsize=11)
     ax_t.set_xlabel('Model time [Myr]', fontsize=11)
     ax_t.set_title('(a) definitions of the mechanical thickness at the trench '
-                   '(navy STD, magenta WAL)', fontsize=10.5)
+                   '(navy STD, magenta WAL); the strength-based mean matches '
+                   'the 900 $^\\circ$C isotherm', fontsize=10.5)
     ax_t.grid(alpha=0.25, color=C_RULE, lw=0.6)
-    ax_t.set_ylim(0, 130)
+    ax_t.set_ylim(20, 110)
     for _, ls, lab in styles:
         if ls == '-o':
             ax_t.plot([], [], '-o', color='0.35', lw=1.6, ms=4, label=lab)
@@ -158,9 +193,10 @@ def main():
     ax_p.set_xlabel(r'mechanical thickness $2\,h_{np}$ [km]', fontsize=10.5)
     ax_p.set_ylabel('trench pull [TN/m]', fontsize=10.5)
     ax_p.set_title('(b) trench pull vs mechanical thickness', fontsize=10.5)
-    ax_a.set_xlabel(r'mechanical thickness $2\,h_{np}$ [km]', fontsize=10.5)
-    ax_a.set_ylabel('effective moment arm [km]', fontsize=10.5)
-    ax_a.set_title('(c) effective moment arm (centroid of the deficit)', fontsize=10.5)
+    ax_a.set_xlabel('Model time [Myr]', fontsize=10.5)
+    ax_a.set_ylabel('depth [km]', fontsize=10.5)
+    ax_a.set_title('(c) the $h/2$ scaling test: $L$ against $h/2$ for the bounds',
+                   fontsize=10.5)
     for ax in (ax_p, ax_a):
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
         ax.legend(frameon=False, fontsize=9)
