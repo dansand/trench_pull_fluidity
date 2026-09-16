@@ -143,14 +143,23 @@ def main():
                      (key, f'h_{name}_q3_km', f'{np.nanpercentile(r[name], 75)/1e3:.1f}')]
         ax_p.plot(r['np2'] / 1e3, r['trench_pull'] / 1e12, 'o', color=col, ms=5,
                   markeredgecolor='white', markeredgewidth=0.5, label=key)
-        # (c) the effective moment arm against h/2 for the two bounds
-        ax_a.fill_between(r['t'], r['np2'] / 2e3, r['thermal'] / 2e3, color=col,
-                          alpha=0.15, lw=0,
-                          label=f'{key}  $h/2$, lower to upper bound')
-        L = r['triangle'] / 2                      # = trench pull / surface deficit
-        ax_a.plot(r['t'], L / 1e3, '-o', color=col, lw=1.8, ms=4,
-                  markeredgecolor='white', markeredgewidth=0.5,
-                  label=f'{key}  $L$ = trench pull / surface deficit')
+        # (c) THE h/2 SCALING TEST, one point per snapshot (Dan, 2026-09-16):
+        #   y  L = trench pull / surface pressure deficit — a single value
+        #   x  h/2, with a horizontal SPAN covering the spread of the
+        #      independent thickness estimates (2 h_np, yield-10 %,
+        #      yield-50 MPa, thermal 900 C). The triangle definition is
+        #      EXCLUDED from the span: L = triangle/2 identically, so
+        #      including it would make the test circular.
+        L = r['triangle'] / 2
+        ests = np.vstack([r['np2'], r['yield10'], r['yield50'], r['thermal']]) / 2e3
+        lo, hi = np.nanmin(ests, axis=0), np.nanmax(ests, axis=0)
+        mid = np.nanmedian(ests, axis=0)
+        ax_a.errorbar(mid, L / 1e3, xerr=[mid - lo, hi - mid], fmt='o', color=col,
+                      ms=5, lw=0, elinewidth=1.0, capsize=2, alpha=0.85,
+                      markeredgecolor='white', markeredgewidth=0.5, label=key)
+        print(f'   h/2 test: L/(h/2) using the estimate median = '
+              f'{np.nanmedian(L / 1e3 / mid):.2f}; '
+              f'L inside the estimate span in {np.mean((L/1e3 >= lo) & (L/1e3 <= hi))*100:.0f}% of snapshots')
         ratio = r['arm'] / r['np2']
         rows += [(key, 'strength_mean_thickness_km', f'{np.nanmedian(r["h_strength"])/1e3:.1f}'),
                  (key, 'matching_isotherm_C', f'{np.nanmedian(r["T_strength"]):.0f}'),
@@ -193,10 +202,14 @@ def main():
     ax_p.set_xlabel(r'mechanical thickness $2\,h_{np}$ [km]', fontsize=10.5)
     ax_p.set_ylabel('trench pull [TN/m]', fontsize=10.5)
     ax_p.set_title('(b) trench pull vs mechanical thickness', fontsize=10.5)
-    ax_a.set_xlabel('Model time [Myr]', fontsize=10.5)
-    ax_a.set_ylabel('depth [km]', fontsize=10.5)
-    ax_a.set_title('(c) the $h/2$ scaling test: $L$ against $h/2$ for the bounds',
-                   fontsize=10.5)
+    lim = np.array([18, 50])
+    ax_a.plot(lim, lim, 'k-', lw=1.2, label='1:1')
+    ax_a.plot(lim, 1.1 * lim, 'k:', lw=0.9, label=r'$0.55\,h$')
+    ax_a.set_xlim(*lim); ax_a.set_ylim(*lim)
+    ax_a.set_aspect('equal', adjustable='box')
+    ax_a.set_xlabel('$h/2$ [km]  (span: spread of estimates)', fontsize=10.5)
+    ax_a.set_ylabel('$L$ = trench pull / deficit [km]', fontsize=10.5)
+    ax_a.set_title('(c) the $h/2$ scaling test', fontsize=10.5)
     for ax in (ax_p, ax_a):
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
         ax.legend(frameon=False, fontsize=9)
