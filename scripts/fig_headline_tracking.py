@@ -33,7 +33,7 @@ from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cerpa_helpers import (make_field_extractor, mirror_fields_in_x, pick_trench_3step,
-                           find_first_isostatic_column, find_ridge_x)
+                           find_first_isostatic_column, find_ridge_x_flow)
 
 DATA = '/Users/DSAND/DATA/numerical_models/OUTPUTS/'
 DX, ZC, Y = 1000.0, 75e3, 2_900_000.0
@@ -81,7 +81,7 @@ def compute():
             xT, _ = pick_trench_3step(x, z, p, vx, subducting_side='right')
             ti = int(np.argmin(np.abs(x - xT)))
             iI, _ = find_first_isostatic_column(x, fs_top, xT, ti, DX, seaward_sign=+1)
-            xR, iR = find_ridge_x(x, fs_top, xT, seaward_sign=+1)
+            xR, iR = find_ridge_x_flow(x, vx[int(np.argmin(np.abs(z - 10e3)))], xT, seaward_sign=+1)
             gpe = -np.trapz(szz, z, axis=0)
             ca = lambda f, j: f[..., max(0, j - W):j + W + 1].mean(axis=-1)
             # normalised profiles on the trench->ridge span

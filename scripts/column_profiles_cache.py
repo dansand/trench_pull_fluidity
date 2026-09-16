@@ -32,6 +32,10 @@ Method notes (2026-09-15 session):
   median dP converges by 150 km (STD -9.05/-9.46/-9.47, WAL
   -4.63/-4.85/-4.80 MPa over 120-190/150-220/200-250 km) -- the chosen
   band sits on the plateau.
+- RIDGE PICK (2026-09-16): the ridge column is the maximum of the surface
+  divergence dvx/dx seaward of the trench (`find_ridge_x_flow`), NOT the
+  shallowest surface point. The topographic pick is stored alongside as
+  `xR_topo` for comparison. See the helper's docstring for why.
 - Sign pin: the trench-lobe integral over 0..z_c must reproduce the
   committed trench pulls (1.71 STD / 1.74 WAL TN/m at f10) -- asserted by
   fig_column_anomalies.py before rendering.
@@ -44,7 +48,8 @@ from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cerpa_helpers import (make_field_extractor, pick_trench_3step,
-                           find_first_isostatic_column, find_ridge_x)
+                           find_first_isostatic_column, find_ridge_x,
+                           find_ridge_x_flow)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.expanduser('~/DATA/numerical_models/OUTPUTS/')
@@ -93,7 +98,11 @@ def build():
             xT, _ = pick_trench_3step(x, z, p, vx, subducting_side='right')
             ti = int(np.argmin(np.abs(x - xT)))
             iI, _ = find_first_isostatic_column(x, fs_top, xT, ti, DX, seaward_sign=+1)
-            xR, iR = find_ridge_x(x, fs_top, xT, seaward_sign=+1)
+            # ridge from the FLOW (max surface divergence) -- the
+            # topographic pick is retained alongside for comparison
+            iz10 = int(np.argmin(np.abs(z - 10e3)))
+            xR, iR = find_ridge_x_flow(x, vx[iz10], xT, seaward_sign=+1)
+            xR_topo, _ = find_ridge_x(x, fs_top, xT, seaward_sign=+1)
             ca = lambda f, j: f[..., max(0, j - W):j + W + 1].mean(axis=-1)
             # column of MAXIMUM BENDING MOMENT (Dan, 2026-09-16): the
             # flexure-based thickness definitions belong here, not at the
@@ -113,15 +122,16 @@ def build():
                              sxx_T=ca(sxx, ti), sxx_I=ca(sxx, iI), sxx_R=ca(sxx, iR),
                              rho_T=ca(rho, ti), rho_I=ca(rho, iI), rho_R=ca(rho, iR),
                              temp_T=ca(T, ti), temp_I=ca(T, iI), temp_R=ca(T, iR),
-                             xT=xT, xI=x[iI], xR=xR))
+                             xT=xT, xI=x[iI], xR=xR, xR_topo=xR_topo))
             print(f'{KEY} t={t_myr:6.2f} Myr  xT={xT/1e3:7.1f} xI={x[iI]/1e3:7.1f} '
-                  f'xR={xR/1e3:7.1f}  xM-xT={(x[iM]-xT)/1e3:+6.1f}', flush=True)
+                  f'xR={xR/1e3:7.1f} (topo {xR_topo/1e3:7.1f})  '
+                  f'xM-xT={(x[iM]-xT)/1e3:+6.1f}', flush=True)
             del v, g
         out[KEY] = rows
     keys = ('t', 'xM', 'M_max', 'szz_M', 'sxx_M', 'temp_M',
             'szz_T', 'szz_I', 'szz_R', 'sxx_T', 'sxx_I', 'sxx_R',
             'rho_T', 'rho_I', 'rho_R',
-            'temp_T', 'temp_I', 'temp_R', 'xT', 'xI', 'xR')
+            'temp_T', 'temp_I', 'temp_R', 'xT', 'xI', 'xR', 'xR_topo')
     np.savez(OUT,
              **{f'{k}_{q}': np.array([r[q] for r in rows]) for k, rows in out.items()
                 for q in keys},

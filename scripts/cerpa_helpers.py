@@ -197,6 +197,49 @@ def find_first_isostatic_column(x, fs_top, x_trench, tindx, DX,
     return i_end, i_far
 
 
+def find_ridge_x_flow(x, vx_row, x_trench, seaward_sign=+1,
+                      smooth_km=15.0, min_offset_km=300.0):
+    """Ridge column from the FLOW, not the topography.
+
+    The ridge is the spreading centre: the maximum of the surface
+    divergence dvx/dx seaward of the trench. Adopted 2026-09-16 after the
+    surface-based pick (`find_ridge_x`) flipped 313 km in a single step in
+    WAL at 70 Myr — the late-run surface carries several topographic highs
+    within 350 m of one another and a shallowest-point pick resolves the
+    ambiguity discontinuously. Dan's ParaView inspection settled it: the
+    ridge is clearly identifiable in the velocity field and does not
+    migrate appreciably.
+
+    Measured behaviour over both runs (37 snapshots each): largest single
+    step 15 km (STD) / 25 km (WAL), against 102 / 313 km for the
+    topographic pick, and defined at every snapshot (the vx = 0 crossing
+    is not). Sits a median 15-25 km seaward of the topographic pick at
+    epochs where that pick is sane.
+
+    Parameters
+    ----------
+    x        : column positions [m], analysis frame
+    vx_row   : horizontal velocity along x at a shallow level (analysis
+               frame; a row of the sampled grid, ~10 km depth)
+    x_trench : trench position [m]
+    min_offset_km : ignore the near-trench zone, where the flexural
+               velocity field has its own structure
+
+    Returns (x_ridge, index).
+    """
+    dx = float(np.median(np.diff(x)))
+    v = gaussian_filter1d(np.nan_to_num(vx_row), max(1.0, smooth_km * 1e3 / dx))
+    div = np.gradient(v, x)
+    if seaward_sign > 0:
+        sea = x > x_trench + min_offset_km * 1e3
+    else:
+        sea = x < x_trench - min_offset_km * 1e3
+        div = -div
+    idx = np.where(sea)[0]
+    j = idx[int(np.argmax(div[idx]))]
+    return float(x[j]), int(j)
+
+
 def find_ridge_x(x, fs_top, x_trench, seaward_sign=+1,
                  buffer_km=200, smooth_km=50):
     """Locate the mid-ocean ridge as the highest point of the free-surface
