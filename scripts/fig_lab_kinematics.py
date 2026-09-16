@@ -5,10 +5,15 @@ column_profiles_deep.npz (the ridge-minus-x_I stress anomaly) and
 lab_kinematics.npz (velocity, strain rate and shear stress averaged
 across the trailing plate, x_I to the ridge). Build both first.
 
-Four panels, mid-run average (36–44 Myr), models overlaid in the brand
+Five panels, mid-run average (36–44 Myr), models overlaid in the brand
 colours per FIGURE_STYLE.md:
+  0. CUMULATIVE trench pull and x_I-to-ridge integrals vs depth (Dan,
+     2026-09-16): the force criterion made visible beside the kinematics
+     it is tested against — the x_I-to-ridge curve MAXIMISES exactly at
+     the sign change of its integrand (panel 1), which is the rule the
+     paper adopts; the trench pull is convergent by ~60 km
   1. sigma_zz anomaly (ridge − x_I), pressure register — the zero
-     crossing (dotted) is the candidate base-of-lithosphere level
+     crossing (dotted) is where the pressure forcing REVERSES direction
   2. ABSOLUTE horizontal velocity v_x about a bold zero line, so both
      transitions are visible: the coherently translating plate at the
      top and the depth at which the mantle flow REVERSES (Dan,
@@ -74,7 +79,7 @@ def crossing_depth(p_r, zkm, zmin_km=20.0):
 def main():
     d, k = cpc.load(), lkc.load()
     zk = k['z'] / 1e3
-    fig, axes = plt.subplots(1, 4, figsize=(14, 5.8), sharey=True)
+    fig, axes = plt.subplots(1, 5, figsize=(17, 5.8), sharey=True)
     for key in ('STD', 'WAL'):
         col = C[key]
         c = cpc.derive(d, key)
@@ -96,18 +101,30 @@ def main():
         dtxz = np.gradient(txz, k['z'])                                 # Pa/m
         dPdx = c['dP'][m].mean() / span                                 # Pa/m, measured
 
-        axes[0].plot(p_r, zp, color=col, lw=1.9, label=key)
-        axes[1].plot(vx, zk, color=col, lw=1.9, label=key)
+        # cumulative force integrals (panel 0) — the force criterion
+        zc_m = c['z']
+        cum = lambda a: np.concatenate([[0.0], np.cumsum(0.5 * (a[1:] + a[:-1]) * np.diff(zc_m))])
+        p_t = gaussian_filter1d(c['p_T'][m].mean(axis=0), 2)
+        TP = -cum(p_t) / 1e12
+        RP = cum(p_r * 1e6) / 1e12
+        axes[0].plot(TP, zp, color=col, lw=2.0, label=f'{key}  trench pull')
+        axes[0].plot(RP, zp, color=col, lw=1.5, ls='--', label=f'{key}  $x_I$ to ridge')
+        axes[1].plot(p_r, zp, color=col, lw=1.9, label=key)
+        axes[2].plot(vx, zk, color=col, lw=1.9, label=key)
         # shear strain rate from the velocity gradient; invariant for comparison
         vx_ms = vx * 1e-2 / 3.15576e7                                   # cm/yr -> m/s
         exz = np.abs(np.gradient(vx_ms, k['z'])) / 2.0                  # 1/s
         log_exz = np.log10(np.clip(exz, 1e-22, None))
-        axes[2].plot(eii, zk, color=col, lw=1.2, alpha=0.30)
-        axes[2].plot(log_exz, zk, color=col, lw=1.9)
+        axes[3].plot(eii, zk, color=col, lw=1.2, alpha=0.30)
+        axes[3].plot(log_exz, zk, color=col, lw=1.9)
         above = zk <= z_cross
-        axes[3].plot(dtxz[above], zk[above], color=col, lw=1.4, alpha=0.25)
-        axes[3].plot(dtxz[~above], zk[~above], color=col, lw=1.9)
-        axes[3].axvline(dPdx, color=col, lw=1.2, ls='--')
+        axes[4].plot(dtxz[above], zk[above], color=col, lw=1.4, alpha=0.25)
+        axes[4].plot(dtxz[~above], zk[~above], color=col, lw=1.9)
+        axes[4].axvline(dPdx, color=col, lw=1.2, ls='--')
+        d2v = np.gradient(np.gradient(vx_ms, k['z']), k['z'])
+        w2 = (zk > 30) & (zk < 200)
+        print(f'   d2v/dz2 peak at {zk[w2][int(np.argmax(np.abs(d2v[w2])))]:.0f} km '
+              f'(curvature = pressure-driven shear; rigid plate has none)')
         for ax in axes:
             ax.axhline(z_cross, color=col, lw=0.9, ls=':')
         ch = (zk >= 120) & (zk <= 220)
@@ -120,7 +137,8 @@ def main():
         print(f'   d<tau_zx>/dz (120–220 km) {dtxz[ch].mean():+.2f} Pa/m vs measured dP/dx '
               f'{dPdx:+.2f} Pa/m  -> ratio {dtxz[ch].mean() / dPdx:.2f}')
 
-    for ax, lab in zip(axes, [r'$\sigma_{zz}$ anomaly, ridge $-\,x_I$ [MPa]',
+    for ax, lab in zip(axes, ['Cumulative force per unit\ndistance [TN/m]',
+                              r'$\sigma_{zz}$ anomaly, ridge $-\,x_I$ [MPa]',
                               r'$v_x$ [cm/yr]  (negative = plate motion)',
                               r'$\log_{10}|\dot\varepsilon_{xz}|$ [s$^{-1}$]'
                               '\n(faint: second invariant)',
@@ -130,17 +148,18 @@ def main():
         ax.grid(alpha=0.2, color=C_RULE, lw=0.6)
     # bold zero lines — but NOT on the strain-rate panel (its structure
     # lives far from zero; including the axis squashes it)
-    for ax in (axes[0], axes[1], axes[3]):
+    for ax in (axes[0], axes[1], axes[2], axes[4]):
         ax.axvline(0, color='k', lw=1.8)
-    axes[2].set_xlim(-19.5, -14.2)
-    axes[3].set_xlim(-6, 6)
+    axes[3].set_xlim(-19.5, -14.2)
+    axes[4].set_xlim(-6, 6)
+    axes[0].legend(frameon=False, fontsize=8, loc='lower right')
     axes[0].set_ylabel('Depth [km]', fontsize=11)
     axes[0].set_ylim(250, 0)
-    axes[0].legend(frameon=False, fontsize=10)
+    axes[1].legend(frameon=False, fontsize=10)
     fig.suptitle('Beneath the trailing plate ($x_I$ to ridge, mid-run average): '
                  'the stress anomaly and the kinematics\n'
-                 '(dotted: $\\sigma_{zz}$ zero crossing — the candidate base of the '
-                 'coherently translating plate)', fontsize=11)
+                 '(dotted: $\\sigma_{zz}$ sign change — where the pressure forcing '
+                 'reverses; the maximum of the cumulative curve)', fontsize=11)
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_lab_kinematics.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
