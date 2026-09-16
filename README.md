@@ -135,7 +135,46 @@ All knobs live in §2 of each notebook (single source of truth), with per-cell o
 
 ## Reproducing the figures
 
-The notebooks are the build pipeline. Workflow:
+**Two parallel tracks.** `scripts/fig_*.py` are the deterministic
+**paper-figure** pipeline (one script → one figure of the same name,
+plus tables where applicable); `notebooks/` is the mutable, exploratory
+track that the scripts were lifted from. Styling conventions for both
+live in [`FIGURE_STYLE.md`](FIGURE_STYLE.md).
+
+### The script pipeline (paper figures)
+
+Two **cache builders** read the data archive once; every figure script
+then reads only caches, so figures re-render in seconds.
+
+| builder | writes | holds |
+|---|---|---|
+| `scripts/column_profiles_cache.py` | `notebooks/outputs/column_profiles_deep.npz` | σ_zz, ρ, T profiles to 250 km at the trench, first-isostatic and ridge columns (±5 km means), every snapshot ≥ 8 Myr, both models — plus the picks |
+| `scripts/lab_kinematics_cache.py` | `notebooks/outputs/lab_kinematics.npz` | v_x, τ_zx, strain-rate and viscosity invariants, T to 300 km, averaged across the trailing plate (x_I → ridge), every snapshot; reads its picks from the cache above |
+
+```bash
+python scripts/column_profiles_cache.py     # ~20 min, run first
+python scripts/lab_kinematics_cache.py      # ~10 min
+python scripts/fig_column_anomalies.py      # then any fig_ script, seconds each
+```
+
+| figure script | figure | reads |
+|---|---|---|
+| `fig_headline_tracking.py` | normalised ΔGPE* vs topography (time-aggregated) | own cache `headline_time_agg.npz` (`--recompute`) |
+| `fig_balance_snapshot.py` | trailing-plate balance at the reference snapshot | data archive directly (one snapshot per model) |
+| `fig_column_anomalies.py` | trench/ridge column anomalies vs depth | column profiles |
+| `fig_column_anomalies_normalised.py` | the same, scaled by ΔP_T | column profiles |
+| `fig_ridge_density_check.py` | untilted anomaly vs the density structure | column profiles |
+| `fig_force_vs_depth.py` | cumulative forces and their ratio vs integration depth | column profiles |
+| `fig_lab_kinematics.py` | stress anomaly beside velocity, strain rate, dτ_zx/dz | both caches |
+| `fig_nd_trench_ridge.py` | N_D at trench and ridge + difference (writes `tables/nd_trench_ridge.csv`) | time-evolution caches |
+| `fig_trench_resultants.py` | N_D, V, M at the trench through time | time-evolution + bending caches |
+
+Each script's docstring carries its method notes, the conventions it
+implements, its sign pins (several assert against committed values
+before rendering) and a draft caption. `tables/*.csv` hold the quotable
+statistics behind figures that have them.
+
+### The notebook track
 
 1. **Point `DATA_ROOT`** in each notebook's §2 at your local copy of the Cerpa data archive.
 2. **Time-evolution caches** — run `fluidity_time_evolution.ipynb` once with `MODEL_KEY = 'STD'`, then once with `'WAL'`. Each populates `notebooks/outputs/time_evolution_<MODEL_KEY>.npz`. Multi-model figures in §7 then load both caches and don't need the time loop re-run.
@@ -149,19 +188,26 @@ The `further_analysis/` notebooks (`fluidity_basal_drag.ipynb`, `fluidity_slab_n
 ## Repo layout
 
 ```
-notebooks/
-  fluidity_single_step.ipynb — main analysis, single timestep
-  fluidity_time_evolution.ipynb — main analysis, time evolution + npz cache
-  cerpa_helpers.py — shared functions (importable from any notebook)
-  further_analysis/
-    fluidity_basal_drag.ipynb — approximation test: isotherm vs horizontal plane
-    fluidity_slab_normal_FD.ipynb — approximation test: slab-normal vs vertical plane
-  figures/ — analysis-produced PNGs (canonical home)
-  outputs/ — npz time-evolution caches
-zenodo_materials/ — original Cerpa input file + parameter file + README
+scripts/
+  cerpa_helpers.py            — shared extraction/pickers (single implementation)
+  column_profiles_cache.py    — cache builder (column profiles)   } read the
+  lab_kinematics_cache.py     — cache builder (plate kinematics)  } archive
+  fig_*.py                    — one script per paper figure (read caches only)
+figures/                      — ALL renders and animations, one flat directory
+tables/                       — CSV statistics written by figure scripts
+notebooks/                    — mutable, exploratory; read single-step →
+  fluidity_single_step.ipynb    time-evolution → further_analysis/
+  fluidity_time_evolution.ipynb
+  further_analysis/           — assumption checks (basal drag, bending, back-tilt,
+                                slab-normal N_D, centroid arm, viscosity evolution)
+  outputs/                    — npz caches (further_analysis/ keeps its own)
+FIGURE_STYLE.md               — STD/WAL symbolisation + shared figure conventions
+zenodo_materials/             — original Cerpa input file + parameter file + README
 ```
 
-The `further_analysis/` notebooks reach `cerpa_helpers.py` one level up via a small `sys.path.insert(0, "..")` block at the top of their import cell — this is necessary because Jupyter only auto-adds the notebook's own directory to `sys.path`.
+Notebooks and scripts both reach `scripts/cerpa_helpers.py` through a
+root-finding `sys.path` shim at the top of their import cell, so they run
+from any working directory.
 
 ---
 
