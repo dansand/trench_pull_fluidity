@@ -141,8 +141,7 @@ def main():
             rows += [(key, f'h_{name}_median_km', f'{np.nanmedian(r[name])/1e3:.1f}'),
                      (key, f'h_{name}_q1_km', f'{np.nanpercentile(r[name], 25)/1e3:.1f}'),
                      (key, f'h_{name}_q3_km', f'{np.nanpercentile(r[name], 75)/1e3:.1f}')]
-        ax_p.plot(r['np2'] / 1e3, r['trench_pull'] / 1e12, 'o', color=col, ms=5,
-                  markeredgecolor='white', markeredgewidth=0.5, label=key)
+
         # (c) THE h/2 SCALING TEST, one point per snapshot (Dan, 2026-09-16):
         #   y  L = trench pull / surface pressure deficit — a single value
         #   x  h/2, with a horizontal SPAN covering the spread of the
@@ -154,6 +153,12 @@ def main():
         ests = np.vstack([r['np2'], r['yield10'], r['yield50'], r['thermal']]) / 2e3
         lo, hi = np.nanmin(ests, axis=0), np.nanmax(ests, axis=0)
         mid = np.nanmedian(ests, axis=0)
+        # (b) trench pull against thickness, SAME span as (c) — the
+        # thickness ambiguity is shown in both panels (Dan, 2026-09-16)
+        ax_p.errorbar(2 * mid, r['trench_pull'] / 1e12,
+                      xerr=[2 * (mid - lo), 2 * (hi - mid)], fmt='o', color=col,
+                      ms=5, lw=0, elinewidth=1.0, capsize=2, alpha=0.85,
+                      markeredgecolor='white', markeredgewidth=0.5, label=key)
         ax_a.errorbar(mid, L / 1e3, xerr=[mid - lo, hi - mid], fmt='o', color=col,
                       ms=5, lw=0, elinewidth=1.0, capsize=2, alpha=0.85,
                       markeredgecolor='white', markeredgewidth=0.5, label=key)
@@ -199,7 +204,8 @@ def main():
         else:
             ax_t.plot([], [], color='0.35', lw=1.6, ls=ls, label=lab)
     ax_t.legend(frameon=False, fontsize=8.5, ncol=3, loc='upper left')
-    ax_p.set_xlabel(r'mechanical thickness $2\,h_{np}$ [km]', fontsize=10.5)
+    ax_p.set_xlabel('mechanical thickness $h$ [km]  (span: spread of estimates)',
+                    fontsize=10.5)
     ax_p.set_ylabel('trench pull [TN/m]', fontsize=10.5)
     ax_p.set_title('(b) trench pull vs mechanical thickness', fontsize=10.5)
     lim = np.array([18, 50])
