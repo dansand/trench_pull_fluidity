@@ -4,7 +4,7 @@ Normalised Delta-GPE* and topography vs normalised trench-to-ridge distance,
 averaged over every snapshot with t >= 8 Myr, STD and WAL; min-max range bands
 (lightly smoothed). Per-snapshot normalisation: values rescaled trench = 0,
 ridge = 1; distance rescaled by the trench-to-ridge span. Columns are +-5 km
-means (conventions §4.1); pickers from cerpa_helpers (single implementation).
+means (conventions §4.1); pickers from fluidity_helpers (single implementation).
 
 Usage: python fig_headline_tracking.py [--recompute]
 Reads/writes cache ../notebooks/outputs/headline_time_agg.npz; writes
@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cerpa_helpers import (make_field_extractor, mirror_fields_in_x, pick_trench_3step,
+from fluidity_helpers import (make_field_extractor, mirror_fields_in_x, pick_trench_3step,
                            find_first_isostatic_column, find_ridge_x_flow)
 
 DATA = '/Users/DSAND/DATA/numerical_models/OUTPUTS/'

@@ -84,7 +84,7 @@ The two forms produce closures that differ only by a constant; the residual shap
 
 **Ridge picker** (`find_ridge_x`). Argmax of the lightly-smoothed surface field, restricted to columns seaward of the trench with a buffer to skip the outer-rise bulge.
 
-**Shared helpers** all live in [`notebooks/cerpa_helpers.py`](notebooks/cerpa_helpers.py): `make_field_extractor`, `mirror_fields_in_x`, `pick_trench_3step`, `find_first_isostatic_column`, `find_ridge_x`, `col_avg`, `norm01`, `norm_TR`, `load_records`. Each notebook's §3 collapses to a single import block.
+**Shared helpers** all live in [`notebooks/fluidity_helpers.py`](notebooks/fluidity_helpers.py): `make_field_extractor`, `mirror_fields_in_x`, `pick_trench_3step`, `find_first_isostatic_column`, `find_ridge_x`, `col_avg`, `norm01`, `norm_TR`, `load_records`. Each notebook's §3 collapses to a single import block.
 
 ---
 
@@ -189,7 +189,7 @@ The `further_analysis/` notebooks (`fluidity_basal_drag.ipynb`, `fluidity_slab_n
 
 ```
 scripts/
-  cerpa_helpers.py            — shared extraction/pickers (single implementation)
+  fluidity_helpers.py            — shared extraction/pickers (single implementation)
   column_profiles_cache.py    — cache builder (column profiles)   } read the
   lab_kinematics_cache.py     — cache builder (plate kinematics)  } archive
   fig_*.py                    — one script per paper figure (read caches only)
@@ -205,7 +205,7 @@ FIGURE_STYLE.md               — STD/WAL symbolisation + shared figure conventi
 zenodo_materials/             — original Cerpa input file + parameter file + README
 ```
 
-Notebooks and scripts both reach `scripts/cerpa_helpers.py` through a
+Notebooks and scripts both reach `scripts/fluidity_helpers.py` through a
 root-finding `sys.path` shim at the top of their import cell, so they run
 from any working directory.
 

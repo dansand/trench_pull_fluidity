@@ -19,7 +19,7 @@ to (re)build (~20 min; reads every archive snapshot of both runs).
 Method notes (2026-09-15 session):
 - Analysis frame per the repo conventions: x-mirrored so the subducting
   plate is on the right; sigma_zz = tzz - p (tension-positive); scalars
-  flip only under the mirror (cerpa_helpers.mirror_fields_in_x register).
+  flip only under the mirror (fluidity_helpers.mirror_fields_in_x register).
 - The fluidity mesh is UNDEFORMED (no true free surface): topography lives
   in the surface-stress field, so column density integrals carry no
   elevation mass -- the topographic counterweight enters sigma_zz as a
@@ -47,7 +47,7 @@ import pyvista as pv
 from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cerpa_helpers import (make_field_extractor, pick_trench_3step,
+from fluidity_helpers import (make_field_extractor, pick_trench_3step,
                            find_first_isostatic_column, find_ridge_x,
                            find_ridge_x_flow)
 

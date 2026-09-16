@@ -55,7 +55,7 @@ from scipy.integrate import cumulative_trapezoid
 from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cerpa_helpers import (make_field_extractor, mirror_fields_in_x, pick_trench_3step,
+from fluidity_helpers import (make_field_extractor, mirror_fields_in_x, pick_trench_3step,
                            find_first_isostatic_column, find_ridge_x)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

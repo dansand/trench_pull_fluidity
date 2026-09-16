@@ -1,4 +1,11 @@
-"""Shared helpers for the trench_pull_fluidity notebooks.
+"""Shared helpers for the trench_pull_fluidity analysis.
+
+Renamed from `fluidity_helpers.py` on 2026-09-16 to match the repository's
+naming (one module per code, not per author). The model OUTPUTS analysed
+here are the work of Cerpa et al. and are cited as such throughout —
+see MODEL.md, the README, and `zenodo_materials/`; the rename is a
+code-organisation change only and carries no implication about
+attribution.
 
 Provides field extraction, x-mirror, trench / first-isostatic-column / ridge
 pickers, column-window averaging, simple [0, 1] normalisation, and the npz
