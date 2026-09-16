@@ -1,7 +1,9 @@
 """Deep column-profile cache for the sigma_zz anomaly figure family.
 
 Per snapshot (t >= T_MIN_MYR), STD and WAL: vertical profiles to 250 km of
-the full vertical normal stress sigma_zz, density and temperature at the
+the full vertical normal stress sigma_zz, the horizontal normal stress
+sigma_xx (so the fibre stress sigma_xx - sigma_zz is available for the
+mechanical-thickness analysis), density and temperature at the
 trench, first-isostatic and ridge columns (+-5 km window means,
 conventions §4.1), plus the picks. Raw per-column profiles are stored so
 downstream scripts form their own differences.
@@ -64,6 +66,7 @@ def build():
                 continue
             v.point_data['p'] = v['NormalSP::Pressure']
             v.point_data['tzz'] = v['NormalSP::Stress'][:, 4]
+            v.point_data['txx'] = v['NormalSP::Stress'][:, 0]
             v.point_data['rho'] = v['NormalSP::Density']
             v.point_data['T'] = v['NormalSP::Temperature']
             v.point_data['fs'] = v['NormalSP::FreeSurface']
@@ -78,10 +81,11 @@ def build():
             val = g['vtkValidPointMask'].reshape((nxp, nzp), order='F').astype(bool)
             gf = make_field_extractor(g, nxp, nzp, val)
             # scalars: mirror = flip only; vx needs the sign flip
-            p, tzz = flip(gf('p')), flip(gf('tzz'))
+            p, tzz, txx = flip(gf('p')), flip(gf('tzz')), flip(gf('txx'))
             rho, T = flip(gf('rho')), flip(gf('T'))
             fs, vx = flip(gf('fs')), -flip(gf('vx'))
             szz = np.nan_to_num(tzz - p)
+            sxx = np.nan_to_num(txx - p)
             rho = np.nan_to_num(rho)           # void rows above the surface -> 0
             T = np.nan_to_num(T)
             fs_top = np.nan_to_num(fs[0, :])
@@ -92,6 +96,7 @@ def build():
             ca = lambda f, j: f[..., max(0, j - W):j + W + 1].mean(axis=-1)
             rows.append(dict(t=t_myr,
                              szz_T=ca(szz, ti), szz_I=ca(szz, iI), szz_R=ca(szz, iR),
+                             sxx_T=ca(sxx, ti), sxx_I=ca(sxx, iI), sxx_R=ca(sxx, iR),
                              rho_T=ca(rho, ti), rho_I=ca(rho, iI), rho_R=ca(rho, iR),
                              temp_T=ca(T, ti), temp_I=ca(T, iI), temp_R=ca(T, iR),
                              xT=xT, xI=x[iI], xR=xR))
@@ -99,7 +104,8 @@ def build():
                   f'xR={xR/1e3:7.1f}', flush=True)
             del v, g
         out[KEY] = rows
-    keys = ('t', 'szz_T', 'szz_I', 'szz_R', 'rho_T', 'rho_I', 'rho_R',
+    keys = ('t', 'szz_T', 'szz_I', 'szz_R', 'sxx_T', 'sxx_I', 'sxx_R',
+            'rho_T', 'rho_I', 'rho_R',
             'temp_T', 'temp_I', 'temp_R', 'xT', 'xI', 'xR')
     np.savez(OUT,
              **{f'{k}_{q}': np.array([r[q] for r in rows]) for k, rows in out.items()

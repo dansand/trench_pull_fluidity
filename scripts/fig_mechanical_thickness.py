@@ -1,0 +1,178 @@
+"""fig_mechanical_thickness — six ways to define the plate's mechanical
+thickness, how they evolve, and what trench pull does as a function of it.
+
+Writes figures/fig_mechanical_thickness.png and tables/mechanical_thickness.csv
+from the committed column-profile cache (+ the bending cache for the
+flexural route). All definitions are evaluated at the TRENCH column, where
+the bending moment is largest.
+
+The definitions (Dan's list, 2026-09-16, plus two of our own):
+
+  thermal        the 950 C isotherm — the suite's declared mechanical base
+                 (conventions §5.2), the thermal reference point
+  2 x h_np       twice the neutral-plane depth, the neutral plane taken as
+                 the extremum of the cumulative fibre stress
+                 C(z) = int (sigma_xx - sigma_zz) dz  (a symmetric plate
+                 bends about its mid-depth, so h = 2 h_np)
+  yield 10%      the depth at which the fibre-stress envelope falls to 10 %
+                 of its peak — Dan's preferred threshold, a scale-free
+                 version of McNutt & Menard's fixed 50 MPa
+  yield 50 MPa   the McNutt & Menard threshold, for comparison
+  TP 90%         the depth at which the cumulative trench pull reaches 90 %
+                 of its final value: the depth over which the topographic
+                 load is actually supported
+  triangle       2 x (trench pull) / (trench pressure deficit): the
+                 equivalent thickness of a linearly decaying deficit
+
+Also computed: the EFFECTIVE MOMENT ARM of the trench pull — the centroid
+of the trench pressure deficit, arm = int p_T z dz / int p_T dz — and its
+ratio to each thickness.
+
+DRAFT CAPTION. (a) Six definitions of the plate's mechanical thickness at
+the trench column through the runs, for STD (navy) and WAL (magenta).
+(b) Trench pull against mechanical thickness (2 x neutral-plane depth),
+every snapshot. (c) The effective moment arm of the trench pull — the
+centroid of the pressure deficit — against the same thickness; the dashed
+line is the arm expected for a linearly decaying deficit (h/3).
+"""
+import os, sys
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter1d
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import column_profiles_cache as cpc
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+C = {'STD': '#002147', 'WAL': '#E5007D'}
+C_RULE = '#BFC3D1'
+T_MECH_C = 950.0           # conventions §5.2 mechanical base isotherm
+YIELD_FRAC = 0.10          # Dan's scale-free threshold
+YIELD_ABS_MPA = 50.0       # McNutt & Menard
+TP_FRAC = 0.90             # trench-pull equilibration level
+
+def thicknesses(d, key):
+    """All definitions, per snapshot, evaluated at the trench column."""
+    c = cpc.derive(d, key)
+    p = cpc.partition(d, key)
+    z = c['z']
+    sm = lambda a: gaussian_filter1d(a, 2)
+    fib = d[f'{key}_sxx_T'] - d[f'{key}_szz_T']        # fibre stress, Pa
+    temp = d[f'{key}_temp_T'] - 273.0
+    out = {k: [] for k in ('thermal', 'np2', 'yield10', 'yield50', 'tp90',
+                           'triangle', 'arm', 'trench_pull')}
+    for i in range(len(c['t'])):
+        f = sm(fib[i])
+        # thermal
+        j = np.where(temp[i] >= T_MECH_C)[0]
+        out['thermal'].append(z[j[0]] if len(j) else np.nan)
+        # neutral plane: extremum of the cumulative fibre stress (5-60 km window)
+        cfib = np.concatenate([[0.0], np.cumsum(0.5 * (f[1:] + f[:-1]) * np.diff(z))])
+        w = (z >= 5e3) & (z <= 60e3)
+        h_np = z[w][int(np.argmax(np.abs(cfib[w])))]
+        out['np2'].append(2 * h_np)
+        # yield-envelope thresholds, below the neutral plane
+        peak = np.abs(f[(z > 2e3) & (z < 80e3)]).max()
+        deep = z > h_np
+        k10 = np.where(deep & (np.abs(f) < YIELD_FRAC * peak))[0]
+        k50 = np.where(deep & (np.abs(f) < YIELD_ABS_MPA * 1e6))[0]
+        out['yield10'].append(z[k10[0]] if len(k10) else np.nan)
+        out['yield50'].append(z[k50[0]] if len(k50) else np.nan)
+        # trench-pull equilibration and the moment arm
+        pT = sm(c['p_T'][i])                    # pressure register (deficit negative)
+        dfc = -pT                                # deficit, positive
+        cum = np.concatenate([[0.0], np.cumsum(0.5 * (dfc[1:] + dfc[:-1]) * np.diff(z))])
+        zc = z <= 120e3
+        total = cum[zc][-1]
+        k = np.where(cum >= TP_FRAC * total)[0]
+        out['tp90'].append(z[k[0]] if len(k) else np.nan)
+        out['trench_pull'].append(total)
+        dP_T = np.abs(dfc[z <= 75e3]).max()
+        out['triangle'].append(2 * total / dP_T)
+        out['arm'].append(np.trapz(dfc[zc] * z[zc], z[zc]) / total)
+    out = {k: np.array(v) for k, v in out.items()}
+    out['t'] = c['t']
+    return out
+
+def main():
+    if not hasattr(np, 'trapz'):
+        np.trapz = np.trapezoid
+    d = cpc.load()
+    if f'STD_sxx_T' not in d.files:
+        raise SystemExit('cache lacks sigma_xx — rebuild column_profiles_cache.py')
+    fig = plt.figure(figsize=(12.5, 8.4))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1.25, 1])
+    ax_t = fig.add_subplot(gs[0, :])
+    ax_p = fig.add_subplot(gs[1, 0])
+    ax_a = fig.add_subplot(gs[1, 1])
+    styles = [('thermal', '-', 'thermal (950 $^\\circ$C)'),
+              ('np2', '-o', r'$2\,h_{np}$'),
+              ('yield10', '--', 'yield envelope, 10 % of peak'),
+              ('yield50', ':', 'yield envelope, 50 MPa'),
+              ('tp90', '-.', 'trench pull 90 % equilibrated'),
+              ('triangle', (0, (3, 1, 1, 1)), 'triangle equivalent')]
+    rows = [('model', 'quantity', 'value')]
+    for key in ('STD', 'WAL'):
+        col = C[key]
+        r = thicknesses(d, key)
+        for name, ls, lab in styles:
+            kw = dict(color=col, lw=1.6)
+            if ls == '-o':
+                ax_t.plot(r['t'], r[name] / 1e3, ls, ms=4, markeredgecolor='white',
+                          markeredgewidth=0.5, **kw)
+            else:
+                ax_t.plot(r['t'], r[name] / 1e3, ls=ls, **kw)
+            rows += [(key, f'h_{name}_median_km', f'{np.nanmedian(r[name])/1e3:.1f}'),
+                     (key, f'h_{name}_q1_km', f'{np.nanpercentile(r[name], 25)/1e3:.1f}'),
+                     (key, f'h_{name}_q3_km', f'{np.nanpercentile(r[name], 75)/1e3:.1f}')]
+        ax_p.plot(r['np2'] / 1e3, r['trench_pull'] / 1e12, 'o', color=col, ms=5,
+                  markeredgecolor='white', markeredgewidth=0.5, label=key)
+        ax_a.plot(r['np2'] / 1e3, r['arm'] / 1e3, 'o', color=col, ms=5,
+                  markeredgecolor='white', markeredgewidth=0.5, label=key)
+        ratio = r['arm'] / r['np2']
+        rows += [(key, 'moment_arm_median_km', f'{np.nanmedian(r["arm"])/1e3:.1f}'),
+                 (key, 'moment_arm_over_h_median', f'{np.nanmedian(ratio):.3f}'),
+                 (key, 'trench_pull_median_TNm', f'{np.nanmedian(r["trench_pull"])/1e12:.3f}')]
+        print(f'=== {key} === (run medians, km)')
+        for name, _, lab in styles:
+            print(f'   {lab:34s} {np.nanmedian(r[name])/1e3:5.1f}  '
+                  f'(IQR {np.nanpercentile(r[name],25)/1e3:.0f}–{np.nanpercentile(r[name],75)/1e3:.0f})')
+        print(f'   effective moment arm               {np.nanmedian(r["arm"])/1e3:5.1f} km '
+              f'= {np.nanmedian(ratio):.2f} x (2 h_np)')
+    hh = np.linspace(30, 110, 50)
+    ax_a.plot(hh, hh / 3, 'k--', lw=1.0, label='$h/3$ (linear deficit)')
+    ax_t.set_ylabel('Thickness [km]', fontsize=11)
+    ax_t.set_xlabel('Model time [Myr]', fontsize=11)
+    ax_t.set_title('(a) definitions of the mechanical thickness at the trench '
+                   '(navy STD, magenta WAL)', fontsize=10.5)
+    ax_t.grid(alpha=0.25, color=C_RULE, lw=0.6)
+    ax_t.set_ylim(0, 130)
+    for _, ls, lab in styles:
+        if ls == '-o':
+            ax_t.plot([], [], '-o', color='0.35', lw=1.6, ms=4, label=lab)
+        else:
+            ax_t.plot([], [], color='0.35', lw=1.6, ls=ls, label=lab)
+    ax_t.legend(frameon=False, fontsize=8.5, ncol=3, loc='upper left')
+    ax_p.set_xlabel(r'mechanical thickness $2\,h_{np}$ [km]', fontsize=10.5)
+    ax_p.set_ylabel('trench pull [TN/m]', fontsize=10.5)
+    ax_p.set_title('(b) trench pull vs mechanical thickness', fontsize=10.5)
+    ax_a.set_xlabel(r'mechanical thickness $2\,h_{np}$ [km]', fontsize=10.5)
+    ax_a.set_ylabel('effective moment arm [km]', fontsize=10.5)
+    ax_a.set_title('(c) effective moment arm (centroid of the deficit)', fontsize=10.5)
+    for ax in (ax_p, ax_a):
+        ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
+        ax.legend(frameon=False, fontsize=9)
+    fig.tight_layout()
+    out = os.path.join(ROOT, 'figures', 'fig_mechanical_thickness.png')
+    fig.savefig(out, bbox_inches='tight', dpi=220)
+    print('written:', out)
+    os.makedirs(os.path.join(ROOT, 'tables'), exist_ok=True)
+    tab = os.path.join(ROOT, 'tables', 'mechanical_thickness.csv')
+    with open(tab, 'w') as f:
+        f.write('\n'.join(','.join(x) for x in rows) + '\n')
+    print('written:', tab)
+
+if __name__ == '__main__':
+    main()
