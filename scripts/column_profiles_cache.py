@@ -154,5 +154,59 @@ def derive(d, key):
                 dP=dP, dP_T=dP_T,
                 mid=(t >= MIDRUN_MYR[0]) & (t <= MIDRUN_MYR[1]))
 
+PLATEAU_KM = (150.0, 240.0)    # where cum(D) has flattened (spread < 0.3 %)
+
+def partition(d, key):
+    """Per-snapshot decomposition of the x_I-to-ridge sigma_zz term.
+
+    Single implementation, used by every figure and table that quotes the
+    partition (Dan's rule, 2026-09-16). One depth throughout: z*, the sign
+    change of the measured anomaly — equivalently the maximum of its
+    cumulative integral. Returns, per snapshot (N/m unless noted):
+
+      z_star    integration depth [m]: argmax of the cumulative integral
+      measured  the term as it enters the force balance, integral to z*
+      tilt      |Delta P| * z*  -- the back-tilt contribution contained in
+                `measured`, evaluated at the SAME depth (using any other
+                thickness would redefine the plate midway through the
+                derivation: a different, static model)
+      dynamic_isostatic  measured + tilt: the isostatic part over the same
+                depth. Closes exactly by construction.
+      static    the STATIC RIDGE PUSH (Dan's term): the asymptote of the
+                cumulative integral of the shifted profile D = anomaly -
+                Delta P, i.e. what the density structure alone would supply
+                with no transition from lithospheric boundary layer to
+                asthenospheric counterflow. Read off the plateau, NOT by
+                integrating to a zero crossing -- D is flat there, so its
+                crossing is ill-conditioned while the integral is bounded
+                (plateau spread 0.1-0.3 %).
+      tail      static - dynamic_isostatic: the density-structure tail
+                below z*, excluded from the balance (6-10 % of static).
+    """
+    c = derive(d, key)
+    z = c['z']
+    plateau = (z >= PLATEAU_KM[0] * 1e3) & (z <= PLATEAU_KM[1] * 1e3)
+    sel = (z > 30e3) & (z < 200e3)
+    cum = lambda a: np.concatenate([[0.0], np.cumsum(0.5 * (a[1:] + a[:-1]) * np.diff(z))])
+    out = {k: [] for k in ('z_star', 'measured', 'tilt', 'dynamic_isostatic',
+                           'static', 'tail')}
+    for p_r, dP in zip(c['p_R'], c['dP']):
+        cr = cum(p_r)
+        j = int(np.argmax(cr[sel])) + int((z <= 30e3).sum())
+        zs = z[j]
+        meas = cr[j]
+        tilt = -dP * zs
+        static = cum(p_r - dP)[plateau].mean()
+        out['z_star'].append(zs)
+        out['measured'].append(meas)
+        out['tilt'].append(tilt)
+        out['dynamic_isostatic'].append(meas + tilt)
+        out['static'].append(static)
+        out['tail'].append(static - (meas + tilt))
+    out = {k: np.array(v) for k, v in out.items()}
+    out['t'] = c['t']
+    out['mid'] = c['mid']
+    return out
+
 if __name__ == '__main__':
     build()
