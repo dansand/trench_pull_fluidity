@@ -58,6 +58,7 @@ OUT = os.path.join(ROOT, 'notebooks', 'outputs', 'column_profiles_deep.npz')
 DX, Z_MAX, Y, W = 1000.0, 250e3, 2_900_000.0, 5
 T_MIN_MYR = 8.0
 DP_BAND_KM = (150.0, 220.0)        # deep Delta P band (see module docstring)
+GRAD_SMOOTH_KM = 10.0              # x-smoothing before differentiating tau_zx
 
 def build():
     flip = lambda a: np.flip(a, axis=1)
@@ -73,6 +74,9 @@ def build():
             v.point_data['p'] = v['NormalSP::Pressure']
             v.point_data['tzz'] = v['NormalSP::Stress'][:, 4]
             v.point_data['txx'] = v['NormalSP::Stress'][:, 0]
+            # z-down shear: tau_zx = -sigma_xy(y-up). Under the x-mirror it
+            # flips sign again, so the analysis-frame field is +flip(sigma_xy).
+            v.point_data['txz'] = -v['NormalSP::Stress'][:, 1]
             v.point_data['rho'] = v['NormalSP::Density']
             v.point_data['T'] = v['NormalSP::Temperature']
             v.point_data['fs'] = v['NormalSP::FreeSurface']
@@ -88,10 +92,19 @@ def build():
             gf = make_field_extractor(g, nxp, nzp, val)
             # scalars: mirror = flip only; vx needs the sign flip
             p, tzz, txx = flip(gf('p')), flip(gf('tzz')), flip(gf('txx'))
+            txz = -flip(gf('txz'))                   # analysis frame (mirror sign flip)
             rho, T = flip(gf('rho')), flip(gf('T'))
             fs, vx = flip(gf('fs')), -flip(gf('vx'))
             szz = np.nan_to_num(tzz - p)
             sxx = np.nan_to_num(txx - p)
+            txz = np.nan_to_num(txz)
+            # along-strike gradient of the vertical shear stress, tau_zx,x --
+            # the quantity whose depth distribution supports the trench
+            # pressure deficit (the companion's equivalent density is
+            # rho_hat = tau_zx,x / g). Smoothed over GRAD_SMOOTH_KM in x
+            # before differencing; the raw field is too noisy to differentiate.
+            dtxz_dx = np.gradient(
+                gaussian_filter1d(txz, GRAD_SMOOTH_KM * 1e3 / DX, axis=1), DX, axis=1)
             rho = np.nan_to_num(rho)           # void rows above the surface -> 0
             T = np.nan_to_num(T)
             fs_top = np.nan_to_num(fs[0, :])
@@ -118,6 +131,9 @@ def build():
             iM = sea[int(np.argmax(np.abs(gaussian_filter1d(Mx[sea], 5))))]
             rows.append(dict(t=t_myr, xM=x[iM], M_max=Mx[iM],
                              szz_M=ca(szz, iM), sxx_M=ca(sxx, iM), temp_M=ca(T, iM),
+                             txz_M=ca(txz, iM), dtxz_M=ca(dtxz_dx, iM),
+                             txz_T=ca(txz, ti), dtxz_T=ca(dtxz_dx, ti),
+                             txz_I=ca(txz, iI), dtxz_I=ca(dtxz_dx, iI),
                              szz_T=ca(szz, ti), szz_I=ca(szz, iI), szz_R=ca(szz, iR),
                              sxx_T=ca(sxx, ti), sxx_I=ca(sxx, iI), sxx_R=ca(sxx, iR),
                              rho_T=ca(rho, ti), rho_I=ca(rho, iI), rho_R=ca(rho, iR),
@@ -129,6 +145,7 @@ def build():
             del v, g
         out[KEY] = rows
     keys = ('t', 'xM', 'M_max', 'szz_M', 'sxx_M', 'temp_M',
+            'txz_M', 'dtxz_M', 'txz_T', 'dtxz_T', 'txz_I', 'dtxz_I',
             'szz_T', 'szz_I', 'szz_R', 'sxx_T', 'sxx_I', 'sxx_R',
             'rho_T', 'rho_I', 'rho_R',
             'temp_T', 'temp_I', 'temp_R', 'xT', 'xI', 'xR', 'xR_topo')
