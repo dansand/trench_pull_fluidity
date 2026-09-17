@@ -133,6 +133,32 @@ All knobs live in §2 of each notebook (single source of truth), with per-cell o
 
 ---
 
+## Two ways in
+
+**Want the paper's figures and numbers?** Build the two caches once, then
+run any figure script. Each writes its figure and its table together.
+
+```bash
+python scripts/column_profiles_cache.py     # ~25 min, run first
+python scripts/lab_kinematics_cache.py      # ~10 min
+python scripts/fig_partition_time.py        # then any fig_*.py, seconds each
+```
+
+**Want to work with the analysis?** Use the notebooks. They are for
+tinkering — changing the window half-width, the closure depth, the
+reference epoch, which columns are compared, how things are plotted — and
+watching the numbers move.
+
+**What the notebooks share with the scripts, and what they don't.** The
+notebooks import the *primitives* from `scripts/`: field extraction, the
+mirror, the trench / first-isostatic-column / ridge pickers, and the
+partition function. Those encode conventions that must not fork — if a
+notebook used a different ridge definition from the paper, the two would
+silently disagree. Everything else is live, editable code in the
+notebook: the windows, z_c, the epoch, the column choices, the figures.
+So you can change what the analysis *does* without being able to change
+what the conventions *are* by accident.
+
 ## Reproducing the figures
 
 **Two parallel tracks.** `scripts/fig_*.py` are the deterministic
