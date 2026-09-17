@@ -31,6 +31,30 @@ Panels (a)-(c) are referenced to the trench, where the force balance is
 taken; (d) is at the moment maximum, where the flexural signal is
 strongest.
 
+HOW tau_zx,x IS CONSTRUCTED. tau_zx is sampled on the analysis-frame
+grid (1 km in x and z); smoothed ALONG X ONLY with a Gaussian of
+sigma = 10 km (the raw field cannot be differentiated); central-
+differenced in x at 1 km; then averaged over the +-5 km column window.
+No smoothing in depth precedes the derivative, so the vertical structure
+is not manufactured by the filter. Display adds a 2 km depth smooth.
+
+SMOOTHING SENSITIVITY (STD, t = 40 Myr, trench column, 0-100 km). The
+PEAK depends on the filter; the CENTRE OF MASS -- which is what the
+argument rests on -- does not:
+
+    sigma      rho_hat peak      centre of mass
+    none        251 kg/m3           33.1 km
+    5 km        236                 33.1
+    10 km       201                 33.6   <- used
+    20 km       147                 35.7
+    40 km        97                 40.8
+
+Quote the peak only with its smoothing stated, or quote the unsmoothed
+value (251 kg/m3). The centre of mass is a property of the field.
+
+TIME AVERAGING: the mid-run window 36-44 Myr (conventions 4b) -- five
+snapshots for STD, four for WAL.
+
 Overlaid on both, per model: the span of the three mechanical thickness
 estimates (2 h_np, truncated yield envelope at 10 % of peak, thermal
 900 C) as a shaded band, with the neutral plane h_np marked separately. Reading the
@@ -69,6 +93,7 @@ Z_TP_KM = 120.0    # declared integration depth for the trench-pull area.
 
 def main():
     d = cpc.load()
+    rows = [('model', 'quantity', 'value')]
     fig, axes = plt.subplots(1, 4, figsize=(15.5, 6.2), sharey=True)
     for key in ('STD', 'WAL'):
         col = C[key]
@@ -92,6 +117,15 @@ def main():
         print(f'{key}: tau_zx peak {txz[zkm<80].min():+.0f} MPa; rho_hat peak '
               f'{dtxz[zkm<80].max()/9.8:+.0f} kg/m3; centre of mass of tau_zx,x '
               f'= {arm/1e3:.0f} km (the effective moment arm)')
+        rows += [(key, 'tau_zx_peak_MPa', f'{txz[zkm<80].min():.1f}'),
+                 (key, 'tau_zx_peak_depth_km', f'{zkm[zkm<80][int(np.argmin(txz[zkm<80]))]:.0f}'),
+                 (key, 'rho_hat_peak_kgm3_smooth10km', f'{dtxz[zkm<80].max()/9.8:.0f}'),
+                 (key, 'rho_hat_peak_depth_km', f'{zkm[zkm<80][int(np.argmax(dtxz[zkm<80]))]:.0f}'),
+                 (key, 'tau_zx_x_centre_of_mass_km', f'{arm/1e3:.1f}'),
+                 (key, 'deficit_peak_MPa', f'{dzz.max():.1f}'),
+                 (key, 'max_moment_offset_km', f'{dx_M:.0f}'),
+                 (key, 'x_smoothing_km', '10'),
+                 (key, 'midrun_snapshots', f'{int(m.sum())}')]
         ests = np.array([r[k][m].mean() for k in ('np2', 'yield10', 'thermal')]) / 1e3
         h_np = r['np2'][m].mean() / 2e3
         for ax in axes:
@@ -124,6 +158,11 @@ def main():
     out = os.path.join(ROOT, 'figures', 'fig_trench_stress_profiles.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
+    os.makedirs(os.path.join(ROOT, 'tables'), exist_ok=True)
+    tab = os.path.join(ROOT, 'tables', 'bending_stress_regime.csv')
+    with open(tab, 'w') as fh:
+        fh.write('\n'.join(','.join(r) for r in rows) + '\n')
+    print('written:', tab)
 
 if __name__ == '__main__':
     main()
