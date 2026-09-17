@@ -15,6 +15,7 @@
   "sigfig": 6,
   "meta": {
     "t_min_Myr": "8",
-    "note": "ridge N_D from the time-evolution cache (old topographic pick) \u2014 see repo notes"
+    "zc_km": "75",
+    "ridge_pick": "flow (max surface divergence)"
   }
 }

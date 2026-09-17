@@ -1,9 +1,12 @@
 """fig_nd_trench_ridge — N_D at the trench and ridge columns, and their
 difference, through the run.
 
-Writes figures/fig_nd_trench_ridge.png from the committed time-evolution
-caches (notebooks/outputs/time_evolution_{STD,WAL}.npz; cache keys carry
-the legacy Fd naming for N_D).
+Writes figures/fig_nd_trench_ridge.png and tables/nd_trench_ridge.csv
+from the committed COLUMN-PROFILE cache, via the shared
+column_profiles_cache.resultants(). It previously read the
+notebook-built time-evolution cache, which predates the flow-based ridge
+pick and placed the ridge ~300 km away; N_D at the ridge is about half
+what that cache reported (2026-09-17).
 
 The setup this figure makes explicit (Dan, 2026-09-15): N_D at the ridge
 is always tension-like but SMALL, so the plate-wide difference
@@ -52,6 +55,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import column_profiles_cache as cpc
 from tables_io import write_table
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -59,12 +63,13 @@ T_MIN_MYR = 8.0
 
 def main():
     fig, axes = plt.subplots(1, 2, figsize=(8.6, 4.2), sharey=True, sharex=True)
+    d = cpc.load()
     for ax, k in zip(axes, ('STD', 'WAL')):
-        d = np.load(os.path.join(ROOT, 'notebooks', 'outputs', f'time_evolution_{k}.npz'))
-        t = d['t_yr'] / 1e6
+        r = cpc.resultants(d, k)
+        t = r['t']
         m = t >= T_MIN_MYR
-        nd_t = d['Fd_xT'][m] / 1e12
-        nd_r = (d['Fd_xT'][m] + d['delta_Fd_R'][m]) / 1e12   # N_D(x_R)
+        nd_t = r['nd_T'][m] / 1e12
+        nd_r = r['nd_R'][m] / 1e12
         diff = nd_t - nd_r                                    # N_D(x_T) - N_D(x_R)
         ax.axhline(0, color='0.75', lw=0.8)
         ax.plot(t[m], nd_t, 'k-', lw=1.6, label='$N_D$ at the trench')
@@ -105,13 +110,15 @@ def write_stats():
     """
     rows = [('model', 'quantity', 'value')]
     pool_r, pool_t = [], []
+    d = cpc.load()
     for k in ('STD', 'WAL'):
-        d = np.load(os.path.join(ROOT, 'notebooks', 'outputs', f'time_evolution_{k}.npz'))
-        m = d['t_yr'] / 1e6 >= T_MIN_MYR
-        nd_t = d['Fd_xT'][m] / 1e12
-        nd_r = (d['Fd_xT'][m] + d['delta_Fd_R'][m]) / 1e12
+        r = cpc.resultants(d, k)
+        p = cpc.partition(d, k)
+        m = r['t'] >= T_MIN_MYR
+        nd_t = r['nd_T'][m] / 1e12
+        nd_r = r['nd_R'][m] / 1e12
         diff = nd_t - nd_r
-        gpe_diff = -d['delta_GPE_R'][m] / 1e12
+        gpe_diff = p['measured'][m] / 1e12
         pool_r.append(nd_r); pool_t.append(nd_t)
         rows += [
             (k, 'nd_ridge_max', f'{nd_r.max():.3f}'),
@@ -135,7 +142,7 @@ def write_stats():
     ]
     tab = write_table('nd_trench_ridge', rows[0], rows[1:],
                       script='fig_nd_trench_ridge.py', figure='fig_nd_trench_ridge.png',
-                      models=('STD', 'WAL'), meta={'t_min_Myr': T_MIN_MYR, 'note': 'ridge N_D from the time-evolution cache (old topographic pick) — see repo notes'})
+                      models=('STD', 'WAL'), meta={'t_min_Myr': T_MIN_MYR, 'zc_km': cpc.ZC_KM, 'ridge_pick': 'flow (max surface divergence)'})
     print('written:', tab)
 
 if __name__ == '__main__':

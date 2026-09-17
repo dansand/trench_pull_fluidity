@@ -1,17 +1,21 @@
 """fig_trench_resultants — N_D, V and M at the trench through the runs.
 
-Writes figures/fig_trench_resultants.png from the committed caches:
-notebooks/outputs/time_evolution_{STD,WAL}.npz (N_D, V at x_T; legacy Fd
-naming) and notebooks/further_analysis/outputs/bending_moment_{...}.npz
-(M at x_T, local-pivot h_np; bending-notebook implementation).
+Writes figures/fig_trench_resultants.png from the committed
+COLUMN-PROFILE cache, via the shared column_profiles_cache.resultants().
+It previously read two notebook-built caches (time-evolution for N_D and
+V, bending-moment for M); moved 2026-09-17 so that every resultant in
+the paper comes from one cache, one set of pickers and one integration
+depth. N_D and V reproduce the notebook values to better than 1 %; M
+differs by ~10 % because the pivot is now the trench neutral plane from
+the same cumulative fibre stress the rest of the pipeline uses.
 
 Styling per FIGURE_STYLE.md (house style from the time-evolution
 notebook's series figures): models overlaid, STD navy #002147 / WAL
 magenta #E5007D, solid with 'o' markers and white marker edges, rule
 grid; one quantity per panel, three stacked panels sharing model time.
 
-Register note on V (SYMBOLOGY §7.5): the plotted V is the notebook's
-extracted V = ∫τ_zx dz at the trench column — the repo's engineering
+Register note on V (SYMBOLOGY §7.5): the plotted V is the extracted
+V = ∫τ_zx dz at the trench column — the repo's engineering
 sense, which is the NEGATIVE of the companion register's V. Any prose
 quoting a V relation must say which V it means.
 
@@ -22,36 +26,35 @@ resultant V (middle), and the bending moment M about the neutral plane
 compression-like; V and M carry the trench topography (the vertical
 load and moment support of the deflection).
 """
-import os
+import os, sys
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import column_profiles_cache as cpc
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 T_MIN_MYR = 8.0
 C_STD, C_WAL, C_RULE = '#002147', '#E5007D', '#BFC3D1'
 
 def main():
+    d = cpc.load()
     fig, axes = plt.subplots(3, 1, figsize=(9, 9), sharex=True)
     for key, color in (('STD', C_STD), ('WAL', C_WAL)):
-        te = np.load(os.path.join(ROOT, 'notebooks', 'outputs',
-                                  f'time_evolution_{key}.npz'))
-        t = te['t_yr'] / 1e6
+        r = cpc.resultants(d, key)
+        t = r['t']
         m = t >= T_MIN_MYR
-        bm = np.load(os.path.join(ROOT, 'notebooks', 'further_analysis',
-                                  'outputs', f'bending_moment_{key}.npz'))
-        tb = bm['t_myr']
-        mb = (tb >= T_MIN_MYR) & np.isfinite(bm['M'])
         style = dict(color=color, lw=2.0, ms=5.5, markeredgecolor='white',
                      markeredgewidth=0.6)
-        axes[0].plot(t[m], te['Fd_xT'][m] * 1e-12, '-o', label=key, **style)
-        axes[1].plot(t[m], te['V_xT'][m] * 1e-12, '-o', label=key, **style)
-        axes[2].plot(tb[mb], bm['M'][mb] * 1e-17, '-o', label=key, **style)
-        print(f'{key}: N_D(x_T) median {np.median(te["Fd_xT"][m])/1e12:+.2f} TN/m; '
-              f'V(x_T) median {np.median(te["V_xT"][m])/1e12:+.2f} TN/m; '
-              f'M(x_T) median {np.median(bm["M"][mb])/1e17:+.2f} x10^17 N '
-              f'({mb.sum()} steps)')
+        axes[0].plot(t[m], r['nd_T'][m] * 1e-12, '-o', label=key, **style)
+        axes[1].plot(t[m], r['v_T'][m] * 1e-12, '-o', label=key, **style)
+        axes[2].plot(t[m], r['m_T'][m] * 1e-17, '-o', label=key, **style)
+        print(f'{key}: N_D(x_T) median {np.median(r["nd_T"][m])/1e12:+.2f} TN/m; '
+              f'V(x_T) median {np.median(r["v_T"][m])/1e12:+.2f} TN/m; '
+              f'M(x_T) median {np.median(r["m_T"][m])/1e17:+.2f} x10^17 N; '
+              f'h_np median {np.median(r["h_np"][m])/1e3:.0f} km ({m.sum()} steps)')
     axes[0].set_ylabel(r'$N_D(x_T)$' + '\nForce per unit distance [TN/m]',
                        fontsize=12)
     axes[1].set_ylabel(r'$V(x_T)$' + '\nForce per unit distance [TN/m]',
