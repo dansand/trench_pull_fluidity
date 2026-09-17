@@ -1,0 +1,19 @@
+{
+  "table": "plate_velocities.csv",
+  "script": "fig_plate_velocities.py",
+  "figure": "fig_plate_velocities.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 24,
+  "sigfig": 6,
+  "meta": {
+    "t_min_Myr": 8
+  }
+}

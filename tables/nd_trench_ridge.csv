@@ -17,11 +17,11 @@ WAL,nd_ridge_always_tension_like,True
 WAL,nd_trench_median,-1.886
 WAL,nd_trench_mean_abs,2.058
 WAL,nd_trench_max_abs,3.686
-WAL,nd_trench_tension_like_fraction,0.000
+WAL,nd_trench_tension_like_fraction,0
 WAL,ratio_ridge_max_over_trench_mean_abs,0.168
 WAL,ratio_ridge_max_over_trench_max_abs,0.094
-WAL,nd_diff_trench_minus_ridge_median,-2.210
-WAL,nd_diff_driving_fraction,0.000
+WAL,nd_diff_trench_minus_ridge_median,-2.21
+WAL,nd_diff_driving_fraction,0
 WAL,ratio_nd_diff_over_gpe_diff_max,0.822
 POOLED,nd_ridge_max,0.622
 POOLED,ratio_ridge_max_over_trench_mean_abs,0.391

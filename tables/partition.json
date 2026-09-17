@@ -1,0 +1,21 @@
+{
+  "table": "partition.csv",
+  "script": "fig_partition_time.py",
+  "figure": "fig_partition_time.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 48,
+  "sigfig": 6,
+  "meta": {
+    "depth_rule": "sign change of the ridge anomaly (= argmax of its cumulative integral)",
+    "window_km": 5,
+    "t_min_Myr": 8
+  }
+}

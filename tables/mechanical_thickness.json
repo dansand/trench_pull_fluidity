@@ -1,0 +1,22 @@
+{
+  "table": "mechanical_thickness.csv",
+  "script": "fig_mechanical_thickness.py",
+  "figure": "fig_mechanical_thickness.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 42,
+  "sigfig": 6,
+  "meta": {
+    "T_mech_C": "900",
+    "yield_frac": "0.1",
+    "yield_abs_MPa": "50",
+    "column": "maximum bending moment"
+  }
+}

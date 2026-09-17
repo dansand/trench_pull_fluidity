@@ -80,6 +80,7 @@ from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import column_profiles_cache as cpc
+from tables_io import write_table
 from fig_mechanical_thickness import thicknesses
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -158,10 +159,9 @@ def main():
     out = os.path.join(ROOT, 'figures', 'fig_trench_stress_profiles.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
-    os.makedirs(os.path.join(ROOT, 'tables'), exist_ok=True)
-    tab = os.path.join(ROOT, 'tables', 'bending_stress_regime.csv')
-    with open(tab, 'w') as fh:
-        fh.write('\n'.join(','.join(r) for r in rows) + '\n')
+    tab = write_table('bending_stress_regime', rows[0], rows[1:],
+                      script='fig_trench_stress_profiles.py', figure='fig_trench_stress_profiles.png',
+                      models=('STD', 'WAL'), meta={'x_smoothing_km': 10, 'midrun_window_Myr': list(cpc.MIDRUN_MYR)})
     print('written:', tab)
 
 if __name__ == '__main__':

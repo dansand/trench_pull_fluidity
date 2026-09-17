@@ -45,11 +45,14 @@ value is predominantly compression-like: the edge term mostly resists,
 and the driving force must be carried by the topographic pressure
 gradient.
 """
-import os
+import os, sys
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from tables_io import write_table
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 T_MIN_MYR = 8.0
@@ -130,10 +133,9 @@ def write_stats():
         ('POOLED', 'ratio_ridge_max_over_trench_mean_abs', f'{pr.max()/np.abs(pt).mean():.3f}'),
         ('POOLED', 'ratio_ridge_max_over_trench_max_abs', f'{pr.max()/np.abs(pt).max():.3f}'),
     ]
-    os.makedirs(os.path.join(ROOT, 'tables'), exist_ok=True)
-    tab = os.path.join(ROOT, 'tables', 'nd_trench_ridge.csv')
-    with open(tab, 'w') as f:
-        f.write('\n'.join(','.join(r) for r in rows) + '\n')
+    tab = write_table('nd_trench_ridge', rows[0], rows[1:],
+                      script='fig_nd_trench_ridge.py', figure='fig_nd_trench_ridge.png',
+                      models=('STD', 'WAL'), meta={'t_min_Myr': T_MIN_MYR, 'note': 'ridge N_D from the time-evolution cache (old topographic pick) — see repo notes'})
     print('written:', tab)
 
 if __name__ == '__main__':

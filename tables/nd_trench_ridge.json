@@ -1,0 +1,20 @@
+{
+  "table": "nd_trench_ridge.csv",
+  "script": "fig_nd_trench_ridge.py",
+  "figure": "fig_nd_trench_ridge.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 27,
+  "sigfig": 6,
+  "meta": {
+    "t_min_Myr": "8",
+    "note": "ridge N_D from the time-evolution cache (old topographic pick) \u2014 see repo notes"
+  }
+}

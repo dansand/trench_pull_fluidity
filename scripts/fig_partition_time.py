@@ -35,6 +35,7 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import column_profiles_cache as cpc
+from tables_io import write_table
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 C = {'STD': '#002147', 'WAL': '#E5007D'}
@@ -95,10 +96,9 @@ def main():
     out = os.path.join(ROOT, 'figures', 'fig_partition_time.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
-    os.makedirs(os.path.join(ROOT, 'tables'), exist_ok=True)
-    tab = os.path.join(ROOT, 'tables', 'partition.csv')
-    with open(tab, 'w') as f:
-        f.write('\n'.join(','.join(r) for r in rows) + '\n')
+    tab = write_table('partition', rows[0], rows[1:],
+                      script='fig_partition_time.py', figure='fig_partition_time.png',
+                      models=('STD', 'WAL'), meta={'depth_rule': 'sign change of the ridge anomaly (= argmax of its cumulative integral)', 'window_km': 5, 't_min_Myr': 8})
     print('written:', tab)
 
 if __name__ == '__main__':

@@ -1,0 +1,23 @@
+{
+  "table": "bending_stress_regime.csv",
+  "script": "fig_trench_stress_profiles.py",
+  "figure": "fig_trench_stress_profiles.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 18,
+  "sigfig": 6,
+  "meta": {
+    "x_smoothing_km": 10,
+    "midrun_window_Myr": [
+      36.0,
+      44.0
+    ]
+  }
+}

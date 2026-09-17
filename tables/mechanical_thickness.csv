@@ -1,7 +1,7 @@
 model,quantity,value
-STD,h_np2_median_km,63.0
-STD,h_np2_q1_km,63.0
-STD,h_np2_q3_km,65.0
+STD,h_np2_median_km,63
+STD,h_np2_q1_km,63
+STD,h_np2_q3_km,65
 STD,h_yield10_median_km,69.5
 STD,h_yield10_q1_km,63.5
 STD,h_yield10_q3_km,74.5
@@ -12,7 +12,7 @@ STD,strength_mean_thickness_km,66.2
 STD,matching_isotherm_C,901
 STD,h_yield50_median_km,62.5
 STD,h_tp90_median_km,52.5
-STD,moment_arm_median_km,27.0
+STD,moment_arm_median_km,27
 STD,moment_arm_over_h_median,0.415
 STD,L_scaling_km_median,33.89
 STD,L_over_h_np2,0.539
@@ -20,9 +20,9 @@ STD,L_over_h_yield10,0.494
 STD,L_over_h_thermal900,0.516
 STD,L_over_h_strengthmean,0.516
 STD,trench_pull_median_TNm,2.167
-WAL,h_np2_median_km,55.0
-WAL,h_np2_q1_km,55.0
-WAL,h_np2_q3_km,57.0
+WAL,h_np2_median_km,55
+WAL,h_np2_q1_km,55
+WAL,h_np2_q3_km,57
 WAL,h_yield10_median_km,65.5
 WAL,h_yield10_q1_km,60.5
 WAL,h_yield10_q3_km,73.5
@@ -34,10 +34,10 @@ WAL,matching_isotherm_C,878
 WAL,h_yield50_median_km,58.5
 WAL,h_tp90_median_km,47.5
 WAL,moment_arm_median_km,23.3
-WAL,moment_arm_over_h_median,0.420
+WAL,moment_arm_over_h_median,0.42
 WAL,L_scaling_km_median,33.82
 WAL,L_over_h_np2,0.605
-WAL,L_over_h_yield10,0.500
+WAL,L_over_h_yield10,0.5
 WAL,L_over_h_thermal900,0.524
 WAL,L_over_h_strengthmean,0.546
 WAL,trench_pull_median_TNm,1.761

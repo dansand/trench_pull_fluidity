@@ -31,6 +31,7 @@ from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import column_profiles_cache as cpc
+from tables_io import write_table
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 C = {'STD': '#002147', 'WAL': '#E5007D'}
@@ -80,10 +81,9 @@ def main():
     out = os.path.join(ROOT, 'figures', 'fig_plate_velocities.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
-    os.makedirs(os.path.join(ROOT, 'tables'), exist_ok=True)
-    tab = os.path.join(ROOT, 'tables', 'plate_velocities.csv')
-    with open(tab, 'w') as f:
-        f.write('\n'.join(','.join(x) for x in rows) + '\n')
+    tab = write_table('plate_velocities', rows[0], rows[1:],
+                      script='fig_plate_velocities.py', figure='fig_plate_velocities.png',
+                      models=('STD', 'WAL'), meta={'t_min_Myr': 8})
     print('written:', tab)
 
 if __name__ == '__main__':

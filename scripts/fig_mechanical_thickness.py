@@ -46,6 +46,7 @@ from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import column_profiles_cache as cpc
+from tables_io import write_table
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 C = {'STD': '#002147', 'WAL': '#E5007D'}
@@ -241,10 +242,9 @@ def main():
     out = os.path.join(ROOT, 'figures', 'fig_mechanical_thickness.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
-    os.makedirs(os.path.join(ROOT, 'tables'), exist_ok=True)
-    tab = os.path.join(ROOT, 'tables', 'mechanical_thickness.csv')
-    with open(tab, 'w') as f:
-        f.write('\n'.join(','.join(x) for x in rows) + '\n')
+    tab = write_table('mechanical_thickness', rows[0], rows[1:],
+                      script='fig_mechanical_thickness.py', figure='fig_mechanical_thickness.png',
+                      models=('STD', 'WAL'), meta={'T_mech_C': T_MECH_C, 'yield_frac': YIELD_FRAC, 'yield_abs_MPa': YIELD_ABS_MPA, 'column': 'maximum bending moment'})
     print('written:', tab)
 
 if __name__ == '__main__':
