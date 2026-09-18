@@ -97,6 +97,78 @@ def draw_direction_glyph(ax):
                 fontsize=9, color=c, va='center',
                 ha='right' if s < 0 else 'left')
 
+def compute(key):
+    """Every term of the trailing-plate balance at the reference snapshot.
+
+    Single implementation, shared by fig_balance_snapshot (the Delta form)
+    and fig_balance_absolute (the form shifted by N_D(x_T), which shows
+    the actual N_D rather than its change). Returns a dict of arrays in
+    the analysis frame.
+    """
+    if not hasattr(np, 'trapz'):
+        np.trapz = np.trapezoid
+    v, t_myr = load_snapshot(key)
+    v.point_data['p'] = v['NormalSP::Pressure']
+    v.point_data['tzz'] = v['NormalSP::Stress'][:, 4]
+    v.point_data['txx'] = v['NormalSP::Stress'][:, 0]
+    v.point_data['txz'] = -v['NormalSP::Stress'][:, 1]
+    v.point_data['T'] = v['NormalSP::Temperature']
+    v.point_data['fs'] = v['NormalSP::FreeSurface']
+    vel = v['NormalSP::Velocity'] / 3.17098e-10
+    v.point_data['vx'] = vel[:, 0]; v.point_data['vy'] = vel[:, 1]
+    x0, x1, _, _, _, _ = v.bounds
+    nx, nz = int((x1 - x0) / DX), int(ZC / DX)
+    x = x0 + (np.arange(nx) + 0.5) * DX
+    z = (np.arange(nz) + 0.5) * DX
+    X, Z = np.meshgrid(x, z, indexing='xy')
+    g = pv.StructuredGrid(X.T, (Y - Z).T, np.zeros_like(X.T)).sample(v)
+    nxp, nzp, _ = g.dimensions
+    val = g['vtkValidPointMask'].reshape((nxp, nzp), order='F').astype(bool)
+    gf = make_field_extractor(g, nxp, nzp, val)
+    p, txx, tzz, txz = gf('p'), gf('txx'), gf('tzz'), gf('txz')
+    T, fs, vx, vz = gf('T'), gf('fs'), gf('vx'), -gf('vy')
+    p, txx, tzz, txz, T, fs, vx, vz = mirror_fields_in_x(p, txx, tzz, txz, T, fs, vx, vz)
+    p, txx, tzz, txz = (np.nan_to_num(a) for a in (p, txx, tzz, txz))
+    fs_top = np.nan_to_num(fs[0, :])
+    xT, _ = pick_trench_3step(x, z, p, vx, subducting_side='right')
+    ti = int(np.argmin(np.abs(x - xT)))
+    iI, _ = find_first_isostatic_column(x, fs_top, xT, ti, DX, seaward_sign=+1)
+    xR, iR = find_ridge_x(x, fs_top, xT, seaward_sign=+1)
+    ca = lambda f, j: f[..., max(0, j - W):j + W + 1].mean(axis=-1)
+
+    # resultants (notebook §7 chain, verbatim logic)
+    Fd = np.trapz(txx - tzz, z, axis=0)
+    Sxx = np.trapz(-p + txx, z, axis=0)
+    gpe = -np.trapz(-p + tzz, z, axis=0)
+    tau_b = txz[-1, :]
+    FB_ = cumulative_trapezoid(tau_b, x, initial=0.0)
+    d_Fd = Fd - ca(Fd, ti)
+    d_Sxx = Sxx - ca(Sxx, ti)
+    d_gpe = gpe - ca(gpe, ti)
+    FB = FB_ - ca(FB_, ti)
+
+    # sign pin: trench pull at x_I vs the committed series
+    tp = ca(d_gpe, iI)
+    rel = abs(tp - COMMITTED_TP_T40[key]) / COMMITTED_TP_T40[key]
+    assert rel < 0.05, f'{key}: ΔGPE*(x_I) = {tp/1e12:.2f} TN/m vs committed — chain broken'
+
+    # pinned closure (conventions §2.3)
+    res = d_Fd - d_gpe + FB
+    pin = (x > xT + PIN_KM[0] * 1e3) & (x < xT + PIN_KM[1] * 1e3)
+    res_const = res[pin].mean()
+    res_pin = res - res_const
+    print(f'{key} t={t_myr:.1f}: ΔGPE*(x_I) {tp/1e12:+.2f} TN/m (pin OK); '
+          f'closure constant removed {res_const/1e12:+.3f} TN/m '
+          f'(window x_T+{PIN_KM[0]:.0f}..{PIN_KM[1]:.0f} km); '
+          f'rms about pinned closure {res_pin[pin].std()/1e12:.3f} TN/m')
+
+
+    return dict(x=x, xT=xT, xI=x[iI], xR=xR, t_myr=t_myr, z=z,
+                fs_top=fs_top, Fd=Fd, Sxx=Sxx, gpe=gpe,
+                d_Fd=d_Fd, d_Sxx=d_Sxx, d_gpe=d_gpe, FB=FB,
+                Fd_T=ca(Fd, ti), res_pin=res_pin, res_const=res_const)
+
+
 def main():
     if not hasattr(np, 'trapz'):
         np.trapz = np.trapezoid
@@ -104,64 +176,15 @@ def main():
                              gridspec_kw={'height_ratios': [1, 1.4, 1.8]})
     lims = {0: [], 1: [], 2: []}          # per-row plotted data, for axis limits
     for col, key in enumerate(('STD', 'WAL')):
-        v, t_myr = load_snapshot(key)
-        v.point_data['p'] = v['NormalSP::Pressure']
-        v.point_data['tzz'] = v['NormalSP::Stress'][:, 4]
-        v.point_data['txx'] = v['NormalSP::Stress'][:, 0]
-        v.point_data['txz'] = -v['NormalSP::Stress'][:, 1]
-        v.point_data['T'] = v['NormalSP::Temperature']
-        v.point_data['fs'] = v['NormalSP::FreeSurface']
-        vel = v['NormalSP::Velocity'] / 3.17098e-10
-        v.point_data['vx'] = vel[:, 0]; v.point_data['vy'] = vel[:, 1]
-        x0, x1, _, _, _, _ = v.bounds
-        nx, nz = int((x1 - x0) / DX), int(ZC / DX)
-        x = x0 + (np.arange(nx) + 0.5) * DX
-        z = (np.arange(nz) + 0.5) * DX
-        X, Z = np.meshgrid(x, z, indexing='xy')
-        g = pv.StructuredGrid(X.T, (Y - Z).T, np.zeros_like(X.T)).sample(v)
-        nxp, nzp, _ = g.dimensions
-        val = g['vtkValidPointMask'].reshape((nxp, nzp), order='F').astype(bool)
-        gf = make_field_extractor(g, nxp, nzp, val)
-        p, txx, tzz, txz = gf('p'), gf('txx'), gf('tzz'), gf('txz')
-        T, fs, vx, vz = gf('T'), gf('fs'), gf('vx'), -gf('vy')
-        p, txx, tzz, txz, T, fs, vx, vz = mirror_fields_in_x(p, txx, tzz, txz, T, fs, vx, vz)
-        p, txx, tzz, txz = (np.nan_to_num(a) for a in (p, txx, tzz, txz))
-        fs_top = np.nan_to_num(fs[0, :])
-        xT, _ = pick_trench_3step(x, z, p, vx, subducting_side='right')
-        ti = int(np.argmin(np.abs(x - xT)))
-        iI, _ = find_first_isostatic_column(x, fs_top, xT, ti, DX, seaward_sign=+1)
-        xR, iR = find_ridge_x(x, fs_top, xT, seaward_sign=+1)
-        ca = lambda f, j: f[..., max(0, j - W):j + W + 1].mean(axis=-1)
-
-        # resultants (notebook §7 chain, verbatim logic)
-        Fd = np.trapz(txx - tzz, z, axis=0)
-        Sxx = np.trapz(-p + txx, z, axis=0)
-        gpe = -np.trapz(-p + tzz, z, axis=0)
-        tau_b = txz[-1, :]
-        FB_ = cumulative_trapezoid(tau_b, x, initial=0.0)
-        d_Fd = Fd - ca(Fd, ti)
-        d_Sxx = Sxx - ca(Sxx, ti)
-        d_gpe = gpe - ca(gpe, ti)
-        FB = FB_ - ca(FB_, ti)
-
-        # sign pin: trench pull at x_I vs the committed series
-        tp = ca(d_gpe, iI)
-        rel = abs(tp - COMMITTED_TP_T40[key]) / COMMITTED_TP_T40[key]
-        assert rel < 0.05, f'{key}: ΔGPE*(x_I) = {tp/1e12:.2f} TN/m vs committed — chain broken'
-
-        # pinned closure (conventions §2.3)
-        res = d_Fd - d_gpe + FB
-        pin = (x > xT + PIN_KM[0] * 1e3) & (x < xT + PIN_KM[1] * 1e3)
-        res_const = res[pin].mean()
-        res_pin = res - res_const
-        print(f'{key} t={t_myr:.1f}: ΔGPE*(x_I) {tp/1e12:+.2f} TN/m (pin OK); '
-              f'closure constant removed {res_const/1e12:+.3f} TN/m '
-              f'(window x_T+{PIN_KM[0]:.0f}..{PIN_KM[1]:.0f} km); '
-              f'rms about pinned closure {res_pin[pin].std()/1e12:.3f} TN/m')
-
+        r = compute(key)
+        x, xT, t_myr = r['x'], r['xT'], r['t_myr']
+        fs_top, d_Sxx, d_gpe, d_Fd, FB = (r['fs_top'], r['d_Sxx'], r['d_gpe'],
+                                          r['d_Fd'], r['FB'])
+        res_pin = r['res_pin']
+        iI_x, xR = r['xI'], r['xR']
         # --- render: lifted from the notebook cells (§8.1b, §8.2) ---
         xkm = (x - xT) / 1e3
-        xi_km, xr_km = (x[iI] - xT) / 1e3, (xR - xT) / 1e3
+        xi_km, xr_km = (iI_x - xT) / 1e3, (xR - xT) / 1e3
         vis = (xkm >= -50) & (xkm <= 3500)      # the displayed span
 
         # topography: display-smoothed SEAWARD OF x_I ONLY — the
@@ -172,7 +195,7 @@ def main():
         # over 100 km beyond x_I.
         topo_raw = -fs_top
         topo_sm = -gaussian_filter1d(fs_top, TOPO_SMOOTH_KM * 1e3 / DX)
-        wgt = np.clip(((x - x[iI]) / 1e3 - 50.0) / 100.0, 0.0, 1.0)
+        wgt = np.clip(((x - iI_x) / 1e3 - 50.0) / 100.0, 0.0, 1.0)
         topo_disp = topo_raw * (1 - wgt) + topo_sm * wgt
 
         ax1 = axes[0, col]
@@ -227,7 +250,6 @@ def main():
         ax3.set_xlim(-50, 3500)                 # SEAWARD ONLY (Dan, 2026-09-15)
         if col == 0:
             draw_direction_glyph(ax3)
-        del v, g
 
     # data-driven axis limits, shared across the two model columns per row
     for row, arrs in lims.items():

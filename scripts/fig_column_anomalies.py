@@ -80,12 +80,20 @@ def main():
         sgn = np.where((pr[:-1] > 0) & (pr[1:] <= 0) & (zkm[:-1] > 20))[0]
         z_x = zkm[sgn[0]] if len(sgn) else np.nan
         ax.axhline(z_x, color='0.35', lw=0.9, ls='--')
-        ax.text(0.97, z_x - 4, 'plate: topographic pressure gradient',
-                transform=ax.get_yaxis_transform(), ha='right', va='bottom',
-                fontsize=7.5, color='0.3')
-        ax.text(0.97, z_x + 4, 'asthenosphere: adverse pressure gradient',
-                transform=ax.get_yaxis_transform(), ha='right', va='top',
-                fontsize=7.5, color='0.3')
+        # Regime labels: two lines each, set WELL CLEAR of the sign change
+        # (one shallower, one much deeper), each with an arrow giving the
+        # direction of the force it produces (Dan, 2026-09-18).
+        for zlab, txt, sgn in ((z_x - 42, 'plate:\ntopographic pressure gradient', -1),
+                               (z_x + 78, 'asthenosphere:\nadverse pressure gradient', +1)):
+            ax.text(0.62, zlab, txt, transform=ax.get_yaxis_transform(),
+                    ha='right', va='center', fontsize=8, color='0.25',
+                    linespacing=1.4)
+            ax.annotate('', xy=(0.78 + sgn * 0.10, zlab),
+                        xytext=(0.78, zlab),
+                        xycoords=ax.get_yaxis_transform(),
+                        textcoords=ax.get_yaxis_transform(),
+                        arrowprops=dict(arrowstyle='-|>', color='0.25', lw=2.0,
+                                        mutation_scale=15))
         ax.set_xlabel('Vertical normal stress anomaly [MPa]\n(pressure-positive)')
     axes[0].set_ylabel('Depth [km]')
     axes[0].set_ylim(230, 0)

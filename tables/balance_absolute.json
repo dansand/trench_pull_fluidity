@@ -1,0 +1,20 @@
+{
+  "table": "balance_absolute.csv",
+  "script": "fig_balance_absolute.py",
+  "figure": "fig_balance_absolute.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 8,
+  "sigfig": 6,
+  "meta": {
+    "form": "absolute (GPE* offset by N_D(x_T))",
+    "reference_epoch_Myr": "40"
+  }
+}
