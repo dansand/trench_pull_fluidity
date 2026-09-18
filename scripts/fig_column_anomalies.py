@@ -96,7 +96,7 @@ def main():
         # its force-direction arrow beneath. Trench-ward is left.
         for xc, z_lab, z_arr, txt, head in (
                 (0.24, z_x - 18, z_x - 4, 'plate: topographic\npressure gradient', -1),
-                (0.72, z_x + 26, z_x + 42, 'asthenosphere: adverse\npressure gradient', +1)):
+                (0.79, z_x + 26, z_x + 42, 'asthenosphere: adverse\npressure gradient', +1)):
             ax.text(xc, z_lab, txt, transform=ax.get_yaxis_transform(),
                     ha='center', va='center', fontsize=8.5, color='0.25',
                     linespacing=1.4)
