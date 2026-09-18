@@ -113,9 +113,10 @@ def main():
             [[0.0], np.cumsum(0.5 * (a[1:] + a[:-1]) * np.diff(z))])
         C_zz = cum(dzz * 1e6) / 1e12
         C_nd = -cum(nd * 1e6) / 1e12
-        axes[2].plot(C_zz, zkm, color=col, lw=2.0, label=f'{key}  $\\sigma_{{zz}}$ term')
+        axes[2].plot(C_zz, zkm, color=col, lw=2.0,
+                     label=f'{key}  $\\Delta\\sigma_{{zz}}$')
         axes[2].plot(C_nd, zkm, color=col, lw=1.5, ls='--',
-                     label=f'{key}  $N_D$ term')
+                     label=f'{key}  $\\Delta N_D$')
         nd_settled = np.interp(240e3, z, C_nd) - np.interp(100e3, z, C_nd)
         zz_lost = np.interp(240e3, z, C_zz) - np.max(C_zz)
         print(f'   cumulative at 100 km: sigma_zz {np.interp(100e3, z, C_zz):+.2f}, '
@@ -164,15 +165,13 @@ def main():
                  '$\\Delta\\sigma_{zz}$ sign change: no shear\n'
                  'strength to support it',
                  transform=axes[1].transAxes, fontsize=8.5, color='0.3', va='top')
-    axes[2].legend(frameon=False, fontsize=8, loc='upper right')
+    axes[2].legend(frameon=False, fontsize=8.5, loc='lower right')
     axes[2].text(0.03, 0.55,
                  'below the sign change the $N_D$\nterm stops changing while the\n'
                  '$\\sigma_{zz}$ term keeps falling: the\nasthenosphere removes driving\n'
                  'force and supplies none',
                  transform=axes[2].transAxes, fontsize=8, color='0.3', va='top')
-    fig.suptitle('The two column stresses acting on vertical faces, ridge minus first '
-                 'isostatic column\n(mid-run average). One persists below the plate; '
-                 'the other does not.', fontsize=10.5)
+    fig.suptitle('Ridge minus first isostatic column, mid-run average', fontsize=11)
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_ridge_column_stresses.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)

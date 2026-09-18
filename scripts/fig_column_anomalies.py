@@ -82,13 +82,20 @@ def main():
         # Regime labels: two lines each, set WELL CLEAR of the sign change
         # (one shallower, one much deeper), each with an arrow giving the
         # direction of the force it produces (Dan, 2026-09-18).
-        for z_txt, z_arr, txt, sgn in (
-                (112, 130, 'plate:\ntopographic pressure gradient', -1),
-                (172, 190, 'asthenosphere:\nadverse pressure gradient', +1)):
-            ax.text(0.72, z_txt, txt, transform=ax.get_yaxis_transform(),
+        # Each label sits on ITS OWN SIDE of the sign change -- plate above,
+        # asthenosphere below -- with the arrow beside it giving the
+        # direction of the force. Two balanced lines, not a one-word first
+        # line (Dan, 2026-09-18).
+        # Plate label in the empty LEFT region above the sign change,
+        # asthenosphere label in the empty RIGHT region below it; each with
+        # its force-direction arrow beneath. Trench-ward is left.
+        for xc, z_lab, z_arr, txt, head in (
+                (0.24, z_x - 18, z_x - 4, 'plate: topographic\npressure gradient', -1),
+                (0.72, z_x + 26, z_x + 42, 'asthenosphere: adverse\npressure gradient', +1)):
+            ax.text(xc, z_lab, txt, transform=ax.get_yaxis_transform(),
                     ha='center', va='center', fontsize=8.5, color='0.25',
-                    linespacing=1.5)
-            ax.annotate('', xy=(0.72 + sgn * 0.10, z_arr), xytext=(0.72, z_arr),
+                    linespacing=1.4)
+            ax.annotate('', xy=(xc + head * 0.06, z_arr), xytext=(xc - head * 0.06, z_arr),
                         xycoords=ax.get_yaxis_transform(),
                         textcoords=ax.get_yaxis_transform(),
                         arrowprops=dict(arrowstyle='-|>', color='0.25', lw=2.2,
