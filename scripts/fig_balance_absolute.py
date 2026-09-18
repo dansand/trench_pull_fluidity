@@ -19,7 +19,9 @@ Curves, in the balance palette (FIGURE_STYLE.md):
     red          F_B(x), the accumulated basal traction
     green dashed N_D(x) - [Delta GPE*(x) + N_D(x_T)] + F_B(x), the closure
 
-Seaward side only; x_T, x_I and x_R marked.
+Seaward side only, models stacked one above the other; x_T, x_I and x_R
+marked. The column values of N_D are printed and tabulated, not
+annotated on the figure.
 
 DRAFT CAPTION. The trailing-plate force balance at the reference
 snapshot (t = 40 Myr) for STD (left) and WAL (right), plotted so that the
@@ -27,7 +29,7 @@ normal-stress-difference resultant appears as its actual value rather
 than as a change: the topographic pressure term is offset by N_D at the
 trench. Black, N_D(x); blue, the topographic pressure term on the same
 offset; red, the accumulated basal traction; green dashed, the closure.
-The value of N_D at the first isostatic column is marked.
+Models are stacked one above the other on a common axis.
 """
 import os, sys
 import numpy as np
@@ -42,7 +44,7 @@ from tables_io import write_table
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def main():
-    fig, axes = plt.subplots(1, 2, figsize=(12.5, 5.6), sharey=True, sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=(10.0, 8.4), sharex=True, sharey=True)
     rows = [('model', 'quantity', 'value')]
     for ax, key in zip(axes, ('STD', 'WAL')):
         r = compute(key)
@@ -68,14 +70,7 @@ def main():
         nd_T = float(r['Fd_T'])
         nd_I = float(np.interp(r['xI'], x, Fd))
         nd_R = float(np.interp(r['xR'], x, Fd))
-        ax.plot([xi_km], [nd_I * 1e-12], 'o', color='k', ms=7,
-                markeredgecolor='white', markeredgewidth=1.2, zorder=5)
-        ax.annotate(f'$N_D(x_I)$ = {nd_I/1e12:+.2f} TN/m',
-                    xy=(xi_km, nd_I * 1e-12), xytext=(28, -34),
-                    textcoords='offset points', fontsize=9,
-                    arrowprops=dict(arrowstyle='-', color='0.4', lw=0.8))
         ax.set_title(f'{key},  $t = {r["t_myr"]:.1f}$ Myr', fontsize=12)
-        ax.set_xlabel('Distance from trench [km]', fontsize=11)
         ax.set_xlim(-50, 3500)
         ax.set_ylim(-2.6, 3.4)
         print(f'{key}: N_D at x_T {nd_T/1e12:+.2f}, at x_I {nd_I/1e12:+.2f}, '
@@ -84,7 +79,9 @@ def main():
                  (key, 'nd_first_isostatic_TNm', f'{nd_I/1e12:.3f}'),
                  (key, 'nd_ridge_TNm', f'{nd_R/1e12:.3f}'),
                  (key, 'reference_epoch_Myr', f'{r["t_myr"]:.1f}')]
-    axes[0].set_ylabel('Force per unit distance [TN/m]', fontsize=11)
+    axes[1].set_xlabel('Distance from trench [km]', fontsize=11)
+    for ax in axes:
+        ax.set_ylabel('Force per unit distance [TN/m]', fontsize=10.5)
     axes[0].legend(loc='lower right', fontsize=8, ncol=2)
     fig.suptitle('The trailing-plate balance in absolute form: the topographic pressure '
                  'term is offset by $N_D(x_T)$,\nso the black curve is $N_D$ itself',
