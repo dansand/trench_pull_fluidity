@@ -80,10 +80,10 @@ def main():
         ax.axhline(z_x, color='0.35', lw=0.9, ls='--')
         # name the two forces where their amplitude is largest, in the
         # corridor between the trench and ridge bands (Dan, 2026-09-18)
-        ax.text(-5, 17, 'trench pull', ha='right', va='center', fontsize=10,
-                color='0.15')
-        ax.text(5, 17, 'ridge push', ha='left', va='center', fontsize=10,
-                color='0.15')
+        ax.text(-3, 9, 'trench\npull', ha='right', va='center', fontsize=8.5,
+                color='0.15', linespacing=1.3)
+        ax.text(3, 9, 'ridge\npush', ha='left', va='center', fontsize=8.5,
+                color='0.15', linespacing=1.3)
         # Regime labels: two lines each, set WELL CLEAR of the sign change
         # (one shallower, one much deeper), each with an arrow giving the
         # direction of the force it produces (Dan, 2026-09-18).
@@ -107,7 +107,7 @@ def main():
                                         mutation_scale=16))
         ax.set_xlabel('Vertical normal stress anomaly [MPa]\n(pressure-positive)')
     axes[0].set_ylabel('Depth [km]')
-    axes[0].set_ylim(230, 0)
+    axes[0].set_ylim(200, 0)
     axes[0].legend(fontsize=8, frameon=False, loc='lower left')
     fig.suptitle('Column stress anomalies relative to the first isostatic column\n'
                  '(bands: full-run range, 8–80 Myr; dashed: $\\Delta\\sigma_{zz}$ sign change)', fontsize=10)
