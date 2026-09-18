@@ -104,6 +104,8 @@ def main():
                  - (d[f'{key}_sxx_I'] - d[f'{key}_szz_I']))[m].mean(axis=0)) / 1e6
         axes[0].plot(dzz, zkm, color=col, lw=2.0, label=key)
         axes[1].plot(nd, zkm, color=col, lw=2.0, label=key)
+        s_x = np.where((dzz[:-1] > 0) & (dzz[1:] <= 0) & (zkm[:-1] > 20))[0]
+        z_cross = zkm[s_x[0]] if len(s_x) else np.nan
         # (c) cumulative contributions, SIGNED so positive drives the plate
         # trench-ward. The net force on the segment in +x is
         # d(sigma_xx-bar) = dN_D + d(sigma_zz-bar); driving is -x, so each
@@ -113,10 +115,18 @@ def main():
             [[0.0], np.cumsum(0.5 * (a[1:] + a[:-1]) * np.diff(z))])
         C_zz = cum(dzz * 1e6) / 1e12
         C_nd = -cum(nd * 1e6) / 1e12
-        axes[2].plot(C_zz, zkm, color=col, lw=2.0,
+        axes[2].plot(C_zz, zkm, color=col, lw=1.4,
                      label=f'{key}  $\\int\\Delta\\sigma_{{zz}}\\,dz$')
-        axes[2].plot(C_nd, zkm, color=col, lw=1.5, ls='--',
+        axes[2].plot(C_nd, zkm, color=col, lw=1.4, ls='--',
                      label=f'{key}  $-\\int\\Delta(\\sigma_{{xx}}-\\sigma_{{zz}})\\,dz$')
+        # the sum, bold above the sign change and faded below it: only the
+        # part above is net force generated within the boundary layer
+        C_sum = C_zz + C_nd
+        above = zkm <= z_cross
+        axes[2].plot(C_sum[above], zkm[above], color=col, lw=3.4,
+                     solid_capstyle='round', label=f'{key}  sum')
+        axes[2].plot(C_sum[~above], zkm[~above], color=col, lw=3.4, alpha=0.3,
+                     solid_capstyle='round')
         nd_settled = np.interp(240e3, z, C_nd) - np.interp(100e3, z, C_nd)
         zz_lost = np.interp(240e3, z, C_zz) - np.max(C_zz)
         print(f'   cumulative at 100 km: sigma_zz {np.interp(100e3, z, C_zz):+.2f}, '
@@ -127,8 +137,6 @@ def main():
         dP = dzz[deep].mean()
         below = np.where((zkm > 40) & (np.abs(nd) < ZERO_TOL_MPA))[0]
         z_nd0 = zkm[below[0]] if len(below) else np.nan
-        s = np.where((dzz[:-1] > 0) & (dzz[1:] <= 0) & (zkm[:-1] > 20))[0]
-        z_cross = zkm[s[0]] if len(s) else np.nan
         axes[0].axvline(dP, color=col, lw=1.0, ls='-.')
         # the one horizontal marker, on ALL panels: where Delta sigma_zz
         # changes sign (Dan, 2026-09-18)
@@ -157,20 +165,9 @@ def main():
     for ax in axes:
         ax.axvline(0, color='k', lw=1.6)
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
-    axes[0].legend(frameon=False, fontsize=10, loc='upper right')
+    axes[0].legend(frameon=False, fontsize=10, loc='lower right')
     axes[1].legend(frameon=False, fontsize=10, loc='upper right')
-    axes[0].text(0.03, 0.97, 'persists at depth:\nasthenospheric\npressure gradient',
-                 transform=axes[0].transAxes, fontsize=8.5, color='0.3', va='top')
-    axes[1].text(0.03, 0.97, 'equilibrates just below the\n'
-                 '$\\Delta\\sigma_{zz}$ sign change: no shear\n'
-                 'strength to support it',
-                 transform=axes[1].transAxes, fontsize=8.5, color='0.3', va='top')
     axes[2].legend(frameon=False, fontsize=8, loc='lower right')
-    axes[2].text(0.03, 0.55,
-                 'below the sign change the $N_D$\nterm stops changing while the\n'
-                 '$\\sigma_{zz}$ term keeps falling: the\nasthenosphere removes driving\n'
-                 'force and supplies none',
-                 transform=axes[2].transAxes, fontsize=8, color='0.3', va='top')
     fig.suptitle('Ridge minus first isostatic column, mid-run average', fontsize=11)
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_ridge_column_stresses.png')
