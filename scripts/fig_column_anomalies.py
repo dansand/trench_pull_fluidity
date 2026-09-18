@@ -69,7 +69,6 @@ def main():
                 label='ridge, tilt ($\\Delta P$) removed')
         ax.axvline(0, color='0.7', lw=0.7)
         ax.axhline(cpc.ZC_KM, color='0.5', lw=0.8, ls=':')
-        ax.axhspan(*cpc.DP_BAND_KM, color='0.6', alpha=0.12, lw=0)
         ax.set_title(f'{k}  (avg {c["t"][m].min():.0f}–{c["t"][m].max():.0f} Myr, n={m.sum()})',
                      fontsize=10)
         # regime annotations (Dan, 2026-09-18): above the sign change the
@@ -83,25 +82,25 @@ def main():
         # Regime labels: two lines each, set WELL CLEAR of the sign change
         # (one shallower, one much deeper), each with an arrow giving the
         # direction of the force it produces (Dan, 2026-09-18).
-        for zlab, txt, sgn in ((z_x - 42, 'plate:\ntopographic pressure gradient', -1),
-                               (z_x + 78, 'asthenosphere:\nadverse pressure gradient', +1)):
-            ax.text(0.62, zlab, txt, transform=ax.get_yaxis_transform(),
-                    ha='right', va='center', fontsize=8, color='0.25',
-                    linespacing=1.4)
-            ax.annotate('', xy=(0.78 + sgn * 0.10, zlab),
-                        xytext=(0.78, zlab),
+        for z_txt, z_arr, txt, sgn in (
+                (112, 130, 'plate:\ntopographic pressure gradient', -1),
+                (172, 190, 'asthenosphere:\nadverse pressure gradient', +1)):
+            ax.text(0.72, z_txt, txt, transform=ax.get_yaxis_transform(),
+                    ha='center', va='center', fontsize=8.5, color='0.25',
+                    linespacing=1.5)
+            ax.annotate('', xy=(0.72 + sgn * 0.10, z_arr), xytext=(0.72, z_arr),
                         xycoords=ax.get_yaxis_transform(),
                         textcoords=ax.get_yaxis_transform(),
-                        arrowprops=dict(arrowstyle='-|>', color='0.25', lw=2.0,
-                                        mutation_scale=15))
+                        arrowprops=dict(arrowstyle='-|>', color='0.25', lw=2.2,
+                                        mutation_scale=16))
         ax.set_xlabel('Vertical normal stress anomaly [MPa]\n(pressure-positive)')
     axes[0].set_ylabel('Depth [km]')
     axes[0].set_ylim(230, 0)
-    axes[0].text(0.03, 0.34, '$z_c$', transform=axes[0].get_yaxis_transform(),
-                 fontsize=8, color='0.4')
+    axes[0].text(0.02, cpc.ZC_KM - 3, '$z_c$', transform=axes[0].get_yaxis_transform(),
+                 fontsize=8, color='0.4', va='bottom')
     axes[0].legend(fontsize=8, frameon=False, loc='lower left')
     fig.suptitle('Column stress anomalies relative to the first isostatic column\n'
-                 '(bands: full-run range, 8–80 Myr)', fontsize=10)
+                 '(bands: full-run range, 8–80 Myr; dashed: $\\Delta\\sigma_{zz}$ sign change)', fontsize=10)
     fig.tight_layout()
     out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                        'figures', 'fig_column_anomalies.png')
