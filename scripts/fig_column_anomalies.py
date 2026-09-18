@@ -65,7 +65,7 @@ def main():
         ax.fill_betweenx(zkm, pR.min(axis=0), pR.max(axis=0), color='0.92', lw=0)
         ax.plot(pT[m].mean(axis=0), zkm, 'k-', lw=1.7, label='trench $-$ first isostatic')
         ax.plot(pR[m].mean(axis=0), zkm, '-', color='0.4', lw=1.5, label='ridge $-$ first isostatic')
-        ax.plot(pRd[m].mean(axis=0), zkm, 'k--', lw=1.2,
+        ax.plot(pRd[m].mean(axis=0), zkm, 'k--', lw=1.2, alpha=0.3,
                 label='ridge, tilt ($\\Delta P$) removed')
         ax.axvline(0, color='0.7', lw=0.7)
         ax.set_title(f'{k}  (avg {c["t"][m].min():.0f}–{c["t"][m].max():.0f} Myr, n={m.sum()})',
