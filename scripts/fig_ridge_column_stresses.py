@@ -3,13 +3,28 @@
 Writes figures/fig_ridge_column_stresses.png and
 tables/ridge_column_stresses.csv from the committed column-profile cache.
 
+This is the decomposition of the total column force across the
+ISOSTATIC DOMAIN (x_I to the ridge, in the sense of Figure 1); the
+non-isostatic domain (trench to x_I) has its own figures.
+
 Only two parts of the stress field act on the vertical faces of a
 column: the vertical normal stress, whose difference integrates to
 Delta GPE*, and the normal-stress difference, whose integral is N_D.
-(The third term in the balance, basal shear, acts on the horizontal
-face.) This figure puts those two differences side by side for the same
-column pair — ridge minus first isostatic column — so their depth
-behaviour can be compared directly.
+Together they are the total resultant, Delta sigma_xx-bar = Delta N_D +
+Delta sigma_zz-bar. (The third term in the balance, basal shear, acts on
+the horizontal face.) This figure puts those two differences side by
+side for the same column pair, so their depth behaviour can be compared
+directly.
+
+WHAT IT ESTABLISHES. All of the net force across the isostatic domain
+arises ABOVE the depth at which Delta sigma_zz changes sign — that is,
+within the convective thermal boundary layer. Below it, Delta N_D plays
+essentially no role (it moves by 0.06 TN/m between 100 and 240 km,
+because the asthenosphere has no shear strength to support a
+normal-stress difference), while Delta sigma_zz continues to act, as the
+asthenospheric pressure gradient. The sign change is therefore not only
+where the forcing reverses but the base of the region that generates net
+force at all, which is what one would expect.
 
   (a) Delta sigma_zz. Positive through the lithosphere (the cooling
       topography), crossing zero near the base of the coherently
@@ -46,7 +61,8 @@ own figure.
 Mid-run average (36-44 Myr, conventions 4b), models overlaid in the
 brand colours per FIGURE_STYLE.md.
 
-DRAFT CAPTION. The two column stresses that act on vertical faces,
+DRAFT CAPTION. Decomposition of the total column force across the
+isostatic domain: the two stresses that act on vertical faces,
 differenced between the ridge and the first isostatic column and
 averaged over the mid-run window, for STD (navy) and WAL (magenta).
 (a) The vertical normal stress difference, whose integral is the
