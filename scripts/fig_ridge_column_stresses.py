@@ -15,6 +15,14 @@ behaviour can be compared directly.
       topography), crossing zero near the base of the coherently
       translating plate, then holding a FINITE deep offset: the
       asthenospheric pressure gradient that tilts the plate.
+  (c) The CUMULATIVE contribution of each to the driving force, signed
+      so that positive drives the plate trench-ward. This is where the
+      boundary layer and the asthenosphere separate: below about 100 km
+      the N_D term stops changing (it moves by 0.06 TN/m between 100 and
+      240 km), while the sigma_zz term keeps declining as the adverse
+      gradient eats into it. The asthenosphere removes driving force
+      through sigma_zz and supplies none through N_D.
+
   (b) Delta (sigma_xx - sigma_zz). Large in the lithosphere, where the
       ridge and the first isostatic column have very different thermal
       and rheological structure, and then DECAYING TO ZERO by about
@@ -62,7 +70,7 @@ ZERO_TOL_MPA = 1.0        # |value| below this counts as equilibrated
 
 def main():
     d = cpc.load()
-    fig, axes = plt.subplots(1, 2, figsize=(10.0, 6.4), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(13.5, 6.4), sharey=True)
     rows = [('model', 'quantity', 'value')]
     for key in ('STD', 'WAL'):
         col = C[key]
@@ -75,6 +83,23 @@ def main():
                  - (d[f'{key}_sxx_I'] - d[f'{key}_szz_I']))[m].mean(axis=0)) / 1e6
         axes[0].plot(dzz, zkm, color=col, lw=2.0, label=key)
         axes[1].plot(nd, zkm, color=col, lw=2.0, label=key)
+        # (c) cumulative contributions, SIGNED so positive drives the plate
+        # trench-ward. The net force on the segment in +x is
+        # d(sigma_xx-bar) = dN_D + d(sigma_zz-bar); driving is -x, so each
+        # term's driving contribution is minus its own difference. In the
+        # pressure register that makes the sigma_zz term +int p_R dz.
+        cum = lambda a: np.concatenate(
+            [[0.0], np.cumsum(0.5 * (a[1:] + a[:-1]) * np.diff(z))])
+        C_zz = cum(dzz * 1e6) / 1e12
+        C_nd = -cum(nd * 1e6) / 1e12
+        axes[2].plot(C_zz, zkm, color=col, lw=2.0, label=f'{key}  $\\sigma_{{zz}}$ term')
+        axes[2].plot(C_nd, zkm, color=col, lw=1.5, ls='--',
+                     label=f'{key}  $N_D$ term')
+        nd_settled = np.interp(240e3, z, C_nd) - np.interp(100e3, z, C_nd)
+        zz_lost = np.interp(240e3, z, C_zz) - np.max(C_zz)
+        print(f'   cumulative at 100 km: sigma_zz {np.interp(100e3, z, C_zz):+.2f}, '
+              f'N_D {np.interp(100e3, z, C_nd):+.2f} TN/m; below 100 km the N_D term '
+              f'moves {nd_settled:+.3f} while the sigma_zz term loses {zz_lost:+.2f}')
         # where each difference stops changing
         deep = (zkm >= 150) & (zkm <= 240)
         dP = dzz[deep].mean()
@@ -91,21 +116,35 @@ def main():
                  (key, 'dSzz_sign_change_km', f'{z_cross:.0f}'),
                  (key, 'dNSD_equilibration_depth_km', f'{z_nd0:.0f}'),
                  (key, 'dNSD_deep_value_MPa', f'{nd[deep].mean():.2f}'),
-                 (key, 'dNSD_lithospheric_extreme_MPa', f'{nd[zkm < 60].min():.0f}')]
+                 (key, 'dNSD_lithospheric_extreme_MPa', f'{nd[zkm < 60].min():.0f}'),
+                 (key, 'cum_szz_driving_at_100km_TNm', f'{np.interp(100e3, z, C_zz):.3f}'),
+                 (key, 'cum_nd_driving_at_100km_TNm', f'{np.interp(100e3, z, C_nd):.3f}'),
+                 (key, 'cum_nd_change_100_to_240km_TNm', f'{nd_settled:.3f}'),
+                 (key, 'cum_szz_loss_below_peak_TNm', f'{zz_lost:.3f}')]
     axes[0].set_xlabel(r'(a) $\Delta\sigma_{zz}$, ridge $-\,x_I$ [MPa]'
                        '\n(dash-dot: deep offset)', fontsize=11)
-    axes[1].set_xlabel(r'(b) $\Delta(\sigma_{xx}-\sigma_{zz})$, ridge $-\,x_I$ [MPa]'
-                       '\n(dotted: equilibration depth)', fontsize=11)
+    axes[1].set_xlabel(r'(b) $\Delta(\sigma_{xx}-\sigma_{zz})$, ridge $-\,x_I$ [MPa]',
+                       fontsize=11)
+    axes[2].set_xlabel('(c) cumulative contribution to the\ndriving force [TN/m]',
+                       fontsize=11)
     axes[0].set_ylabel('Depth [km]', fontsize=11)
     axes[0].set_ylim(250, 0)
     for ax in axes:
         ax.axvline(0, color='k', lw=1.6)
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
-    axes[0].legend(frameon=False, fontsize=10, loc='upper left')
-    axes[0].text(0.03, 0.74, 'persists at depth:\nasthenospheric\npressure gradient',
+    axes[0].legend(frameon=False, fontsize=10, loc='upper right')
+    axes[0].text(0.03, 0.97, 'persists at depth:\nasthenospheric\npressure gradient',
                  transform=axes[0].transAxes, fontsize=8.5, color='0.3', va='top')
-    axes[1].text(0.56, 0.74, 'equilibrates by ~100 km:\nno shear strength\nto support it',
+    axes[1].text(0.03, 0.97, 'equilibrates by ~100 km:\nno shear strength\nto support it\n'
+                 '(dotted: where it vanishes)',
                  transform=axes[1].transAxes, fontsize=8.5, color='0.3', va='top')
+    axes[2].legend(frameon=False, fontsize=8, loc='upper right')
+    axes[2].axhline(100, color='0.45', lw=0.9, ls=':')
+    axes[2].text(0.03, 0.55,
+                 'below ~100 km (dotted) the $N_D$\nterm stops changing while the\n'
+                 '$\\sigma_{zz}$ term keeps falling: the\nasthenosphere removes driving\n'
+                 'force and supplies none',
+                 transform=axes[2].transAxes, fontsize=8, color='0.3', va='top')
     fig.suptitle('The two column stresses acting on vertical faces, ridge minus first '
                  'isostatic column\n(mid-run average). One persists below the plate; '
                  'the other does not.', fontsize=10.5)
