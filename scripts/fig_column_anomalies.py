@@ -80,9 +80,9 @@ def main():
         ax.axhline(z_x, color='0.35', lw=0.9, ls='--')
         # name the two forces where their amplitude is largest, in the
         # corridor between the trench and ridge bands (Dan, 2026-09-18)
-        ax.text(-3, 9, 'trench\npull', ha='right', va='center', fontsize=8.5,
+        ax.text(-9, 10, 'trench\npull', ha='right', va='center', fontsize=9.5,
                 color='0.15', linespacing=1.3)
-        ax.text(3, 9, 'ridge\npush', ha='left', va='center', fontsize=8.5,
+        ax.text(9, 10, 'ridge\npush', ha='left', va='center', fontsize=9.5,
                 color='0.15', linespacing=1.3)
         # Regime labels: two lines each, set WELL CLEAR of the sign change
         # (one shallower, one much deeper), each with an arrow giving the
