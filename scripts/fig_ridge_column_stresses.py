@@ -114,9 +114,9 @@ def main():
         C_zz = cum(dzz * 1e6) / 1e12
         C_nd = -cum(nd * 1e6) / 1e12
         axes[2].plot(C_zz, zkm, color=col, lw=2.0,
-                     label=f'{key}  $\\Delta\\bar\\sigma_{{zz}}$')
+                     label=f'{key}  $\\int\\Delta\\sigma_{{zz}}\\,dz$')
         axes[2].plot(C_nd, zkm, color=col, lw=1.5, ls='--',
-                     label=f'{key}  $\\Delta N_D$')
+                     label=f'{key}  $-\\int\\Delta(\\sigma_{{xx}}-\\sigma_{{zz}})\\,dz$')
         nd_settled = np.interp(240e3, z, C_nd) - np.interp(100e3, z, C_nd)
         zz_lost = np.interp(240e3, z, C_zz) - np.max(C_zz)
         print(f'   cumulative at 100 km: sigma_zz {np.interp(100e3, z, C_zz):+.2f}, '
@@ -158,13 +158,14 @@ def main():
         ax.axvline(0, color='k', lw=1.6)
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
     axes[0].legend(frameon=False, fontsize=10, loc='upper right')
+    axes[1].legend(frameon=False, fontsize=10, loc='upper right')
     axes[0].text(0.03, 0.97, 'persists at depth:\nasthenospheric\npressure gradient',
                  transform=axes[0].transAxes, fontsize=8.5, color='0.3', va='top')
     axes[1].text(0.03, 0.97, 'equilibrates just below the\n'
                  '$\\Delta\\sigma_{zz}$ sign change: no shear\n'
                  'strength to support it',
                  transform=axes[1].transAxes, fontsize=8.5, color='0.3', va='top')
-    axes[2].legend(frameon=False, fontsize=8.5, loc='lower right')
+    axes[2].legend(frameon=False, fontsize=8, loc='lower right')
     axes[2].text(0.03, 0.55,
                  'below the sign change the $N_D$\nterm stops changing while the\n'
                  '$\\sigma_{zz}$ term keeps falling: the\nasthenosphere removes driving\n'
