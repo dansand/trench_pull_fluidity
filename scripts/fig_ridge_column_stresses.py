@@ -114,7 +114,7 @@ def main():
         C_zz = cum(dzz * 1e6) / 1e12
         C_nd = -cum(nd * 1e6) / 1e12
         axes[2].plot(C_zz, zkm, color=col, lw=2.0,
-                     label=f'{key}  $\\Delta\\sigma_{{zz}}$')
+                     label=f'{key}  $\\Delta\\bar\\sigma_{{zz}}$')
         axes[2].plot(C_nd, zkm, color=col, lw=1.5, ls='--',
                      label=f'{key}  $\\Delta N_D$')
         nd_settled = np.interp(240e3, z, C_nd) - np.interp(100e3, z, C_nd)
@@ -147,12 +147,11 @@ def main():
                  (key, 'cum_nd_change_100_to_240km_TNm', f'{nd_settled:.3f}'),
                  (key, 'cum_szz_loss_below_peak_TNm', f'{zz_lost:.3f}')]
     axes[0].set_xlabel(r'(a) $\Delta\sigma_{zz}$, ridge $-\,x_I$ [MPa]'
-                       '\n(dash-dot: deep offset; dotted: its sign change, all panels)',
-                       fontsize=10)
+                       '\n(dotted: its sign change, all panels)', fontsize=10.5)
     axes[1].set_xlabel(r'(b) $\Delta(\sigma_{xx}-\sigma_{zz})$, ridge $-\,x_I$ [MPa]',
                        fontsize=11)
-    axes[2].set_xlabel('(c) cumulative contribution to the\ndriving force [TN/m]',
-                       fontsize=11)
+    axes[2].set_xlabel('(c) cumulative integral of (a) and (b) [TN/m]\n'
+                       '(signed: positive drives trench-ward)', fontsize=10.5)
     axes[0].set_ylabel('Depth [km]', fontsize=11)
     axes[0].set_ylim(250, 0)
     for ax in axes:
