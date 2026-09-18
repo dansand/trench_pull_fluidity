@@ -72,6 +72,20 @@ def main():
         ax.axhspan(*cpc.DP_BAND_KM, color='0.6', alpha=0.12, lw=0)
         ax.set_title(f'{k}  (avg {c["t"][m].min():.0f}–{c["t"][m].max():.0f} Myr, n={m.sum()})',
                      fontsize=10)
+        # regime annotations (Dan, 2026-09-18): above the sign change the
+        # ridge column carries the plate's own topographic pressure
+        # gradient; below it the anomaly is the asthenospheric gradient,
+        # which stabilises onto Delta P.
+        pr = sm(c['p_R'][m].mean(axis=0)) / 1e6
+        sgn = np.where((pr[:-1] > 0) & (pr[1:] <= 0) & (zkm[:-1] > 20))[0]
+        z_x = zkm[sgn[0]] if len(sgn) else np.nan
+        ax.axhline(z_x, color='0.35', lw=0.9, ls='--')
+        ax.text(0.97, z_x - 4, 'plate: topographic pressure gradient',
+                transform=ax.get_yaxis_transform(), ha='right', va='bottom',
+                fontsize=7.5, color='0.3')
+        ax.text(0.97, z_x + 4, 'asthenosphere: adverse pressure gradient',
+                transform=ax.get_yaxis_transform(), ha='right', va='top',
+                fontsize=7.5, color='0.3')
         ax.set_xlabel('Vertical normal stress anomaly [MPa]\n(pressure-positive)')
     axes[0].set_ylabel('Depth [km]')
     axes[0].set_ylim(230, 0)

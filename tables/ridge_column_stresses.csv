@@ -1,0 +1,11 @@
+model,quantity,value
+STD,dSzz_deep_offset_MPa,-8.41
+STD,dSzz_sign_change_km,74
+STD,dNSD_equilibration_depth_km,102
+STD,dNSD_deep_value_MPa,-0.64
+STD,dNSD_lithospheric_extreme_MPa,-211
+WAL,dSzz_deep_offset_MPa,-5.18
+WAL,dSzz_sign_change_km,84
+WAL,dNSD_equilibration_depth_km,88
+WAL,dNSD_deep_value_MPa,-0.52
+WAL,dNSD_lithospheric_extreme_MPa,-157

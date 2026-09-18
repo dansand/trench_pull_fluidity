@@ -1,0 +1,27 @@
+{
+  "table": "ridge_column_stresses.csv",
+  "script": "fig_ridge_column_stresses.py",
+  "figure": "fig_ridge_column_stresses.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 10,
+  "sigfig": 6,
+  "meta": {
+    "midrun_window_Myr": [
+      36.0,
+      44.0
+    ],
+    "deep_band_km": [
+      150,
+      240
+    ],
+    "zero_tolerance_MPa": "1"
+  }
+}
