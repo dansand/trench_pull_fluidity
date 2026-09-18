@@ -26,8 +26,13 @@ behaviour can be compared directly.
   (b) Delta (sigma_xx - sigma_zz). Large in the lithosphere, where the
       ridge and the first isostatic column have very different thermal
       and rheological structure, and then DECAYING TO ZERO by about
-      120 km — the asthenosphere has no shear strength with which to
-      support a normal-stress difference.
+      just below the Delta sigma_zz sign change — the asthenosphere has
+      no shear strength with which to support a normal-stress difference.
+
+The dotted horizontal line on ALL panels is the depth at which
+Delta sigma_zz changes sign (74 km STD / 84 km WAL at mid-run). It is the
+figure's single reference level, so the three panels can be read against
+one another.
 
 The contrast is the point: below the plate one difference persists and
 the other does not, which is why the deep part of Delta sigma_zz is a
@@ -48,8 +53,8 @@ averaged over the mid-run window, for STD (navy) and WAL (magenta).
 plate-wide driving term: positive through the plate, crossing zero near
 its base, and holding a finite deep offset — the asthenospheric pressure
 gradient. (b) The normal-stress difference, whose integral is N_D: large
-within the lithosphere but decaying to zero by about 120 km, because the
-asthenosphere cannot support a normal-stress difference. The deep part of
+within the lithosphere but decaying to zero just below that level,
+because the asthenosphere cannot support a normal-stress difference. The deep part of
 (a) is therefore a flow pressure, not a strength signal.
 """
 import os, sys
@@ -108,7 +113,10 @@ def main():
         s = np.where((dzz[:-1] > 0) & (dzz[1:] <= 0) & (zkm[:-1] > 20))[0]
         z_cross = zkm[s[0]] if len(s) else np.nan
         axes[0].axvline(dP, color=col, lw=1.0, ls='-.')
-        axes[1].axhline(z_nd0, color=col, lw=1.0, ls=':')
+        # the one horizontal marker, on ALL panels: where Delta sigma_zz
+        # changes sign (Dan, 2026-09-18)
+        for ax in axes:
+            ax.axhline(z_cross, color=col, lw=1.0, ls=':')
         print(f'{key}: dSzz deep offset {dP:+.2f} MPa (sign change {z_cross:.0f} km); '
               f'd(Sxx-Szz) falls below {ZERO_TOL_MPA} MPa at {z_nd0:.0f} km, '
               f'deep value {nd[deep].mean():+.2f} MPa')
@@ -122,7 +130,8 @@ def main():
                  (key, 'cum_nd_change_100_to_240km_TNm', f'{nd_settled:.3f}'),
                  (key, 'cum_szz_loss_below_peak_TNm', f'{zz_lost:.3f}')]
     axes[0].set_xlabel(r'(a) $\Delta\sigma_{zz}$, ridge $-\,x_I$ [MPa]'
-                       '\n(dash-dot: deep offset)', fontsize=11)
+                       '\n(dash-dot: deep offset; dotted: its sign change, all panels)',
+                       fontsize=10)
     axes[1].set_xlabel(r'(b) $\Delta(\sigma_{xx}-\sigma_{zz})$, ridge $-\,x_I$ [MPa]',
                        fontsize=11)
     axes[2].set_xlabel('(c) cumulative contribution to the\ndriving force [TN/m]',
@@ -135,13 +144,13 @@ def main():
     axes[0].legend(frameon=False, fontsize=10, loc='upper right')
     axes[0].text(0.03, 0.97, 'persists at depth:\nasthenospheric\npressure gradient',
                  transform=axes[0].transAxes, fontsize=8.5, color='0.3', va='top')
-    axes[1].text(0.03, 0.97, 'equilibrates by ~100 km:\nno shear strength\nto support it\n'
-                 '(dotted: where it vanishes)',
+    axes[1].text(0.03, 0.97, 'equilibrates just below the\n'
+                 '$\\Delta\\sigma_{zz}$ sign change: no shear\n'
+                 'strength to support it',
                  transform=axes[1].transAxes, fontsize=8.5, color='0.3', va='top')
     axes[2].legend(frameon=False, fontsize=8, loc='upper right')
-    axes[2].axhline(100, color='0.45', lw=0.9, ls=':')
     axes[2].text(0.03, 0.55,
-                 'below ~100 km (dotted) the $N_D$\nterm stops changing while the\n'
+                 'below the sign change the $N_D$\nterm stops changing while the\n'
                  '$\\sigma_{zz}$ term keeps falling: the\nasthenosphere removes driving\n'
                  'force and supplies none',
                  transform=axes[2].transAxes, fontsize=8, color='0.3', va='top')
