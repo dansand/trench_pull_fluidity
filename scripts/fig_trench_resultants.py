@@ -6,33 +6,50 @@ column_profiles_cache.resultants(). Consolidated 2026-09-21 per Dan: this
 figure absorbs what fig_nd_trench_ridge carried, and the bending moment
 moves to the SI (fig_trench_moment).
 
-  (a) N_D and V at the TRENCH. Together these show the partition at the
+  (a) N_D and -V at the TRENCH. Together these show the partition at the
       trench column between the vertical load supported by shear stress
-      (V) and the horizontal load transmitted by the slab (N_D) -- the
+      and the horizontal load transmitted by the slab (N_D) -- the
       comparison that matters for the conventional slab-pull expectation.
   (b) N_D at the TRENCH, the FIRST ISOSTATIC COLUMN and the RIDGE. The
       trench curve repeats from (a) deliberately, so the change between
       columns can be read through time.
 
+WHY -V AND NOT V (Dan's ruling, 2026-09-21). V = int tau_zx dz is a
+resultant, and a resultant's sign is only meaningful once paired with the
+outward normal of the plane it acts on (SYMBOLOGY §4.6). In the mirrored
+analysis frame the subducting plate lies seaward at x > x_T, so the
+trailing plate's trench-side face has outward normal -x, and the shear
+traction it carries is -V, positive downward in the z-down frame. That is
+the physically meaningful quantity here -- the downward load the slab
+applies to the trailing plate at the trench -- and it is what is plotted.
+Plotting V itself gives a negative curve for a downward pull, which reads
+backwards.
+
+This also reconciles the display with the companion register, which
+defines V as positive at the trench (SYMBOLOGY §7.5). The repo keeps its
+own V in the frame it extracts in; only the sign shown here is flipped,
+and the table rows are named for the face load, not for V, so nothing
+downstream can quote the two senses interchangeably. The alternative --
+un-mirroring the whole analysis back to the source study's native frame,
+where V is positive at the trench by construction -- was considered and
+deferred on 2026-09-21; it remains the clean fix if the frame is ever
+revisited.
+
 Run medians (t >= 8 Myr): N_D is -0.70 (STD) / -1.83 (WAL) TN/m at the
 trench, +1.27 / -0.14 at the first isostatic column and +0.19 / +0.13 at
-the ridge; V at the trench is -1.60 / -1.11.
+the ridge; the downward shear load at the trench face is +1.60 / +1.11.
 
 Styling per FIGURE_STYLE.md: model by brand colour, quantity or column by
 linestyle.
 
-Register note on V (SYMBOLOGY §7.5): the plotted V is the extracted
-V = int tau_zx dz at the trench column -- the repo's engineering sense,
-which is the NEGATIVE of the companion register's V. Any prose quoting a
-V relation must say which V it means.
-
 DRAFT CAPTION. Stress resultants through the runs for STD (navy) and WAL
 (magenta). (a) At the trench column, the normal-stress-difference
-resultant N_D (solid) and the vertical shear resultant V (dashed): the
-horizontal load transmitted along the plate against the vertical load
-carried by shear. (b) N_D at the trench (solid), the first isostatic
-column (dashed) and the ridge (dotted), showing how the resultant changes
-between columns through time.
+resultant N_D (solid) and the downward shear load carried by the
+trailing plate's trench-side face, -V (dashed): the horizontal load
+transmitted along the plate against the vertical load carried by shear.
+(b) N_D at the trench (solid), the first isostatic column (dashed) and
+the ridge (dotted), showing how the resultant changes between columns
+through time.
 """
 import os, sys
 import numpy as np
@@ -59,17 +76,22 @@ def main():
         t = r['t']
         m = t >= T_MIN_MYR
         kw = dict(color=col, lw=1.9)
+        # the shear load on the trailing plate's trench-side face (outward
+        # normal -x), positive downward -- see the module docstring
+        face_load = -r['v_T']
         axes[0].plot(t[m], r['nd_T'][m] * 1e-12, '-', label=f'{key}  $N_D(x_T)$', **kw)
-        axes[0].plot(t[m], r['v_T'][m] * 1e-12, '--', label=f'{key}  $V(x_T)$', **kw)
+        axes[0].plot(t[m], face_load[m] * 1e-12, '--', label=f'{key}  $-V(x_T)$', **kw)
         axes[1].plot(t[m], r['nd_T'][m] * 1e-12, '-', label=f'{key}  $N_D(x_T)$', **kw)
         axes[1].plot(t[m], r['nd_I'][m] * 1e-12, '--', label=f'{key}  $N_D(x_I)$', **kw)
         axes[1].plot(t[m], r['nd_R'][m] * 1e-12, ':', label=f'{key}  $N_D(x_R)$',
                      color=col, lw=2.1)
         med = lambda a: np.median(a[m]) / 1e12
         print(f'{key}: N_D trench {med(r["nd_T"]):+.2f}, x_I {med(r["nd_I"]):+.2f}, '
-              f'ridge {med(r["nd_R"]):+.2f} TN/m; V trench {med(r["v_T"]):+.2f}')
+              f'ridge {med(r["nd_R"]):+.2f} TN/m; downward shear load at the '
+              f'trench face {med(face_load):+.2f} (extracted V {med(r["v_T"]):+.2f})')
         for name, arr in (('nd_trench', r['nd_T']), ('nd_first_isostatic', r['nd_I']),
-                          ('nd_ridge', r['nd_R']), ('v_trench', r['v_T'])):
+                          ('nd_ridge', r['nd_R']),
+                          ('shear_load_trench_face_down', face_load)):
             a = arr[m] / 1e12
             rows += [(key, f'{name}_median_TNm', f'{np.median(a):.3f}'),
                      (key, f'{name}_q1_TNm', f'{np.percentile(a, 25):.3f}'),
@@ -80,8 +102,8 @@ def main():
                   str(bool((r['nd_R'][m] > 0).all()))),
                  (key, 'abs_v_over_abs_nd_trench_median',
                   f'{np.median(np.abs(v_t) / np.abs(nd_t)):.2f}')]
-    axes[0].set_title('(a) at the trench: horizontal load ($N_D$) and vertical '
-                      'load carried by shear ($V$)', fontsize=10.5)
+    axes[0].set_title('(a) at the trench: horizontal load ($N_D$) and the downward '
+                      'shear load on the trench-side face ($-V$)', fontsize=10.5)
     axes[1].set_title('(b) $N_D$ at the trench, first isostatic column and ridge',
                       fontsize=10.5)
     axes[1].set_xlabel('Model time [Myr]', fontsize=12)
@@ -98,8 +120,13 @@ def main():
                       script='fig_trench_resultants.py',
                       figure='fig_trench_resultants.png', models=('STD', 'WAL'),
                       meta={'zc_km': cpc.ZC_KM, 't_min_Myr': T_MIN_MYR,
-                            'V_sense': 'engineering, int tau_zx dz (negative of the '
-                                       'companion register V)'})
+                            'V_sense': 'extracted V = int tau_zx dz in the mirrored '
+                                       'analysis frame (negative of the companion '
+                                       'register V)',
+                            'shear_load_sense': 'shear_load_trench_face_down = -V, the '
+                                                'traction resultant on the trailing '
+                                                "plate's trench-side face (outward "
+                                                'normal -x), positive DOWNWARD'})
     print('written:', tab)
 
 if __name__ == '__main__':

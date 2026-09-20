@@ -16,6 +16,7 @@
   "meta": {
     "zc_km": "75",
     "t_min_Myr": "8",
-    "V_sense": "engineering, int tau_zx dz (negative of the companion register V)"
+    "V_sense": "extracted V = int tau_zx dz in the mirrored analysis frame (negative of the companion register V)",
+    "shear_load_sense": "shear_load_trench_face_down = -V, the traction resultant on the trailing plate's trench-side face (outward normal -x), positive DOWNWARD"
   }
 }
