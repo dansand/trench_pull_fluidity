@@ -12,8 +12,26 @@ reinvented): panel styling, colours, labels, and axis limits lifted from
 fluidity_single_step.ipynb cells §8.1b (fundamental form: F_B red,
 Δσ̄_xx blue, sum green dashed) and §8.2 (decomposed form: ΔN_D black,
 ΔGPE* blue thick, F_B red, residual green dashed), topography panel with
-the x_T (navy) / x_I / x_R annotations. SEAWARD SIDE ONLY
-(xlim −50..3500 km) — the landward side is distracting (Dan).
+the x_T (navy) / x_I / x_R annotations. SEAWARD SIDE ONLY — the landward
+side is distracting (Dan).
+
+SQUARE-ROOT x AXIS (Dan, 2026-09-21; xlim 0..3500 km). x_I sits 83 km
+(STD) / 100 km (WAL) from the trench while the ridge is at ~2900 km, so
+on a linear axis the NON-ISOSTATIC DOMAIN — where the whole trench pull
+is generated — occupied under 3 % of the plot width and could not be
+read. Alternatives considered and rejected: a broken axis (honest, but
+three stacked rows would each need the break, and it cuts the curves);
+symlog (expands most, but distorts hardest and needs an arbitrary
+linthresh). sqrt(x) is continuous and monotone, so the curves stay
+single and unbroken, and it moves x_I to ~18 % of the width.
+
+⚠ GRADIENTS ARE NOT COMPARABLE ACROSS THIS AXIS. F_B accumulates very
+nearly linearly in x, but on a sqrt axis it appears to flatten seaward;
+the apparent steepening of every curve near the trench is likewise part
+scale, part signal. Read VALUES and CROSSINGS off this figure, never
+slopes. The axis label names the scale for that reason. Tick positions
+are round numbers chosen to be near-evenly spaced once square-rooted,
+otherwise the near-trench labels collide.
 
 Decomposed panel in the PURE Δ FORM (Dan's simplification 2026-09-15):
 every term zero at the trench — no renormalised/absolute-anchored
@@ -33,7 +51,10 @@ All Δ curves are trench-referenced (±5 km window means, conventions
 time-evolution trench pulls at t = 40 (1.98 STD / 1.75 WAL TN/m) — asserted.
 
 DRAFT CAPTION. The trailing-plate force balance at the reference
-snapshot (t = 40 Myr) for STD (left) and WAL (right). Top: surface
+snapshot (t = 40 Myr) for STD (left) and WAL (right). Distance from the
+trench is plotted on a square-root scale, which expands the
+non-isostatic domain between the trench and the first isostatic column;
+gradients are therefore not comparable along the axis. Top: surface
 topography, with the trench, first isostatic and ridge columns marked.
 Middle: the fundamental form of the vertically integrated balance — the
 change in the vertically integrated horizontal normal stress, Δσ̄_xx,
@@ -63,6 +84,10 @@ DATA = os.path.expanduser('~/DATA/numerical_models/OUTPUTS/')
 DX, ZC, Y, W = 1000.0, 75e3, 2_900_000.0, 5
 T_REF_MYR = 40.0                      # conventions §4b (mid-run rule)
 TOPO_SMOOTH_KM = 10.0                 # display smoothing of w (short-wavelength noise)
+# sqrt-x tick set: round numbers chosen to be near-EVENLY spaced once
+# square-rooted (0, 7.1, 14.1, 22.4, 31.6, 44.7, 54.8), so the labels do
+# not collide near the trench the way a linear-looking set does
+SQRT_TICKS_KM = [0, 50, 200, 500, 1000, 2000, 3000]
 PIN_KM = (1000.0, 2000.0)             # closure pinning window rel. x_T (conventions §2.3)
 COMMITTED_TP_T40 = {'STD': 1.98e12, 'WAL': 1.75e12}   # N/m, time-evolution cache at t=40
 
@@ -209,7 +234,9 @@ def main():
         ax1.text(xi_km + 60, 0.75 * topo_disp[vis].max(),
                  'first isostatic\ncolumn (' + r'$x_I$' + ')\n' + r'$dV/dx = 0$',
                  fontsize=9)
-        for x_col, lab, c, side in [(0, r'$x_T$', '#002147', 'right'),
+        # x_T now sits ON the left spine (the sqrt axis starts at 0), so its
+        # label must go inside the axes, not to the left of the line
+        for x_col, lab, c, side in [(0, r'$x_T$', '#002147', 'left'),
                                     (xi_km, r'$x_I$', 'k', 'left'),
                                     (xr_km, r'$x_R$', 'k', 'left')]:
             ax1.annotate(lab, xy=(x_col, 1), xycoords=('data', 'axes fraction'),
@@ -246,10 +273,26 @@ def main():
             ax3.axvline(xc, color='k', lw=0.5)
         lims[2] += [res_pin[vis] * 1e-12, FB[vis] * 1e-12,
                     d_gpe[vis] * 1e-12, d_Fd[vis] * 1e-12]
-        ax3.set_xlabel('Distance from trench [km]', fontsize=11)
-        ax3.set_xlim(-50, 3500)                 # SEAWARD ONLY (Dan, 2026-09-15)
+        ax3.set_xlabel('Distance from trench [km]  ' + r'($\sqrt{x}$ scale)',
+                       fontsize=11)
+        ax3.set_xlim(0, 3500)                   # SEAWARD ONLY (Dan, 2026-09-15)
         if col == 0:
             draw_direction_glyph(ax3)
+
+    # SQUARE-ROOT x AXIS (Dan, 2026-09-21). x_I sits 83 km (STD) / 100 km
+    # (WAL) from the trench while the ridge is at ~2900 km, so on a linear
+    # axis the non-isostatic domain -- where the entire trench pull is
+    # generated -- is under 3 % of the plot width and unreadable. sqrt(x)
+    # is continuous and monotone, so no break is needed and the curves stay
+    # single; it moves x_I to ~18 % of the width. The cost is that GRADIENTS
+    # ARE NOT COMPARABLE ACROSS THE AXIS (F_B's constant slope appears to
+    # flatten seaward), which is why the axis label names the scale.
+    for ax in axes.flat:
+        ax.set_xscale('function',
+                      functions=(lambda a: np.sqrt(np.clip(a, 0, None)),
+                                 lambda a: np.clip(a, 0, None) ** 2))
+        ax.set_xticks(SQRT_TICKS_KM)
+        ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
     # data-driven axis limits, shared across the two model columns per row
     for row, arrs in lims.items():
