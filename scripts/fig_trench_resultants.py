@@ -19,7 +19,8 @@ moves to the SI (fig_trench_moment).
       medians are +1.94 (STD) / +1.71 (WAL) TN/m (medians of the
       difference, not the difference of the medians); the fill is per
       model rather than plotted as a curve so the two columns it is taken
-      between stay visible.
+      between stay visible, and is kept faint (alpha 0.06) so the STD and
+      WAL bands stay separable where they overlap.
 
 WHY -V AND NOT V (Dan's ruling, 2026-09-21). V = int tau_zx dz is a
 resultant, and a resultant's sign is only meaningful once paired with the
@@ -93,7 +94,7 @@ def main():
         # the gap between the trench and first-isostatic curves IS the
         # trench pull increment, Delta N_D across the non-isostatic domain
         axes[1].fill_between(t[m], r['nd_T'][m] * 1e-12, r['nd_I'][m] * 1e-12,
-                             color=col, alpha=0.10, lw=0, zorder=0)
+                             color=col, alpha=0.06, lw=0, zorder=0)
         axes[1].plot(t[m], r['nd_T'][m] * 1e-12, '-', label=f'{key}  $N_D(x_T)$', **kw)
         axes[1].plot(t[m], r['nd_I'][m] * 1e-12, '--', label=f'{key}  $N_D(x_I)$', **kw)
         axes[1].plot(t[m], r['nd_R'][m] * 1e-12, ':', label=f'{key}  $N_D(x_R)$',
