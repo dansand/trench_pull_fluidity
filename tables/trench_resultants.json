@@ -1,0 +1,21 @@
+{
+  "table": "trench_resultants.csv",
+  "script": "fig_trench_resultants.py",
+  "figure": "fig_trench_resultants.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 30,
+  "sigfig": 6,
+  "meta": {
+    "zc_km": "75",
+    "t_min_Myr": "8",
+    "V_sense": "engineering, int tau_zx dz (negative of the companion register V)"
+  }
+}

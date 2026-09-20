@@ -1,0 +1,20 @@
+{
+  "table": "trench_moment.csv",
+  "script": "fig_trench_moment.py",
+  "figure": "fig_trench_moment.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 8,
+  "sigfig": 6,
+  "meta": {
+    "pivot": "trench neutral plane (extremum of cumulative fibre stress, 5-60 km)",
+    "t_min_Myr": "8"
+  }
+}

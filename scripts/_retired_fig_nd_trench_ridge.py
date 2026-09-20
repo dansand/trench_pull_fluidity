@@ -1,53 +1,12 @@
-"""fig_nd_trench_ridge — N_D at the trench and ridge columns, and their
-difference, through the run.
+"""RETIRED 2026-09-21 — consolidated into fig_trench_resultants.
 
-Writes figures/fig_nd_trench_ridge.png and tables/nd_trench_ridge.csv
-from the committed COLUMN-PROFILE cache, via the shared
-column_profiles_cache.resultants(). It previously read the
-notebook-built time-evolution cache, which predates the flow-based ridge
-pick and placed the ridge ~300 km away; N_D at the ridge is about half
-what that cache reported (2026-09-17).
-
-The setup this figure makes explicit (Dan, 2026-09-15): N_D at the ridge
-is always tension-like but SMALL, so the plate-wide difference
-N_D(x_T) − N_D(x_R) is approximately the trench value whatever its sign —
-pulling or resisting. This unstated approximation is what underlies the
-conventional slab-pull framework: any edge force at the trench is
-effectively the change in N_D across the plate. Measured, the trench
-value is predominantly compression-like, so the difference predominantly
-resists.
-
-Axis reading: for the two RESULTANTS, positive = tension, negative =
-compression (sign-convention statement). For the DIFFERENCE, positive =
-driving (a net tension-like edge force pulling the trailing plate
-trench-ward), negative = resisting. The plate-wide difference is written
-out explicitly as N_D(x_T) − N_D(x_R); the register's bare Δ operator is
-reserved for the (x_I) − (x_T) column difference (SYMBOLOGY §5).
-
-Run statistics printed on execution (t ≥ 8 Myr; committed-cache sourced):
-N_D(x_T) median −0.70 TN/m, tension-like 37 % of steps (STD); −1.89 TN/m,
-0 % (WAL). N_D(x_R) median +0.39 / +0.24 TN/m, positive at every step.
-
-Resultant vs net force (Dan, 2026-09-15): N_D at a single column is a
-COLUMNWISE RESULTANT — the depth integral of the normal-stress difference
-on one vertical plane, with no force meaning until paired with that
-plane's outward normal. The difference between two columns IS a net
-force: N_D(x_T) − N_D(x_R) is the net force per unit distance that the
-two end planes exert on the intervening plate segment.
-
-DRAFT CAPTION. The normal-stress-difference resultant N_D at the trench
-column (black) and ridge column (grey), and their difference
-N_D(x_T) − N_D(x_R) (dashed), through the runs. Each single-column value
-is a columnwise resultant; the difference is the net force per unit
-distance exerted on the plate segment between the two columns. N_D at
-the ridge is tension-like at every step but small, so the difference is
-approximately the trench value whatever its sign — the implicit reading
-of the conventional slab-pull framework, in which a tension-like edge
-force at the trench is the plate-wide change in N_D. The measured trench
-value is predominantly compression-like: the edge term mostly resists,
-and the driving force must be carried by the topographic pressure
-gradient.
+Dan folded this figure into the resultants figure: panel (b) there now
+carries N_D at the trench, first isostatic column and ridge. Kept as
+source history; not part of the figure set and not run by reproduce.
+Its table, tables/nd_trench_ridge.csv, is superseded by
+tables/trench_resultants.csv.
 """
+
 import os, sys
 import numpy as np
 import matplotlib

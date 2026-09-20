@@ -276,8 +276,9 @@ def resultants(d, key, zc_m=None):
     flow-based ridge pick and placed the ridge ~300 km away.
 
     Returns (N/m unless noted):
-      nd_T, nd_R  the normal-stress-difference resultant at the trench
-                  and ridge columns, integrated to zc_m (default z_c)
+      nd_T, nd_I, nd_R  the normal-stress-difference resultant at the
+                  trench, first-isostatic and ridge columns, integrated to
+                  zc_m (default z_c)
       v_T         the vertical shear resultant at the trench, int tau_zx dz
       m_T         the bending moment at the trench about its neutral
                   plane [N], with h_np from the extremum of the
@@ -291,6 +292,7 @@ def resultants(d, key, zc_m=None):
     zc = z <= (ZC_KM * 1e3 if zc_m is None else zc_m)
     fib_T = d[f'{key}_sxx_T'] - d[f'{key}_szz_T']
     fib_R = d[f'{key}_sxx_R'] - d[f'{key}_szz_R']
+    fib_I = d[f'{key}_sxx_I'] - d[f'{key}_szz_I']
     C = np.cumsum(fib_T * np.gradient(z), axis=1)
     w = (z >= 5e3) & (z <= 60e3)
     h_np = z[w][np.argmax(np.abs(C[:, w]), axis=1)]
@@ -298,6 +300,7 @@ def resultants(d, key, zc_m=None):
         t=d[f'{key}_t'],
         nd_T=np.trapz(fib_T[:, zc], z[zc], axis=1),
         nd_R=np.trapz(fib_R[:, zc], z[zc], axis=1),
+        nd_I=np.trapz(fib_I[:, zc], z[zc], axis=1),
         v_T=np.trapz(d[f'{key}_txz_T'][:, zc], z[zc], axis=1),
         m_T=np.trapz(fib_T[:, zc] * (z[zc] - h_np[:, None]), z[zc], axis=1),
         h_np=h_np)

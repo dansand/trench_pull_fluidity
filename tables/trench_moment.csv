@@ -1,0 +1,9 @@
+model,quantity,value
+STD,moment_trench_median_1e17N,-1.169
+STD,moment_trench_q1_1e17N,-1.451
+STD,moment_trench_q3_1e17N,-0.923
+STD,neutral_plane_median_km,30.5
+WAL,moment_trench_median_1e17N,-1.022
+WAL,moment_trench_q1_1e17N,-1.544
+WAL,moment_trench_q3_1e17N,-0.857
+WAL,neutral_plane_median_km,26.5
