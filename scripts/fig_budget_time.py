@@ -97,15 +97,32 @@ def main():
             rows += [(key, f'{name}_median_TNm', f'{np.median(a):.3f}'),
                      (key, f'{name}_q1_TNm', f'{np.percentile(a, 25):.3f}'),
                      (key, f'{name}_q3_TNm', f'{np.percentile(a, 75):.3f}')]
+        # derived statistics the manuscript can quote directly
+        gpe, nd, fb = q['d_gpe'][m], q['d_nd'][m], q['f_b'][m]
+        resist = nd + fb
         rows += [(key, 'closure_rms_TNm', f'{np.sqrt(np.mean((q["closure"][m]/1e12)**2)):.3f}'),
                  (key, 'closure_rms_percent_of_gpe',
-                  f'{100*np.sqrt(np.mean((q["closure"][m])**2))/np.median(np.abs(q["d_gpe"][m])):.2f}')]
+                  f'{100*np.sqrt(np.mean((q["closure"][m])**2))/np.median(np.abs(gpe)):.2f}'),
+                 (key, 'gpe_driving_fraction_of_steps', f'{(gpe > 0).mean():.3f}'),
+                 (key, 'nd_resisting_fraction_of_steps', f'{(nd > 0).mean():.3f}'),
+                 (key, 'fb_resisting_fraction_of_steps', f'{(fb > 0).mean():.3f}'),
+                 (key, 'nd_share_of_total_resistance', f'{np.median(nd / resist):.3f}'),
+                 (key, 'fb_share_of_total_resistance', f'{np.median(fb / resist):.3f}'),
+                 (key, 'gpe_over_nd_ratio_median', f'{np.median(np.abs(gpe / nd)):.2f}'),
+                 (key, 'gpe_over_fb_ratio_median', f'{np.median(np.abs(gpe / fb)):.2f}')]
+        print(f'   {key}: dN_D resists in {(nd>0).mean():.0%} of steps and carries '
+              f'{np.median(nd/resist):.0%} of the resistance; F_B carries '
+              f'{np.median(fb/resist):.0%}')
     axes[0].set_ylabel('Force per unit distance [TN/m]', fontsize=11)
-    axes[0].legend(frameon=False, fontsize=9.5, loc='center left', ncol=2)
-    for ax, lab, va, dy in ((axes[1], 'resisting', 'top', 0.97),
-                            (axes[1], 'driving', 'bottom', 0.03)):
-        ax.text(0.985, dy, lab, transform=ax.transAxes, ha='right', va=va,
-                fontsize=9, style='italic', color='0.4')
+    axes[0].legend(frameon=False, fontsize=10, loc='lower left', ncol=2)
+    # headroom so the two regime words can be set large and clear
+    lo, hi = axes[0].get_ylim()
+    axes[0].set_ylim(lo - 0.30 * abs(lo), hi + 0.30 * abs(hi))
+    for ax in axes:
+        for lab, dy, va in (('RESISTING', 0.975, 'top'), ('DRIVING', 0.025, 'bottom')):
+            ax.text(0.5, dy, lab, transform=ax.transAxes, ha='center', va=va,
+                    fontsize=15, fontweight='bold', color='0.78',
+                    zorder=0)
     fig.suptitle('The three balance terms between the trench and ridge columns, '
                  'through time', fontsize=11)
     fig.tight_layout()

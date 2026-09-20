@@ -13,6 +13,13 @@ STD,closure_q1_TNm,-0.054
 STD,closure_q3_TNm,-0.024
 STD,closure_rms_TNm,0.045
 STD,closure_rms_percent_of_gpe,1.36
+STD,gpe_driving_fraction_of_steps,1
+STD,nd_resisting_fraction_of_steps,0.622
+STD,fb_resisting_fraction_of_steps,1
+STD,nd_share_of_total_resistance,0.273
+STD,fb_share_of_total_resistance,0.727
+STD,gpe_over_nd_ratio_median,2.98
+STD,gpe_over_fb_ratio_median,1.38
 WAL,gpe_like_force_median_TNm,3.081
 WAL,gpe_like_force_q1_TNm,2.747
 WAL,gpe_like_force_q3_TNm,4.423
@@ -27,3 +34,10 @@ WAL,closure_q1_TNm,0.007
 WAL,closure_q3_TNm,0.031
 WAL,closure_rms_TNm,0.035
 WAL,closure_rms_percent_of_gpe,1.13
+WAL,gpe_driving_fraction_of_steps,1
+WAL,nd_resisting_fraction_of_steps,1
+WAL,fb_resisting_fraction_of_steps,1
+WAL,nd_share_of_total_resistance,0.65
+WAL,fb_share_of_total_resistance,0.35
+WAL,gpe_over_nd_ratio_median,1.53
+WAL,gpe_over_fb_ratio_median,2.83
