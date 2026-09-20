@@ -12,7 +12,14 @@ moves to the SI (fig_trench_moment).
       comparison that matters for the conventional slab-pull expectation.
   (b) N_D at the TRENCH, the FIRST ISOSTATIC COLUMN and the RIDGE. The
       trench curve repeats from (a) deliberately, so the change between
-      columns can be read through time.
+      columns can be read through time. The light fill between the trench
+      and first-isostatic curves is the TRENCH PULL INCREMENT -- the
+      register-Delta of N_D across the non-isostatic domain, which is the
+      quantity the balance actually uses (Dan, 2026-09-21). Its run
+      medians are +1.94 (STD) / +1.71 (WAL) TN/m (medians of the
+      difference, not the difference of the medians); the fill is per
+      model rather than plotted as a curve so the two columns it is taken
+      between stay visible.
 
 WHY -V AND NOT V (Dan's ruling, 2026-09-21). V = int tau_zx dz is a
 resultant, and a resultant's sign is only meaningful once paired with the
@@ -49,7 +56,9 @@ trailing plate's trench-side face, -V (dashed): the horizontal load
 transmitted along the plate against the vertical load carried by shear.
 (b) N_D at the trench (solid), the first isostatic column (dashed) and
 the ridge (dotted), showing how the resultant changes between columns
-through time.
+through time. The shaded band between the trench and first isostatic
+curves is the trench pull increment, the change in N_D across the
+non-isostatic domain.
 """
 import os, sys
 import numpy as np
@@ -81,6 +90,10 @@ def main():
         face_load = -r['v_T']
         axes[0].plot(t[m], r['nd_T'][m] * 1e-12, '-', label=f'{key}  $N_D(x_T)$', **kw)
         axes[0].plot(t[m], face_load[m] * 1e-12, '--', label=f'{key}  $-V(x_T)$', **kw)
+        # the gap between the trench and first-isostatic curves IS the
+        # trench pull increment, Delta N_D across the non-isostatic domain
+        axes[1].fill_between(t[m], r['nd_T'][m] * 1e-12, r['nd_I'][m] * 1e-12,
+                             color=col, alpha=0.10, lw=0, zorder=0)
         axes[1].plot(t[m], r['nd_T'][m] * 1e-12, '-', label=f'{key}  $N_D(x_T)$', **kw)
         axes[1].plot(t[m], r['nd_I'][m] * 1e-12, '--', label=f'{key}  $N_D(x_I)$', **kw)
         axes[1].plot(t[m], r['nd_R'][m] * 1e-12, ':', label=f'{key}  $N_D(x_R)$',
@@ -91,7 +104,9 @@ def main():
               f'trench face {med(face_load):+.2f} (extracted V {med(r["v_T"]):+.2f})')
         for name, arr in (('nd_trench', r['nd_T']), ('nd_first_isostatic', r['nd_I']),
                           ('nd_ridge', r['nd_R']),
-                          ('shear_load_trench_face_down', face_load)):
+                          ('shear_load_trench_face_down', face_load),
+                          ('d_nd_trench_to_first_isostatic',
+                           r['nd_I'] - r['nd_T'])):
             a = arr[m] / 1e12
             rows += [(key, f'{name}_median_TNm', f'{np.median(a):.3f}'),
                      (key, f'{name}_q1_TNm', f'{np.percentile(a, 25):.3f}'),
