@@ -22,6 +22,18 @@ moves to the SI (fig_trench_moment).
       between stay visible, and is kept faint (alpha 0.06) so the STD and
       WAL bands stay separable where they overlap.
 
+THE PLATE-WIDE DIFFERENCE, N_D(x_T) - N_D(x_R), is tabulated but not
+plotted (it was the third curve of the retired fig_nd_trench_ridge). Its
+sense is counter-intuitive and is the one thing here most likely to be
+quoted backwards: the net x-force on the trench-to-ridge segment from
+N_D is N_D(x_R) - N_D(x_T), so the tabulated quantity is MINUS the net
+force, and DRIVING (a force toward -x, trench-ward) means it is
+POSITIVE. Run medians -0.94 (STD) / -2.02 (WAL) TN/m, driving in 38 % /
+0 % of steps -- i.e. the plate-wide N_D difference predominantly RESISTS.
+Earlier drafts quoted +0.39 / +0.24 for the ridge median and 32 % / 0 %
+for the driving fraction; those predate the flow-based ridge pick, and
+the ridge medians are now +0.19 / +0.13.
+
 WHY -V AND NOT V (Dan's ruling, 2026-09-21). V = int tau_zx dz is a
 resultant, and a resultant's sign is only meaningful once paired with the
 outward normal of the plane it acts on (SYMBOLOGY §4.6). In the mirrored
@@ -113,9 +125,20 @@ def main():
                      (key, f'{name}_q1_TNm', f'{np.percentile(a, 25):.3f}'),
                      (key, f'{name}_q3_TNm', f'{np.percentile(a, 75):.3f}')]
         nd_t, v_t = r['nd_T'][m], r['v_T'][m]
+        # the plate-wide difference across the trench-to-ridge segment.
+        # CAREFUL with its sense: the net x-force on that segment from N_D
+        # is N_D(x_R) - N_D(x_T), so the quantity below is MINUS the net
+        # force. Driving means a force toward -x (trench-ward), which is
+        # d_tr > 0. This is the opposite of the reading that the plotted
+        # sign suggests, hence the explicit row name.
+        d_tr = (r['nd_T'] - r['nd_R'])[m]
         rows += [(key, 'nd_trench_tension_like_fraction', f'{(nd_t > 0).mean():.3f}'),
                  (key, 'nd_ridge_always_tension_like',
                   str(bool((r['nd_R'][m] > 0).all()))),
+                 (key, 'nd_trench_minus_ridge_median_TNm',
+                  f'{np.median(d_tr) / 1e12:.3f}'),
+                 (key, 'nd_trench_minus_ridge_driving_fraction',
+                  f'{(d_tr > 0).mean():.3f}'),
                  (key, 'abs_v_over_abs_nd_trench_median',
                   f'{np.median(np.abs(v_t) / np.abs(nd_t)):.2f}')]
     axes[0].set_title('(a) at the trench: horizontal load ($N_D$) and the downward '
