@@ -1,0 +1,22 @@
+{
+  "table": "budget_time.csv",
+  "script": "fig_budget_time.py",
+  "figure": "fig_budget_time.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 28,
+  "sigfig": 6,
+  "meta": {
+    "domain": "trench to ridge columns",
+    "zc_km": "75",
+    "t_min_Myr": "8",
+    "sign": "positive = +x = resisting; negative = driving"
+  }
+}

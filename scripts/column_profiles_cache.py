@@ -117,6 +117,14 @@ def build():
             xR, iR = find_ridge_x_flow(x, vx[iz10], xT, seaward_sign=+1)
             xR_topo, _ = find_ridge_x(x, fs_top, xT, seaward_sign=+1)
             ca = lambda f, j: f[..., max(0, j - W):j + W + 1].mean(axis=-1)
+            # accumulated basal traction along the plate: tau_zx on the
+            # horizontal plane at z_c, integrated in x from the trench.
+            # Needed for the three-term budget through time (Dan,
+            # 2026-09-20); the balance is dN_D - dGPE* + F_B = 0.
+            iz_c = int(np.argmin(np.abs(z - ZC_KM * 1e3)))
+            FB_x = np.concatenate(
+                [[0.0], np.cumsum(0.5 * (txz[iz_c, 1:] + txz[iz_c, :-1]) * DX)])
+            FB_x = FB_x - FB_x[ti]
             # column of MAXIMUM BENDING MOMENT (Dan, 2026-09-16): the
             # flexure-based thickness definitions belong here, not at the
             # trench. Fixed pivot = the trench neutral plane; searched over
@@ -138,7 +146,9 @@ def build():
                              sxx_T=ca(sxx, ti), sxx_I=ca(sxx, iI), sxx_R=ca(sxx, iR),
                              rho_T=ca(rho, ti), rho_I=ca(rho, iI), rho_R=ca(rho, iR),
                              temp_T=ca(T, ti), temp_I=ca(T, iI), temp_R=ca(T, iR),
-                             xT=xT, xI=x[iI], xR=xR, xR_topo=xR_topo))
+                             xT=xT, xI=x[iI], xR=xR, xR_topo=xR_topo,
+                             FB_I=float(FB_x[iI]), FB_R=float(FB_x[iR]),
+                             tau_b_rms=float(np.sqrt(np.mean(txz[iz_c] ** 2)))))
             print(f'{KEY} t={t_myr:6.2f} Myr  xT={xT/1e3:7.1f} xI={x[iI]/1e3:7.1f} '
                   f'xR={xR/1e3:7.1f} (topo {xR_topo/1e3:7.1f})  '
                   f'xM-xT={(x[iM]-xT)/1e3:+6.1f}', flush=True)
@@ -148,7 +158,7 @@ def build():
             'txz_M', 'dtxz_M', 'txz_T', 'dtxz_T', 'txz_I', 'dtxz_I',
             'szz_T', 'szz_I', 'szz_R', 'sxx_T', 'sxx_I', 'sxx_R',
             'rho_T', 'rho_I', 'rho_R',
-            'temp_T', 'temp_I', 'temp_R', 'xT', 'xI', 'xR', 'xR_topo')
+            'temp_T', 'temp_I', 'temp_R', 'xT', 'xI', 'xR', 'xR_topo', 'FB_I', 'FB_R', 'tau_b_rms')
     np.savez(OUT,
              **{f'{k}_{q}': np.array([r[q] for r in rows]) for k, rows in out.items()
                 for q in keys},
