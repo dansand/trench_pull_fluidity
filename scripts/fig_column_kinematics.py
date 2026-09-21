@@ -10,11 +10,21 @@ one.
   left   Delta sigma_zz vs depth relative to the first isostatic column:
          trench (blue) and ridge (orange), in the schematic's domain
          colours (FIGURE_STYLE.md).
-  right  the horizontal velocity v_x in those same columns, plus the
-         first isostatic column itself. This is an INDEPENDENT
-         measurement: the stress panels say what force the columns carry,
-         the velocity panels say how the material in them is actually
-         moving, and nothing in one is derived from the other.
+  right  the horizontal velocity v_x, HORIZONTALLY AVERAGED over each
+         domain (Dan, 2026-09-21): x_T -> x_I in blue and x_I -> x_R in
+         orange. Column samples were tried first and rejected -- the
+         depth structure of the flow beneath the plate is a regional
+         property, and single columns carry local detail that has nothing
+         to do with it. This is an INDEPENDENT measurement: the stress
+         panels say what force the columns carry, the velocity panels say
+         how the material is actually moving, and nothing in one is
+         derived from the other.
+
+         The whole-plate average x_T -> x_R is computed and tabulated but
+         NOT drawn: the isostatic domain is 2878 of 2972 km (STD), so its
+         average and the whole-plate average agree to 0.01 cm/yr and the
+         two curves sit on top of each other. Plotting both would imply a
+         distinction the data does not contain.
 
 MATCHED SNAPSHOTS (Dan, 2026-09-21). Both columns, both the lines and the
 bands, use the SAME FOUR snapshots per model: t = 38, 40, 42, 44 Myr.
@@ -43,12 +53,13 @@ DRAFT CAPTION. Column stress anomalies and column velocities for STD
 (38-44 Myr), with the shaded band spanning those four. Left: the
 vertical normal stress anomaly of the trench column (blue) and ridge
 column (orange) relative to the first isostatic column. Right: the
-horizontal velocity in the same three columns. The trench and first
-isostatic columns translate together, so the non-isostatic domain that
-carries the trench pull moves as a unit; the ridge column moves at
-roughly half that rate, the spreading boundary condition rather than
-deformation within the plate. All three decouple downward over the same
-depth range and reverse into the return flow below about 200 km.
+horizontal velocity averaged over each domain: the non-isostatic domain
+x_T to x_I (blue) and the isostatic domain x_I to x_R (orange). The
+near-trench domain moves slightly faster than the plate as a whole
+(-1.33 against -1.18 cm/yr in STD, -2.07 against -1.97 in WAL), and both
+decouple downward over the same depth range, falling to half the surface
+rate near 140 km and reversing into the return flow at about 200 km in
+both models.
 """
 import os, sys, glob
 import numpy as np
@@ -116,7 +127,16 @@ def one_snapshot(key, t_target):
     out = dict(z=z, t=t, xT=xT, xI=x[iI], xR=x[iR])
     for nm, j in (('T', ti), ('I', iI), ('R', iR)):
         out[f'szz_{nm}'] = ca(szz, j)
-        out[f'vx_{nm}'] = ca(vx, j)
+    # velocity is taken as a HORIZONTAL AVERAGE over each domain, not
+    # column-sampled (Dan, 2026-09-21): the depth structure of the flow
+    # beneath the plate is a regional property, and single columns sample
+    # local detail that has nothing to do with it.
+    span = lambda f, j0, j1: f[:, min(j0, j1):max(j0, j1) + 1].mean(axis=1)
+    out['vx_TI'] = span(vx, ti, iI)        # non-isostatic / trench pull domain
+    out['vx_IR'] = span(vx, iI, iR)        # isostatic / ridge push domain
+    out['vx_TR'] = span(vx, ti, iR)        # whole trailing plate
+    out['len_TI_km'] = abs(x[iI] - xT) / 1e3
+    out['len_IR_km'] = abs(x[iR] - x[iI]) / 1e3
     return out
 
 
@@ -132,9 +152,9 @@ def main():
         # pressure-register anomalies relative to x_I, as in the cache
         pT = sm(stack(lambda s: -(s['szz_T'] - s['szz_I']))) / 1e6
         pR = sm(stack(lambda s: -(s['szz_R'] - s['szz_I']))) / 1e6
-        vT = stack(lambda s: s['vx_T'])
-        vI = stack(lambda s: s['vx_I'])
-        vR = stack(lambda s: s['vx_R'])
+        vTI = stack(lambda s: s['vx_TI'])
+        vIR = stack(lambda s: s['vx_IR'])
+        vTR = stack(lambda s: s['vx_TR'])
 
         a0, a1 = axes[r, 0], axes[r, 1]
         for arr, col, lab in ((pT, C_TRENCH, 'trench $-$ first isostatic'),
@@ -142,14 +162,18 @@ def main():
             a0.fill_betweenx(zkm, arr.min(axis=0), arr.max(axis=0), color=col,
                              alpha=0.15, lw=0)
             a0.plot(arr.mean(axis=0), zkm, '-', color=col, lw=1.8, label=lab)
-        for arr, col, lab in ((vT, C_TRENCH, 'trench'), (vI, C_ISO, 'first isostatic'),
-                              (vR, C_RIDGE, 'ridge')):
+        L_TI = np.mean([s['len_TI_km'] for s in snaps])
+        L_IR = np.mean([s['len_IR_km'] for s in snaps])
+        for arr, col, lw, lab in (
+                (vTI, C_TRENCH, 1.8, f'$x_T\\to x_I$  ({L_TI:.0f} km)'),
+                (vIR, C_RIDGE, 1.8, f'$x_I\\to x_R$  ({L_IR:.0f} km)')):
             a1.fill_betweenx(zkm, arr.min(axis=0), arr.max(axis=0), color=col,
                              alpha=0.15, lw=0)
-            a1.plot(arr.mean(axis=0), zkm, '-', color=col, lw=1.8, label=lab)
+            a1.plot(arr.mean(axis=0), zkm, '-', color=col, lw=lw, label=lab)
 
         a0.set_xlabel(r'$\Delta\sigma_{zz}$ [MPa] (pressure-positive)', fontsize=10)
-        a1.set_xlabel(r'$v_x$ [cm/yr]  (negative = trench-ward)', fontsize=10)
+        a1.set_xlabel(r'$\langle v_x\rangle$ [cm/yr], horizontal average'
+                      '\n(negative = trench-ward)', fontsize=10)
         a0.set_ylabel('Depth [km]', fontsize=11)
         a0.set_title(f'{key}   (mean of {len(SNAP_MYR)} snapshots, '
                      f'{SNAP_MYR[0]:.0f}–{SNAP_MYR[-1]:.0f} Myr)',
@@ -158,37 +182,35 @@ def main():
             ax.axvline(0, color='k', lw=1.0)
             ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
-        vm = vI.mean(axis=0)
+        vm = vTR.mean(axis=0)
         surf = vm[zkm < 20].mean()
-        # base of coherent translation: where |v_x| has fallen to half the
-        # plate value -- a measured level, not an assumed thickness
+        # base of coherent translation: where the horizontally averaged
+        # |v_x| has fallen to half the plate value -- a MEASURED level,
+        # not an assumed thickness
         below = np.where(np.abs(vm) < 0.5 * abs(surf))[0]
         z_half = zkm[below[0]] if len(below) else np.nan
         rev = np.where((np.sign(vm[:-1]) != np.sign(vm[1:])) & (zkm[:-1] > 50))[0]
         z_rev = zkm[rev[0]] if len(rev) else np.nan
-        print(f'{key}: plate v_x {surf:+.2f} cm/yr; |v| halves at {z_half:.0f} km; '
-              f'flow reverses at {z_rev:.0f} km; trench-minus-ridge surface v_x '
-              f'{vT.mean(axis=0)[zkm < 20].mean() - vR.mean(axis=0)[zkm < 20].mean():+.3f}; '
-              f'trench-minus-x_I {(vT - vI).mean(axis=0)[zkm < 20].mean():+.3f}')
+        sfc = lambda a: a.mean(axis=0)[zkm < 20].mean()
+        print(f'{key}: plate <v_x> {surf:+.2f} cm/yr; |v| halves at {z_half:.0f} km; '
+              f'flow reverses at {z_rev:.0f} km; domain means at the surface '
+              f'x_T->x_I {sfc(vTI):+.2f} ({L_TI:.0f} km), '
+              f'x_I->x_R {sfc(vIR):+.2f} ({L_IR:.0f} km)')
         rows += [(key, 'plate_vx_surface_cm_yr', f'{surf:.3f}'),
                  (key, 'depth_vx_half_plate_km', f'{z_half:.0f}'),
                  (key, 'depth_vx_reversal_km', f'{z_rev:.0f}'),
-                 (key, 'vx_trench_surface_cm_yr',
-                  f'{vT.mean(axis=0)[zkm < 20].mean():.3f}'),
-                 (key, 'vx_ridge_surface_cm_yr',
-                  f'{vR.mean(axis=0)[zkm < 20].mean():.3f}'),
-                 (key, 'vx_first_isostatic_surface_cm_yr',
-                  f'{vI.mean(axis=0)[zkm < 20].mean():.3f}'),
-                 (key, 'vx_trench_minus_first_isostatic_cm_yr',
-                  f'{(vT - vI).mean(axis=0)[zkm < 20].mean():.3f}'),
-                 (key, 'vx_ridge_over_trench_surface',
-                  f'{vR.mean(axis=0)[zkm < 20].mean() / vT.mean(axis=0)[zkm < 20].mean():.3f}'),
+                 (key, 'vx_trench_to_isostatic_surface_cm_yr', f'{sfc(vTI):.3f}'),
+                 (key, 'vx_isostatic_to_ridge_surface_cm_yr', f'{sfc(vIR):.3f}'),
+                 (key, 'domain_length_trench_to_isostatic_km', f'{L_TI:.0f}'),
+                 (key, 'domain_length_isostatic_to_ridge_km', f'{L_IR:.0f}'),
                  (key, 'n_snapshots', str(len(SNAP_MYR)))]
 
     axes[0, 0].set_ylim(Z_PLOT_KM, 0)
     axes[0, 0].legend(frameon=False, fontsize=9, loc='lower left')
-    axes[0, 1].legend(frameon=False, fontsize=9, loc='lower left', title='column')
-    fig.suptitle('Column stress anomalies and column velocities — the same four '
+    axes[0, 1].legend(frameon=False, fontsize=9, loc='lower left',
+                      title='horizontal average over')
+    fig.suptitle('Column stress anomalies and the velocity structure beneath the plate '
+                 '— the same four '
                  f'snapshots ({SNAP_MYR[0]:.0f}–{SNAP_MYR[-1]:.0f} Myr) in both models\n'
                  '(band: spread across those four)', fontsize=11)
     fig.tight_layout()
