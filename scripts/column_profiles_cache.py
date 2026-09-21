@@ -117,6 +117,15 @@ def build():
             xR, iR = find_ridge_x_flow(x, vx[iz10], xT, seaward_sign=+1)
             xR_topo, _ = find_ridge_x(x, fs_top, xT, seaward_sign=+1)
             ca = lambda f, j: f[..., max(0, j - W):j + W + 1].mean(axis=-1)
+            # HORIZONTALLY AVERAGED HORIZONTAL VELOCITY (Dan, 2026-09-21):
+            # one mean vertical profile of v_x per snapshot, averaged over
+            # every column from the trench to the ridge. The flow structure
+            # beneath the plate is a regional property; single columns
+            # carry local detail that has nothing to do with it. Units are
+            # cm/yr (the velocity is converted at extraction), negative =
+            # trench-ward in the mirrored analysis frame.
+            j0, j1 = min(ti, iR), max(ti, iR)
+            vx_TR = vx[:, j0:j1 + 1].mean(axis=1)
             # accumulated basal traction along the plate: tau_zx on the
             # horizontal plane at z_c, integrated in x from the trench.
             # Needed for the three-term budget through time (Dan,
@@ -146,6 +155,7 @@ def build():
                              sxx_T=ca(sxx, ti), sxx_I=ca(sxx, iI), sxx_R=ca(sxx, iR),
                              rho_T=ca(rho, ti), rho_I=ca(rho, iI), rho_R=ca(rho, iR),
                              temp_T=ca(T, ti), temp_I=ca(T, iI), temp_R=ca(T, iR),
+                             vx_TR=vx_TR,
                              xT=xT, xI=x[iI], xR=xR, xR_topo=xR_topo,
                              FB_I=float(FB_x[iI]), FB_R=float(FB_x[iR]),
                              tau_b_rms=float(np.sqrt(np.mean(txz[iz_c] ** 2)))))
@@ -158,7 +168,13 @@ def build():
             'txz_M', 'dtxz_M', 'txz_T', 'dtxz_T', 'txz_I', 'dtxz_I',
             'szz_T', 'szz_I', 'szz_R', 'sxx_T', 'sxx_I', 'sxx_R',
             'rho_T', 'rho_I', 'rho_R',
-            'temp_T', 'temp_I', 'temp_R', 'xT', 'xI', 'xR', 'xR_topo', 'FB_I', 'FB_R', 'tau_b_rms')
+            'temp_T', 'temp_I', 'temp_R', 'xT', 'xI', 'xR', 'xR_topo', 'FB_I', 'FB_R',
+            'tau_b_rms', 'vx_TR')
+    # this tuple is the SAVE LIST, not derived from the row dicts — a new
+    # quantity added to rows.append() is silently dropped unless it is
+    # named here too (cost me one full rebuild, 2026-09-21)
+    missing = set(next(iter(out.values()))[0]) - set(keys)
+    assert not missing, f'computed but not saved: {sorted(missing)}'
     np.savez(OUT,
              **{f'{k}_{q}': np.array([r[q] for r in rows]) for k, rows in out.items()
                 for q in keys},

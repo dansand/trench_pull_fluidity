@@ -11,17 +11,16 @@
     "quantity",
     "value"
   ],
-  "n_rows": 16,
+  "n_rows": 20,
   "sigfig": 6,
   "meta": {
-    "snapshots_Myr": [
+    "line_snapshots_Myr": [
       38.0,
       40.0,
       42.0,
       44.0
     ],
-    "window_km": 5,
-    "surface": "top-boundary nodes (corrected reading)",
-    "band": "min-to-max across the four snapshots"
+    "band": "full run, all cached snapshots",
+    "velocity": "v_x averaged over all columns x_T..x_R, cm/yr, negative = trench-ward"
   }
 }
