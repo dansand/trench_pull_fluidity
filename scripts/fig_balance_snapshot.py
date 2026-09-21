@@ -15,6 +15,44 @@ fluidity_single_step.ipynb cells §8.1b (fundamental form: F_B red,
 the x_T (navy) / x_I / x_R annotations. SEAWARD SIDE ONLY — the landward
 side is distracting (Dan).
 
+THE FREE SURFACE IS READ AT THE TOP-BOUNDARY NODES (Dan, 2026-09-21),
+via fluidity_helpers.surface_fs, NOT as the top row of the sampled grid.
+That row sits at z = 500 m and this model has no deforming mesh, so it
+was reading the interior extension of a boundary field, not the surface.
+Effect at the reference snapshot: w_T 629 -> 1761 m (STD) and
+1062 -> 1453 m (WAL); x_I 83 -> 93 km and 100 -> 97 km; and the spurious
+~11 km wiggle through the trench zone disappears, so the display
+smoothing that existed to tame it is gone too. Corroborated two ways:
+the corrected depths sit in the 1.6-2.3 km dry-trench range the project
+quotes, and the independent equivalent topography sigma_zz(0)/rho_g
+agrees with this reading to 1 m across the whole plate.
+
+⚠ The column cache (column_profiles_cache.py) and fig_headline_tracking
+STILL USE THE OLD READING, so their x_I differs from this figure's by a
+few km until they are rebuilt.
+
+SHEAR-SUPPORTED TOPOGRAPHY OVERLAY (Dan, 2026-09-21). The topography
+panel carries w_tau = (dV/dx)/rho_m g (SYMBOLOGY §2), the deflection
+required to balance the vertical shear load, lifted from
+fluidity_single_step.ipynb's w_actual_vs_w_tau figure: V smoothed 10 km
+before differentiating, and both curves referenced to a regional column
+500 km seaward. The sign is pinned on the data (conventions §1.2),
+because the repo's V is the negative of the register's (SYMBOLOGY §7.5)
+and the formula's sign therefore depends on which V is in hand.
+
+It accounts for 89 % (STD) / 86 % (WAL) of the measured trench
+deflection, r = +1.00 over x_T..x_T+400 km: the trench is a
+shear-supported load, and dynamic topography is not needed to explain
+it. The two curves separate toward the ridge, where the relief is
+isostatic cooling topography rather than shear-supported.
+
+NAMING: Dan called this the "equivalent topography" on 2026-09-21, but
+W21 already assigned that term to the topography implied by the SURFACE
+NORMAL STRESS, sigma_zz(0)/rho_g — a different quantity (which is what
+validated the surface reading above). This figure therefore uses the
+symbol SYMBOLOGY §2 already defines, w_tau, and calls it the
+shear-supported topography; the collision is flagged for a ruling.
+
 SQUARE-ROOT x AXIS (Dan, 2026-09-21; xlim 0..3500 km). x_I sits 83 km
 (STD) / 100 km (WAL) from the trench while the ridge is at ~2900 km, so
 on a linear axis the NON-ISOSTATIC DOMAIN — where the whole trench pull
@@ -81,7 +119,15 @@ snapshot (t = 40 Myr) for STD (left) and WAL (right). Distance from the
 trench is plotted on a square-root scale, which expands the
 non-isostatic domain between the trench and the first isostatic column;
 gradients are therefore not comparable along the axis. Top: surface
-topography, with the trench, first isostatic and ridge columns marked.
+topography (black), read at the model's top boundary, with the trench,
+first isostatic and ridge columns marked; the dashed magenta curve is
+the shear-supported deflection w_τ = (dV/dx)/ρ_m g, the topography
+required to balance the vertical shear load, referenced to the same
+regional column 500 km seaward. It accounts for 89 % (STD) and 86 %
+(WAL) of the trench deflection, so the trench is supported by the
+vertical shear resultant rather than requiring a dynamic contribution;
+the two curves separate toward the ridge, where the relief is isostatic
+cooling topography instead.
 Middle: the fundamental form of the vertically integrated balance — the
 change in the vertically integrated horizontal normal stress, Δσ̄_xx,
 against the accumulated basal traction −F_B. Bottom: the decomposed
@@ -109,18 +155,20 @@ from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fluidity_helpers import (make_field_extractor, mirror_fields_in_x, pick_trench_3step,
-                           find_first_isostatic_column, find_ridge_x)
+                           find_first_isostatic_column, find_ridge_x, surface_fs)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.expanduser('~/DATA/numerical_models/OUTPUTS/')
 DX, ZC, Y, W = 1000.0, 75e3, 2_900_000.0, 5
 T_REF_MYR = 40.0                      # conventions §4b (mid-run rule)
-TOPO_SMOOTH_KM = 10.0                 # display smoothing of w (short-wavelength noise)
 # sqrt-x tick set: round numbers chosen to be near-EVENLY spaced once
 # square-rooted (0, 7.1, 14.1, 22.4, 31.6, 44.7, 54.8), so the labels do
 # not collide near the trench the way a linear-looking set does
 SQRT_TICKS_KM = [0, 50, 200, 500, 1000, 2000, 3000]
 PIN_KM = (1000.0, 2000.0)             # closure pinning window rel. x_T (conventions §2.3)
+RHO_M, G = 3300.0, 9.8                # Fluidity mantle density; no ocean (conventions §6.1)
+SHEAR_SMOOTH_KM = 10.0                # smoothing of V before differentiating (notebook value)
+W_REF_KM = 500.0                      # regional reference column for the w / w_tau overlay
 COMMITTED_TP_T40 = {'STD': 1.98e12, 'WAL': 1.75e12}   # N/m, time-evolution cache at t=40
 
 def load_snapshot(key):
@@ -202,7 +250,12 @@ def compute(key):
     T, fs, vx, vz = gf('T'), gf('fs'), gf('vx'), -gf('vy')
     p, txx, tzz, txz, T, fs, vx, vz = mirror_fields_in_x(p, txx, tzz, txz, T, fs, vx, vz)
     p, txx, tzz, txz = (np.nan_to_num(a) for a in (p, txx, tzz, txz))
-    fs_top = np.nan_to_num(fs[0, :])
+    # The free surface comes from the TOP-BOUNDARY NODES, not from the
+    # top row of the sampled grid (which sits at z = 500 m and is not the
+    # surface at all). See fluidity_helpers.surface_fs. `fs` is still
+    # extracted above because mirror_fields_in_x takes it, but its top row
+    # is no longer used.
+    fs_top = surface_fs(v, x, mirror_x=True)
     xT, _ = pick_trench_3step(x, z, p, vx, subducting_side='right')
     ti = int(np.argmin(np.abs(x - xT)))
     iI, _ = find_first_isostatic_column(x, fs_top, xT, ti, DX, seaward_sign=+1)
@@ -215,6 +268,33 @@ def compute(key):
     gpe = -np.trapz(-p + tzz, z, axis=0)
     tau_b = txz[-1, :]
     FB_ = cumulative_trapezoid(tau_b, x, initial=0.0)
+
+    # SHEAR-SUPPORTED TOPOGRAPHY w_tau (SYMBOLOGY §2), lifted from
+    # fluidity_single_step.ipynb §w_actual_vs_w_tau: the vertical shear
+    # resultant V = int tau_zx dz, smoothed 10 km before differentiating
+    # (the raw field is too noisy to differentiate), then
+    #     w_tau = (dV/dx) / (rho_m g)
+    # the deflection that a static balance against the vertical shear load
+    # would require. SIGN IS PINNED ON THE DATA below, not asserted: the
+    # repo's V is the negative of the companion register's (SYMBOLOGY
+    # §7.5), so the formula's sign depends on which V is in hand.
+    V = np.trapz(txz, z, axis=0)
+    dVdx = np.gradient(gaussian_filter1d(V, SHEAR_SMOOTH_KM * 1e3 / DX,
+                                         mode='nearest'), x)
+    w_tau = dVdx / (RHO_M * G)
+    # sign ritual (conventions §1.2): pick the sign against the measured
+    # surface over the flexural interval and PRINT it; never assert it
+    w_meas = -fs_top
+    seg = (x > xT) & (x < xT + 400e3)
+    cc = float(np.corrcoef(w_tau[seg], w_meas[seg])[0, 1])
+    if cc < 0:
+        w_tau, cc = -w_tau, -cc
+    # both referenced to the same regional column, W_REF_KM seaward
+    i_ref = int(np.argmin(np.abs(x - (xT + W_REF_KM * 1e3))))
+    w_tau = w_tau - w_tau[i_ref] + w_meas[i_ref]
+    print(f'{key}: w_T measured {w_meas[ti]:+.0f} m, shear-supported '
+          f'{w_tau[ti]:+.0f} m ({100*w_tau[ti]/w_meas[ti]:.0f} % of it); '
+          f'r = {cc:+.2f} over x_T..x_T+400 km')
     d_Fd = Fd - ca(Fd, ti)
     d_Sxx = Sxx - ca(Sxx, ti)
     d_gpe = gpe - ca(gpe, ti)
@@ -237,7 +317,7 @@ def compute(key):
 
 
     return dict(x=x, xT=xT, xI=x[iI], xR=xR, t_myr=t_myr, z=z,
-                fs_top=fs_top, Fd=Fd, Sxx=Sxx, gpe=gpe,
+                fs_top=fs_top, Fd=Fd, Sxx=Sxx, gpe=gpe, V=V, w_tau=w_tau,
                 d_Fd=d_Fd, d_Sxx=d_Sxx, d_gpe=d_gpe, FB=FB,
                 Fd_T=ca(Fd, ti), res_pin=res_pin, res_const=res_const)
 
@@ -266,17 +346,20 @@ def main():
         # filtering shaves hundreds of metres off w_T (the aspect lesson):
         # raw through the trench zone, blended into the smoothed curve
         # over 100 km beyond x_I.
-        topo_raw = -fs_top
-        topo_sm = -gaussian_filter1d(fs_top, TOPO_SMOOTH_KM * 1e3 / DX)
-        wgt = np.clip(((x - iI_x) / 1e3 - 50.0) / 100.0, 0.0, 1.0)
-        topo_disp = topo_raw * (1 - wgt) + topo_sm * wgt
+        # No display smoothing any more (2026-09-21): the top-boundary
+        # reading is already smooth, so the blend that existed to tame the
+        # z = 500 m row's spurious ~11 km wiggle has nothing to tame. A
+        # 9 km median moves the trench value by 2 m.
+        topo_disp = -fs_top
 
         ax1 = axes[0, col]
+        ax1.plot(xkm, r['w_tau'], color='#E5007D', lw=1.3, ls='--',
+                 label=r'$w_\tau = (dV/dx)/\rho_m g$')
         ax1.plot(xkm, topo_disp, color='k', lw=1.5, label='$w$')
         ax1.axhline(0, color='k', lw=0.5)
         for xc in (0, xi_km, xr_km):
             ax1.axvline(xc, color='k', lw=0.5)
-        lims[0].append(topo_disp[vis])
+        lims[0] += [topo_disp[vis], r['w_tau'][vis]]
         ax1.set_title(f'{key},  $t = {t_myr:.1f}$ Myr\ntrailing-plate force balance',
                       fontsize=12)
         ax1.text(xi_km + 60, 0.75 * topo_disp[vis].max(),
@@ -376,6 +459,7 @@ def main():
     axes[0, 0].set_ylabel('$w$ [m] (positive downward)', fontsize=10)
     axes[1, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
     axes[2, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
+    axes[0, 0].legend(loc='lower right', fontsize=8, framealpha=0.9)
     axes[1, 0].legend(loc='lower left', fontsize=8)
     axes[2, 0].legend(loc='lower right', fontsize=7, ncol=2)
     fig.tight_layout()

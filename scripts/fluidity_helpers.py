@@ -204,6 +204,45 @@ def find_first_isostatic_column(x, fs_top, x_trench, tindx, DX,
     return i_end, i_far
 
 
+def surface_fs(vtk_data, x, mirror_x=True, tol_m=1.0):
+    """Free-surface field read at the TOP-BOUNDARY NODES, on the x grid.
+
+    Returns fs(x) in the analysis frame, the same sense as the raw
+    `NormalSP::FreeSurface` field (so the downward-positive deflection is
+    ``w = -fs``).
+
+    WHY THIS EXISTS (2026-09-21). The notebooks and every script before
+    this read the free surface as ``fs[0, :]`` -- the top row of the
+    sampled analysis grid, which sits at z = DX/2 = 500 m. That is NOT the
+    surface. This model has NO deforming mesh: the top is flat at
+    y = y_max and `FreeSurface` is a BOUNDARY field, meaningful on the top
+    nodes and carrying something else immediately below. Down the trench
+    column the field steps from +2842 m at z = 0 to -133 m at z = 500 m.
+
+    Reading at 500 m acted as a heavy low-pass filter: it understated the
+    reference-snapshot trench by 1130 m (STD, 629 vs 1761) and 390 m (WAL),
+    put an ~11 km wiggle into the profile that the surface does not have,
+    and biased the far field by ~80 m. Verified against a fully
+    independent route -- the equivalent topography sigma_zz(0)/rho_g --
+    which agrees with this reading to 1 m across the whole plate.
+
+    No filtering is applied and none is needed: a 9 km median filter moves
+    the trench value by 2 m and a +/-5 km window mean by 6 m.
+    """
+    pts = np.asarray(vtk_data.points)
+    fsf = np.asarray(vtk_data['NormalSP::FreeSurface'])
+    top = np.abs(pts[:, 1] - pts[:, 1].max()) < tol_m
+    if top.sum() < 10:
+        raise RuntimeError('surface_fs: no flat top boundary found — this '
+                           'model may have a deforming mesh, in which case '
+                           'the surface must come from geometry instead')
+    xb = pts[top, 0]
+    if mirror_x:
+        xb = (pts[:, 0].min() + pts[:, 0].max()) - xb
+    o = np.argsort(xb)
+    return np.interp(x, xb[o], fsf[top][o])
+
+
 def find_ridge_x_flow(x, vx_row, x_trench, seaward_sign=+1,
                       smooth_km=15.0, min_offset_km=300.0):
     """Ridge column from the FLOW, not the topography.
