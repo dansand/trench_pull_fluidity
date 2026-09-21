@@ -1,0 +1,27 @@
+{
+  "table": "column_kinematics.csv",
+  "script": "fig_column_kinematics.py",
+  "figure": "fig_column_kinematics.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 18,
+  "sigfig": 6,
+  "meta": {
+    "snapshots_Myr": [
+      38.0,
+      40.0,
+      42.0,
+      44.0
+    ],
+    "window_km": 5,
+    "surface": "top-boundary nodes (corrected reading)",
+    "band": "min-to-max across the four snapshots"
+  }
+}
