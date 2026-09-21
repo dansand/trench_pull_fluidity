@@ -107,10 +107,16 @@ def main():
         # trench pull increment, Delta N_D across the non-isostatic domain
         axes[1].fill_between(t[m], r['nd_T'][m] * 1e-12, r['nd_I'][m] * 1e-12,
                              color=col, alpha=0.06, lw=0, zorder=0)
-        axes[1].plot(t[m], r['nd_T'][m] * 1e-12, '-', label=f'{key}  $N_D(x_T)$', **kw)
-        axes[1].plot(t[m], r['nd_I'][m] * 1e-12, '--', label=f'{key}  $N_D(x_I)$', **kw)
+        # the TRENCH curve carries the argument; x_I and the ridge are
+        # context, so they are faded and drawn beneath rather than
+        # competing for attention (Dan, 2026-09-21). Plot order keeps the
+        # trench first in the legend; zorder puts it on top.
+        axes[1].plot(t[m], r['nd_T'][m] * 1e-12, '-', label=f'{key}  $N_D(x_T)$',
+                     zorder=3, **kw)
+        axes[1].plot(t[m], r['nd_I'][m] * 1e-12, '--', label=f'{key}  $N_D(x_I)$',
+                     color=col, lw=1.9, alpha=0.45, zorder=2)
         axes[1].plot(t[m], r['nd_R'][m] * 1e-12, ':', label=f'{key}  $N_D(x_R)$',
-                     color=col, lw=2.1)
+                     color=col, lw=2.1, alpha=0.45, zorder=2)
         med = lambda a: np.median(a[m]) / 1e12
         print(f'{key}: N_D trench {med(r["nd_T"]):+.2f}, x_I {med(r["nd_I"]):+.2f}, '
               f'ridge {med(r["nd_R"]):+.2f} TN/m; downward shear load at the '
