@@ -1,0 +1,24 @@
+{
+  "table": "column_anomalies_cumulative.csv",
+  "script": "fig_column_anomalies_cumulative.py",
+  "figure": "fig_column_anomalies_cumulative.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 24,
+  "sigfig": 6,
+  "meta": {
+    "midrun_window_Myr": [
+      36.0,
+      44.0
+    ],
+    "zc_km": "75",
+    "sign": "trench pull = -int p_T dz; ridge push = +int p_R dz; both positive = driving"
+  }
+}
