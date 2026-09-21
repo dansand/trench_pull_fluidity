@@ -1,0 +1,22 @@
+{
+  "table": "speed_drivers.csv",
+  "script": "fig_speed_drivers.py",
+  "figure": "fig_speed_drivers.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 46,
+  "sigfig": 6,
+  "meta": {
+    "zc_km": "75",
+    "speed": "|v_x| averaged x_T..x_R and over z < 20 km",
+    "trench_depth": "equivalent topography -sigma_zz(0)/rho_g relative to x_I",
+    "decomposition": "measured = non_tilting - tilting"
+  }
+}
