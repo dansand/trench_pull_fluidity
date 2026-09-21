@@ -36,10 +36,25 @@ otherwise the near-trench labels collide.
 Decomposed panel in the PURE Δ FORM (Dan's simplification 2026-09-15):
 every term zero at the trench — no renormalised/absolute-anchored
 variant in this figure; the trench VALUES are communicated separately by
-fig_nd_trench_ridge. Because ΔN_D and ΔGPE* nearly coincide (F_B is
-small), the panel carries a direction box: positive ΔGPE* = force to the
-left; positive ΔN_D = force to the right; positive F_B = force to the
-right. The displayed residual is the conventions §2.3 PINNED closure
+fig_trench_resultants. Because ΔN_D and ΔGPE* nearly coincide (F_B is
+small), each panel carries a force-direction glyph.
+
+THE GLYPH IS SNAPSHOT-SPECIFIC (Dan, 2026-09-21). It was a sign key —
+"a positive value of this term would mean a force this way". It is now a
+statement about the model state at the plotted step: each arrow is drawn
+in the direction that term ACTUALLY acts, computed from its plate-wide
+value at the ridge column, per model. Change STEP and the arrows follow.
+In the mirrored analysis frame, leftward = trench-ward = driving:
+  ΔGPE*  positive -> LEFT.  Positive at every step of both runs, so in
+         practice always leftward — but computed, never hard-coded.
+  ΔN_D   positive -> RIGHT. The ONLY genuinely variable arrow; it flips
+         leftward whenever the plate-wide ΔN_D goes negative. Positive
+         in both runs at the t = 40 Myr reference (+1.20 STD / +2.08 WAL).
+  F_B    positive -> RIGHT. Always positive here (+2.20 / +1.15).
+The three directions are printed at build time alongside the values, so
+a flip is visible in the log and cannot pass silently into a figure.
+
+The displayed residual is the conventions §2.3 PINNED closure
 (constant removed over x_T + 1000..2000 km, printed) — the near-trench
 anchor noise is shown, not hidden.
 
@@ -63,7 +78,12 @@ form, ΔN_D − ΔGPE* + F_B = 0: the topographic pressure term ΔGPE*
 carries the balance; ΔN_D is secondary; the residual (thin grey), with
 its trench-anchor constant removed over the declared
 mid-subducting-plate window, shows where extraction is imperfect —
-principally the trench zone.
+principally the trench zone. The arrows in the lower panels give the
+direction in which each term acts across the trailing plate at this
+time step: ΔGPE* drives the plate trench-ward, while at this epoch both
+ΔN_D and the accumulated basal traction resist. ΔGPE* acts trench-ward
+and F_B seaward throughout both runs; ΔN_D is the term that changes
+sign, and it is shown as measured at the plotted step.
 """
 import os, sys, glob
 import numpy as np
@@ -100,20 +120,44 @@ def load_snapshot(key):
         del v
     raise SystemExit(f'{key}: no snapshot within 1 Myr of t = {T_REF_MYR}')
 
-def draw_direction_glyph(ax):
-    """Colour-matched force-direction glyph (Dan, 2026-09-15): arrows
-    diverging from a common origin line, one per term in its own curve
-    colour — positive ΔGPE* acts trench-ward (left), positive ΔN_D and
-    F_B act seaward (right). Symbols at the arrow tips; no text box."""
+def draw_direction_glyph(ax, d_gpe_R, d_Fd_R, FB_R):
+    """Force-direction glyph for THE SNAPSHOT BEING PLOTTED.
+
+    Rewritten 2026-09-21 (Dan). The previous glyph was a sign-convention
+    key -- it said what a POSITIVE value of each term would mean. This
+    version reads the actual plate-wide values at the ridge column and
+    draws each arrow in the direction that term actually acts at this
+    time step, so the glyph is a statement about the model state and
+    must be recomputed whenever the snapshot changes.
+
+    Directions in the mirrored analysis frame (subducting plate seaward
+    to the RIGHT, so leftward = trench-ward = driving):
+
+      Delta GPE*   positive -> LEFT.  Positive at every step of both
+                   runs, so this arrow is in practice always leftward,
+                   but it is computed, not hard-coded.
+      Delta N_D    positive -> RIGHT. THE ONLY GENUINELY VARIABLE ONE:
+                   negative flips it leftward. Positive in both runs at
+                   the t = 40 Myr reference.
+      F_B          positive -> RIGHT. Always positive here.
+
+    Terms are evaluated at the RIDGE column, i.e. across the whole
+    trailing plate, which is the difference the balance is written for.
+    """
+    # the stack sits in the clear band above the GPE* curve and below the
+    # top of the axes; dropping it lower collides with that curve
     x0, L = 0.30, 0.09
-    ax.text(x0, 0.975, 'interpreting a change', transform=ax.transAxes,
-            fontsize=9, style='italic', color='0.25', ha='center', va='top')
-    ax.plot([x0, x0], [0.685, 0.895], color='0.5', lw=0.8,
+    ax.text(x0, 1.0, 'trailing-plate force balance\n(current time step)',
+            transform=ax.transAxes, fontsize=9, style='italic',
+            color='0.25', ha='center', va='top', linespacing=1.3)
+    ax.plot([x0, x0], [0.735, 0.895], color='0.5', lw=0.8,
             transform=ax.transAxes)
-    rows = [(0.87, 'b', -1, r'$+\Delta\mathrm{GPE}^{*}$', 3.0),
-            (0.79, 'k', +1, r'$+\Delta N_D$', 1.8),
-            (0.71, 'red', +1, r'$+F_B$', 1.8)]
-    for y, c, s, lab, lw in rows:
+    # (value, positive-means-direction, colour, symbol, linewidth)
+    rows = [(0.875, d_gpe_R, -1, 'b', r'$\Delta\mathrm{GPE}^{*}$', 3.0),
+            (0.815, d_Fd_R, +1, 'k', r'$\Delta N_D$', 1.8),
+            (0.755, FB_R, +1, 'red', r'$F_B$', 1.8)]
+    for y, val, pos_dir, c, lab, lw in rows:
+        s = pos_dir if val >= 0 else -pos_dir      # the actual direction
         ax.annotate('', xy=(x0 + s * L, y), xytext=(x0, y),
                     xycoords='axes fraction', textcoords='axes fraction',
                     arrowprops=dict(arrowstyle='-|>', color=c, lw=lw,
@@ -276,8 +320,18 @@ def main():
         ax3.set_xlabel('Distance from trench [km]  ' + r'($\sqrt{x}$ scale)',
                        fontsize=11)
         ax3.set_xlim(0, 3500)                   # SEAWARD ONLY (Dan, 2026-09-15)
-        if col == 0:
-            draw_direction_glyph(ax3)
+        # the glyph is now a statement about THIS snapshot, so it is drawn
+        # per model from that model's own plate-wide values at the ridge
+        # column -- not once for the pair (Dan, 2026-09-21)
+        gl = {k: float(np.interp(xR, x, a))
+              for k, a in (('gpe', d_gpe), ('nd', d_Fd), ('fb', FB))}
+        print(f'   {key} glyph @ x_R: ΔGPE* {gl["gpe"]/1e12:+.2f} '
+              f'({"left" if gl["gpe"] >= 0 else "right"}), '
+              f'ΔN_D {gl["nd"]/1e12:+.2f} '
+              f'({"right" if gl["nd"] >= 0 else "left"}), '
+              f'F_B {gl["fb"]/1e12:+.2f} '
+              f'({"right" if gl["fb"] >= 0 else "left"}) TN/m')
+        draw_direction_glyph(ax3, gl['gpe'], gl['nd'], gl['fb'])
 
     # SQUARE-ROOT x AXIS (Dan, 2026-09-21). x_I sits 83 km (STD) / 100 km
     # (WAL) from the trench while the ridge is at ~2900 km, so on a linear
