@@ -1,0 +1,21 @@
+{
+  "table": "gpe_decomposition.csv",
+  "script": "fig_gpe_decomposition.py",
+  "figure": "fig_gpe_decomposition.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 24,
+  "sigfig": 6,
+  "meta": {
+    "zc_km": "75",
+    "total": "trench pull + ridge push, both over 0..z_c",
+    "highpass": "Gaussian sigma 6 samples (mode=nearest), ~24 Myr cutoff"
+  }
+}
