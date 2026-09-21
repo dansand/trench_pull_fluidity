@@ -11,11 +11,11 @@
     "quantity",
     "value"
   ],
-  "n_rows": 24,
+  "n_rows": 28,
   "sigfig": 6,
   "meta": {
     "zc_km": "75",
     "total": "trench pull + ridge push, both over 0..z_c",
-    "highpass": "Gaussian sigma 6 samples (mode=nearest), ~24 Myr cutoff"
+    "detrend": "fitted linear model, removed; residual retains all curvature and events"
   }
 }

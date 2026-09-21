@@ -1,4 +1,4 @@
-"""fig_gpe_decomposition — the driving term split by domain, secular vs transient.
+"""fig_gpe_decomposition — the driving term split by domain, trend and residual.
 
 Writes figures/fig_gpe_decomposition.png and
 tables/gpe_decomposition.csv from the committed column-profile cache.
@@ -9,67 +9,76 @@ the sum of the two additive domains of the schematic,
     Delta GPE* (trench -> ridge) = trench pull + ridge push
                                    (non-isostatic)  (isostatic)
 
-and the point of separating them is that THE TWO DOMAINS CARRY DIFFERENT
-TIMESCALES. Rows:
+and the point of separating them is that the two domains carry different
+timescales.
 
-  1  levels. The secular growth, and which domain supplies it.
-  2  the same three high-passed at ~24 Myr, between the oscillation
-     period (~20-25 Myr) and the run-length thermal trend. This is the
-     transient part, and it lives somewhere else.
-  3  the transient plate speed and the kinematic partition f, for
-     comparison against row 2 (see fig_convergence_partition).
+  top     levels, with the fitted secular trend of each shown dashed.
+  bottom  the residual about that trend.
 
-WHAT IT ESTABLISHES. The secular rise is a RIDGE-side phenomenon: the
-ridge push supplies 64 % (STD) / 72 % (WAL) of it, and what rise the
-trench pull does contribute is mostly its growing moment arm (h +34 %)
-rather than a deepening trench (+13 %). A thermal quantity cannot
-accelerate a plate whose feed rate is set elsewhere, so the growing drive
-is absorbed as in-plane resistance instead -- which is what the secular
-rise of Delta N_D is.
+DETRENDING: A FITTED LINEAR MODEL, NOT A FILTER (Dan, 2026-09-22). The
+first version used a Gaussian high-pass at ~24 Myr. A linear fit is
+better here for four reasons:
 
-The transient part is NOT simply trench-side -- the trench carries only
-53 % (STD) / 59 % (WAL) of it, which is barely more than half. What
-separates the domains on this timescale is the SIGN. Against the
-high-passed plate speed the trench pull correlates +0.57 / +0.54 while
-the ridge push correlates -0.50 / -0.33: a faster plate deepens the
-trench and simultaneously suppresses the ridge push through the tilt.
-The two therefore largely cancel: the TOTAL correlates with the plate
-speed at only +0.16 (STD) / +0.36 (WAL), against +-0.5 for either part
-alone. THAT COLLAPSE is the result, not a variance share -- the sd ratio
-understates it (the total's transient sd is only 21 % / 13 % below the
-larger part), because the cancellation is in the phase, not the
-amplitude.
+  1. It has no free cutoff. The filter's 24 Myr was chosen to sit between
+     the oscillation and the run length, which is defensible but is still
+     a tuned parameter a reader has to accept.
+  2. The trend really is close to linear where it matters: the fit gives
+     R2 = 0.96 (STD) / 0.92 (WAL) on ridge push and 0.98 / 0.92 on the
+     total, and a quadratic buys 0-31 % more.
+  3. The trend can be DRAWN. The decomposition becomes visible in the
+     figure instead of asserted in the caption.
+  4. It keeps genuine multi-decadal structure that the filter attenuated
+     -- notably the WAL 60-70 Myr excursion, which is an event, not a
+     trend, and should survive detrending rather than be smoothed away.
 
-WHY HIGH-PASS AND NOT DIFFERENCING. Measured against the plate speed,
-first differencing -- which is what the earlier increment correlations
-used -- is the WEAKEST of the detrending options, because it
-over-amplifies the highest frequencies. On the trench-side loading it
-gives r = +0.36 against +0.57 for a high-pass; on trench depth, +0.57
-against +0.76. Regressing out the non-tilting term fails outright (+0.06)
-because that term and the moment arm are collinear, both being thermal,
-so it removes the signal with the trend. The filter uses mode='nearest':
-reflect padding distorts a strongly trending series at the endpoints.
+Where the linear fit is poor (WAL trench pull, R2 = 0.43) that is because
+there is no real secular trend to remove -- the series is flat and then
+spikes -- so a straight line is the right null, not a bad fit.
+
+⚠ THE CONCLUSION IS ROBUST TO THE CHOICE, THE HEADLINE NUMBER IS NOT.
+Under both treatments the two domains oppose each other against the
+plate speed, trench pull positive and ridge push negative, and the total
+is less sensitive than either part. But how MUCH less depends on the
+method: high-passed, the total collapses to +0.16 (STD); linearly
+detrended it only falls to +0.31. Quote the sign structure, not the
+collapse factor, unless the timescale is stated with it.
+
+  r(plate speed, X), linear-detrended [high-passed in brackets]:
+      trench pull   STD +0.52 [+0.57]   WAL +0.63 [+0.54]
+      ridge push    STD -0.39 [-0.50]   WAL -0.23 [-0.33]
+      total         STD +0.31 [+0.16]   WAL +0.50 [+0.36]
+
+WHAT IT ESTABLISHES. The secular rise is isostatic: ridge push supplies
+64 % (STD) / 72 % (WAL) of it, and what the trench pull contributes is
+mostly its growing moment arm (h +34 %) rather than a deepening trench
+(+13 %). A thermal quantity cannot accelerate a plate whose feed rate is
+set elsewhere, so the growing drive is absorbed as in-plane resistance --
+which is what the secular rise of Delta N_D is.
+
+The residual is where the two domains part company: a faster plate
+deepens the trench and simultaneously suppresses the ridge push through
+the tilt, so they act in opposition and partly cancel in the total.
+
+The plate-speed series is NOT plotted (Dan, 2026-09-22) -- the velocity
+correlations above are carried in the table and the caption instead. For
+the kinematics see fig_convergence_partition.
 
 DRAFT CAPTION. The plate-wide driving term separated into its two
 domains, for STD (left) and WAL (right). Top: the trench pull across the
 non-isostatic domain (blue), the ridge push across the isostatic domain
-(orange), and their sum (black). Middle: the same three high-pass
-filtered at 24 Myr to isolate variability faster than the thermal trend.
-Bottom: the high-passed plate speed and the fraction of the convergence
-carried by plate motion. The secular growth of the driving term is
-supplied mainly by the isostatic domain. On the transient timescale the
-two domains respond to changes in plate speed with opposite sign — the
-trench pull rising as the trench deepens, the ridge push falling as the
-tilt grows — so they largely cancel: the total correlates with the plate
-speed at only +0.16 (STD) and +0.36 (WAL), against ±0.5 for either part
-on its own.
+(orange), and their sum (black), each with its fitted secular trend
+(dashed). Bottom: the residual about those trends. The secular growth is
+supplied mainly by the isostatic domain. In the residual the two domains
+respond to changes in plate speed with opposite sign -- the trench pull
+rising as the trench deepens, the ridge push falling as the tilt grows --
+so they partly cancel and the total is left less sensitive to plate speed
+than either of its parts.
 """
 import os, sys
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import column_profiles_cache as cpc
@@ -79,22 +88,21 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 C_TRENCH = '#0072B2'        # non-isostatic / trench pull domain
 C_RIDGE = '#D55E00'         # isostatic / ridge push domain
 C_TOTAL = 'k'
-C_PLATE = '#1B9E77'         # plate motion (fig_convergence_partition)
 C_RULE = '#BFC3D1'
-HP_SIGMA = 6                # samples; 2 Myr cadence -> ~24 Myr cutoff
 
 
-def hp(y):
-    """High-pass. mode='nearest' -- reflect padding wrecks a trending series."""
-    return y - gaussian_filter1d(y, HP_SIGMA, mode='nearest')
+def detrend(t, y):
+    """Fitted linear secular model, and the residual about it."""
+    trend = np.polyval(np.polyfit(t, y, 1), t)
+    return trend, y - trend
 
 
 def main():
     if not hasattr(np, 'trapezoid'):
         np.trapezoid = np.trapz
     d = cpc.load()
-    fig, axes = plt.subplots(3, 2, figsize=(12.4, 10.4), sharex=True,
-                             gridspec_kw={'height_ratios': [1.5, 1.2, 1.0]})
+    fig, axes = plt.subplots(2, 2, figsize=(12.0, 8.0), sharex=True,
+                             gridspec_kw={'height_ratios': [1.55, 1.0]})
     rows = [('model', 'quantity', 'value')]
 
     for col, key in enumerate(('STD', 'WAL')):
@@ -104,76 +112,69 @@ def main():
         RP = np.trapezoid(c['p_R'][:, zc], z[zc], axis=1) / 1e12
         TOT = TP + RP
         vp = np.abs(d[f'{key}_vx_TR'][:, zkm < 20].mean(axis=1))
-        vt = np.gradient(d[f'{key}_xT'] / 1e3, t) / 10.0
-        f = vp / (vp + vt)
+        _, rv = detrend(t, vp)
 
-        rise = lambda y: np.polyfit(t, y, 1)[0] * (t[-1] - t[0])
-        share = 100 * rise(RP) / (rise(TP) + rise(RP))
-        hTP, hRP, hTOT = hp(TP), hp(RP), hp(TOT)
-        tshare = 100 * hTP.std() / (hTP.std() + hRP.std())
+        span = t[-1] - t[0]
+        parts = {}
+        for nm, y in (('trench_pull', TP), ('ridge_push', RP), ('total', TOT)):
+            tr, res = detrend(t, y)
+            parts[nm] = dict(y=y, trend=tr, res=res,
+                             rise=np.polyfit(t, y, 1)[0] * span,
+                             r2=1 - res.var() / y.var(),
+                             rv=float(np.corrcoef(rv, res)[0, 1]))
+        share = 100 * parts['ridge_push']['rise'] / (parts['trench_pull']['rise']
+                                                     + parts['ridge_push']['rise'])
+        tsd = parts['trench_pull']['res'].std() + parts['ridge_push']['res'].std()
+        tshare = 100 * parts['trench_pull']['res'].std() / tsd
 
-        a0, a1, a2 = (axes[r, col] for r in range(3))
-        for arr, c_, lw, nm in ((TOT, C_TOTAL, 2.2, 'total $\\Delta$GPE*'),
-                                (TP, C_TRENCH, 1.8,
-                                 f'trench pull ({100-share:.0f} % of the rise)'),
-                                (RP, C_RIDGE, 1.8,
-                                 f'ridge push ({share:.0f} % of the rise)')):
-            a0.plot(t, arr, '-', color=c_, lw=lw, label=nm)
+        a0, a1 = axes[0, col], axes[1, col]
+        style = (('total', C_TOTAL, 2.2, f'total $\\Delta$GPE*'),
+                 ('trench_pull', C_TRENCH, 1.8,
+                  f'trench pull ({100 - share:.0f} % of the rise)'),
+                 ('ridge_push', C_RIDGE, 1.8,
+                  f'ridge push ({share:.0f} % of the rise)'))
+        for nm, c_, lw, lab in style:
+            p = parts[nm]
+            a0.plot(t, p['y'], '-', color=c_, lw=lw, label=lab)
+            a0.plot(t, p['trend'], '--', color=c_, lw=1.0, alpha=0.75)
         a0.set_title(key, fontsize=11)
         a0.set_ylabel('[TN/m]', fontsize=10)
         a0.legend(frameon=False, fontsize=8.5, loc='upper left')
 
-        for arr, c_, lw, nm in ((hTOT, C_TOTAL, 2.0, 'total'),
-                                (hTP, C_TRENCH, 1.7,
-                                 f'trench pull ({tshare:.0f} % of the transient)'),
-                                (hRP, C_RIDGE, 1.7,
-                                 f'ridge push ({100-tshare:.0f} %)')):
-            a1.plot(t, arr, '-', color=c_, lw=lw, label=nm)
+        for nm, c_, lw, _ in style:
+            p = parts[nm]
+            lab = ('total' if nm == 'total' else
+                   f'{nm.replace("_", " ")} '
+                   f'({tshare if nm == "trench_pull" else 100 - tshare:.0f} % '
+                   'of the residual)')
+            a1.plot(t, p['res'], '-', color=c_, lw=lw * 0.9, label=lab)
         a1.axhline(0, color='k', lw=0.8)
-        a1.set_ylabel('high-passed [TN/m]', fontsize=9.5)
-        a1.legend(frameon=False, fontsize=8, loc='upper left', ncol=1)
-
-        rv_tp = float(np.corrcoef(hp(vp), hTP)[0, 1])
-        rv_rp = float(np.corrcoef(hp(vp), hRP)[0, 1])
-        rv_tot = float(np.corrcoef(hp(vp), hTOT)[0, 1])
-        # the cancellation: the total varies less than its larger part
-        cancel = 100 * (1 - hTOT.std() / max(hTP.std(), hRP.std()))
-        a2.plot(t, hp(vp), '-', color=C_PLATE, lw=1.8,
-                label=f'plate speed  ($r$: trench pull {rv_tp:+.2f}, ridge push '
-                      f'{rv_rp:+.2f}, TOTAL {rv_tot:+.2f})')
-        a2.axhline(0, color='k', lw=0.8)
-        a2.set_ylabel('high-passed\n[cm/yr]', fontsize=9.5)
-        a2.set_xlabel('Model time [Myr]', fontsize=11)
-        a2.legend(frameon=False, fontsize=8, loc='upper left')
-        a2b = a2.twinx()
-        a2b.plot(t, f, '-', color='0.55', lw=1.2)
-        a2b.set_ylabel('$f$ (grey)', fontsize=9, color='0.45')
-        a2b.tick_params(axis='y', labelcolor='0.45', labelsize=8)
-
-        for ax in (a0, a1, a2):
+        a1.set_ylabel('residual about\nthe trend [TN/m]', fontsize=9.5)
+        a1.set_xlabel('Model time [Myr]', fontsize=11)
+        a1.legend(frameon=False, fontsize=8, loc='upper left')
+        for ax in (a0, a1):
             ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
-        print(f'{key}: secular rise TP {rise(TP):+.2f}, RP {rise(RP):+.2f} TN/m '
-              f'(ridge {share:.0f} %); transient sd TP {hTP.std():.3f}, '
-              f'RP {hRP.std():.3f} (trench {tshare:.0f} %); '
-              f'r(hp speed, hp TP) {rv_tp:+.2f}, RP {rv_rp:+.2f}, '
-              f'TOTAL {rv_tot:+.2f}; total transient sd {hTOT.std():.3f} '
-              f'-> cancellation {cancel:.0f} %')
-        rows += [(key, 'secular_rise_trench_pull_TNm', f'{rise(TP):.3f}'),
-                 (key, 'secular_rise_ridge_push_TNm', f'{rise(RP):.3f}'),
-                 (key, 'ridge_share_of_secular_rise_percent', f'{share:.1f}'),
-                 (key, 'transient_sd_trench_pull_TNm', f'{hTP.std():.4f}'),
-                 (key, 'transient_sd_ridge_push_TNm', f'{hRP.std():.4f}'),
-                 (key, 'trench_share_of_transient_percent', f'{tshare:.1f}'),
-                 (key, 'corr_hp_speed_hp_trench_pull', f'{rv_tp:.3f}'),
-                 (key, 'corr_hp_speed_hp_ridge_push', f'{rv_rp:.3f}'),
-                 (key, 'corr_hp_speed_hp_total', f'{rv_tot:.3f}'),
-                 (key, 'transient_sd_total_TNm', f'{hTOT.std():.4f}'),
-                 (key, 'cancellation_percent', f'{cancel:.1f}'),
-                 (key, 'highpass_cutoff_Myr', f'{2*HP_SIGMA*2:.0f}')]
+        print(f'{key}: rise TP {parts["trench_pull"]["rise"]:+.2f} '
+              f'(R2 {parts["trench_pull"]["r2"]:.2f}), '
+              f'RP {parts["ridge_push"]["rise"]:+.2f} '
+              f'(R2 {parts["ridge_push"]["r2"]:.2f}) TN/m, ridge {share:.0f} %; '
+              f'residual sd TP {parts["trench_pull"]["res"].std():.3f}, '
+              f'RP {parts["ridge_push"]["res"].std():.3f}, '
+              f'TOT {parts["total"]["res"].std():.3f}; '
+              f'r with detrended speed: TP {parts["trench_pull"]["rv"]:+.2f}, '
+              f'RP {parts["ridge_push"]["rv"]:+.2f}, '
+              f'TOT {parts["total"]["rv"]:+.2f}')
+        for nm, p in parts.items():
+            rows += [(key, f'secular_rise_{nm}_TNm', f'{p["rise"]:.3f}'),
+                     (key, f'linear_fit_r2_{nm}', f'{p["r2"]:.3f}'),
+                     (key, f'residual_sd_{nm}_TNm', f'{p["res"].std():.4f}'),
+                     (key, f'corr_detrended_speed_{nm}', f'{p["rv"]:.3f}')]
+        rows += [(key, 'ridge_share_of_secular_rise_percent', f'{share:.1f}'),
+                 (key, 'trench_share_of_residual_percent', f'{tshare:.1f}')]
 
     fig.suptitle('The driving term by domain: the secular rise is isostatic; '
-                 'on transients the two domains oppose each other', fontsize=11.5)
+                 'in the residual the two domains oppose each other', fontsize=11.5)
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_gpe_decomposition.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
@@ -183,8 +184,8 @@ def main():
                       figure='fig_gpe_decomposition.png', models=('STD', 'WAL'),
                       meta={'zc_km': cpc.ZC_KM,
                             'total': 'trench pull + ridge push, both over 0..z_c',
-                            'highpass': f'Gaussian sigma {HP_SIGMA} samples '
-                                        '(mode=nearest), ~24 Myr cutoff'})
+                            'detrend': 'fitted linear model, removed; residual '
+                                       'retains all curvature and events'})
     print('written:', tab)
 
 
