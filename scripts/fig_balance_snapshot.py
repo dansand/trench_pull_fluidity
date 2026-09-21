@@ -35,13 +35,17 @@ SHEAR-SUPPORTED TOPOGRAPHY OVERLAY (Dan, 2026-09-21). The topography
 panel carries w_tau = (dV/dx)/rho_m g (SYMBOLOGY §2), the deflection
 required to balance the vertical shear load, lifted from
 fluidity_single_step.ipynb's w_actual_vs_w_tau figure: V smoothed 10 km
-before differentiating, and both curves referenced to a regional column
-500 km seaward. The sign is pinned on the data (conventions §1.2),
+before differentiating. BOTH curves are zero-referenced at x_I (Dan,
+2026-09-21) — the column where dV/dx = 0, so the natural zero for a
+deflection and for its shear-supported counterpart alike, and the
+notebooks' own convention (w = fs_top[iI] - fs_top). The sign is pinned
+on the data (conventions §1.2),
 because the repo's V is the negative of the register's (SYMBOLOGY §7.5)
 and the formula's sign therefore depends on which V is in hand.
 
-It accounts for 89 % (STD) / 86 % (WAL) of the measured trench
-deflection, r = +1.00 over x_T..x_T+400 km: the trench is a
+It accounts for 90 % of the measured trench deflection in BOTH runs
+(1733 of 1919 m STD, 1424 of 1582 m WAL), r = +1.00 over
+x_T..x_T+400 km: the trench is a
 shear-supported load, and dynamic topography is not needed to explain
 it. The two curves separate toward the ridge, where the relief is
 isostatic cooling topography rather than shear-supported.
@@ -52,6 +56,9 @@ NORMAL STRESS, sigma_zz(0)/rho_g — a different quantity (which is what
 validated the surface reading above). This figure therefore uses the
 symbol SYMBOLOGY §2 already defines, w_tau, and calls it the
 shear-supported topography; the collision is flagged for a ruling.
+
+The overlay is OPTIONAL: set SHOW_W_TAU = False to drop it (and its
+legend) and leave the topography panel as the surface alone.
 
 SQUARE-ROOT x AXIS (Dan, 2026-09-21; xlim 0..3500 km). x_I sits 83 km
 (STD) / 100 km (WAL) from the trench while the ridge is at ~2900 km, so
@@ -122,9 +129,9 @@ gradients are therefore not comparable along the axis. Top: surface
 topography (black), read at the model's top boundary, with the trench,
 first isostatic and ridge columns marked; the dashed magenta curve is
 the shear-supported deflection w_τ = (dV/dx)/ρ_m g, the topography
-required to balance the vertical shear load, referenced to the same
-regional column 500 km seaward. It accounts for 89 % (STD) and 86 %
-(WAL) of the trench deflection, so the trench is supported by the
+required to balance the vertical shear load; both are zero at the first
+isostatic column. It accounts for 90 % of the trench deflection in both
+models, so the trench is supported by the
 vertical shear resultant rather than requiring a dynamic contribution;
 the two curves separate toward the ridge, where the relief is isostatic
 cooling topography instead.
@@ -168,7 +175,7 @@ SQRT_TICKS_KM = [0, 50, 200, 500, 1000, 2000, 3000]
 PIN_KM = (1000.0, 2000.0)             # closure pinning window rel. x_T (conventions §2.3)
 RHO_M, G = 3300.0, 9.8                # Fluidity mantle density; no ocean (conventions §6.1)
 SHEAR_SMOOTH_KM = 10.0                # smoothing of V before differentiating (notebook value)
-W_REF_KM = 500.0                      # regional reference column for the w / w_tau overlay
+SHOW_W_TAU = True                     # overlay the shear-supported deflection w_tau
 COMMITTED_TP_T40 = {'STD': 1.98e12, 'WAL': 1.75e12}   # N/m, time-evolution cache at t=40
 
 def load_snapshot(key):
@@ -289,12 +296,15 @@ def compute(key):
     cc = float(np.corrcoef(w_tau[seg], w_meas[seg])[0, 1])
     if cc < 0:
         w_tau, cc = -w_tau, -cc
-    # both referenced to the same regional column, W_REF_KM seaward
-    i_ref = int(np.argmin(np.abs(x - (xT + W_REF_KM * 1e3))))
-    w_tau = w_tau - w_tau[i_ref] + w_meas[i_ref]
+    # BOTH curves zero-referenced at the FIRST ISOSTATIC COLUMN (Dan,
+    # 2026-09-21). x_I is where dV/dx = 0, so it is the natural zero for a
+    # deflection curve and for its shear-supported counterpart alike, and
+    # it matches the notebooks' own convention, w = fs_top[iI] - fs_top.
+    w_meas = w_meas - w_meas[iI]
+    w_tau = w_tau - w_tau[iI]
     print(f'{key}: w_T measured {w_meas[ti]:+.0f} m, shear-supported '
           f'{w_tau[ti]:+.0f} m ({100*w_tau[ti]/w_meas[ti]:.0f} % of it); '
-          f'r = {cc:+.2f} over x_T..x_T+400 km')
+          f'r = {cc:+.2f} over x_T..x_T+400 km  [both zeroed at x_I]')
     d_Fd = Fd - ca(Fd, ti)
     d_Sxx = Sxx - ca(Sxx, ti)
     d_gpe = gpe - ca(gpe, ti)
@@ -317,7 +327,7 @@ def compute(key):
 
 
     return dict(x=x, xT=xT, xI=x[iI], xR=xR, t_myr=t_myr, z=z,
-                fs_top=fs_top, Fd=Fd, Sxx=Sxx, gpe=gpe, V=V, w_tau=w_tau,
+                fs_top=fs_top, Fd=Fd, Sxx=Sxx, gpe=gpe, V=V, w_tau=w_tau, w=w_meas,
                 d_Fd=d_Fd, d_Sxx=d_Sxx, d_gpe=d_gpe, FB=FB,
                 Fd_T=ca(Fd, ti), res_pin=res_pin, res_const=res_const)
 
@@ -350,16 +360,18 @@ def main():
         # reading is already smooth, so the blend that existed to tame the
         # z = 500 m row's spurious ~11 km wiggle has nothing to tame. A
         # 9 km median moves the trench value by 2 m.
-        topo_disp = -fs_top
+        topo_disp = r['w']          # zero at x_I
 
         ax1 = axes[0, col]
-        ax1.plot(xkm, r['w_tau'], color='#E5007D', lw=1.3, ls='--',
-                 label=r'$w_\tau = (dV/dx)/\rho_m g$')
+        if SHOW_W_TAU:
+            ax1.plot(xkm, r['w_tau'], color='#E5007D', lw=1.3, ls='--',
+                     label=r'$w_\tau = (dV/dx)/\rho_m g$')
         ax1.plot(xkm, topo_disp, color='k', lw=1.5, label='$w$')
         ax1.axhline(0, color='k', lw=0.5)
         for xc in (0, xi_km, xr_km):
             ax1.axvline(xc, color='k', lw=0.5)
-        lims[0] += [topo_disp[vis], r['w_tau'][vis]]
+        lims[0] += ([topo_disp[vis], r['w_tau'][vis]] if SHOW_W_TAU
+                    else [topo_disp[vis]])
         ax1.set_title(f'{key},  $t = {t_myr:.1f}$ Myr\ntrailing-plate force balance',
                       fontsize=12)
         ax1.text(xi_km + 60, 0.75 * topo_disp[vis].max(),
@@ -459,7 +471,8 @@ def main():
     axes[0, 0].set_ylabel('$w$ [m] (positive downward)', fontsize=10)
     axes[1, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
     axes[2, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
-    axes[0, 0].legend(loc='lower right', fontsize=8, framealpha=0.9)
+    if SHOW_W_TAU:
+        axes[0, 0].legend(loc='lower right', fontsize=8, framealpha=0.9)
     axes[1, 0].legend(loc='lower left', fontsize=8)
     axes[2, 0].legend(loc='lower right', fontsize=7, ncol=2)
     fig.tight_layout()
