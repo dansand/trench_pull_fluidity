@@ -1,0 +1,17 @@
+model,quantity,value
+STD,corr_vz_minusND,0.895
+STD,corr_vz_trenchdepth,0.48
+STD,corr_trenchdepth_minusND,0.49
+STD,running_corr_min,0.845
+STD,running_corr_max,0.975
+STD,corr_trenchpull_ridgepush,-0.65
+STD,trench_advance_fraction_of_steps,0
+STD,window_Myr,22
+WAL,corr_vz_minusND,0.126
+WAL,corr_vz_trenchdepth,0.81
+WAL,corr_trenchdepth_minusND,-0.213
+WAL,running_corr_min,-0.442
+WAL,running_corr_max,0.996
+WAL,corr_trenchpull_ridgepush,-0.396
+WAL,trench_advance_fraction_of_steps,0.189
+WAL,window_Myr,22

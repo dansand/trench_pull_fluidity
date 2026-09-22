@@ -1,0 +1,21 @@
+{
+  "table": "slab_trench_coupling.csv",
+  "script": "fig_slab_trench_coupling.py",
+  "figure": "fig_slab_trench_coupling.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 16,
+  "sigfig": 6,
+  "meta": {
+    "normalisation": "linear detrend, then divided by s.d.",
+    "trench_depth": "equivalent topography, -sigma_zz(0)/rho_g relative to x_I",
+    "shading": "trench advance (rollback < 0)"
+  }
+}
