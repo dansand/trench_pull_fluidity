@@ -62,6 +62,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from scipy.signal import savgol_filter
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(_HERE))          # the shared scripts/ dir
@@ -75,9 +76,9 @@ ROOT = os.path.dirname(os.path.dirname(_HERE))
 RHO_G = 3300.0 * 9.8
 C_SLAB = '#0072B2'
 C = {'plate velocity': '#1B9E77', 'convergence': 'k',
-     'trench rollback': '#E7298A', 'slab tip advance': '#7B3294',
-     '$w_\\tau=(dV/dx)/\\rho g$': '#D55E00', 'trench depth': '#E7298A',
-     'trench pull': '#0072B2', '$\\Delta N_D$': '0.35'}
+     'trench rollback': '#E7298A', '$V(x_T)$': '#7B3294',
+     '$M(x_T)$': '#D55E00', 'trench depth': '#E7298A',
+     'trench pull': '#0072B2', '$-\\Delta N_D$': '0.35'}
 
 
 def main():
@@ -109,34 +110,42 @@ def main():
         mM = r['m_T'][:n] / 1e17               # bending moment
         ND = q['d_nd'][:n] / 1e12
 
-        tip = np.gradient(s[f'{key}_z_tip'][:n], tt) / 10.0     # cm/yr
         roll = (np.gradient(d[f'{key}_xT'] / 1e3, t) / 10.0)[:n]
-        dVdx = np.trapezoid(d[f'{key}_dtxz_T'][:n][:, zc], z[zc], axis=1)
-        w_tau = dVdx / RHO_G                       # shear-supported depth, m
+        Vt = r['v_T'][:n] / 1e12               # V as extracted (see docstring)
+        Mt = r['m_T'][:n] / 1e17               # bending moment at the trench
         TP = -np.trapezoid(c['p_T'][:n, zc], z[zc], axis=1) / 1e12
 
-        a_vz, a_tip = ld(tt, vz), ld(tt, tip)
+        # LIGHT ZERO-PHASE SMOOTHING for display (Dan, 2026-09-22): trench
+        # pull in particular is noisy enough to hide its own signal. A
+        # 5-point Savitzky-Golay is symmetric, so it injects no lag. It
+        # DOES raise correlations by removing noise, so the table carries
+        # both the smoothed and the raw value.
+        sm = lambda y: savgol_filter(y, 5, 2)
+        a_vz = sm(ld(tt, vz))
+        raw = {}
+
         grp = [
             ('kinematics', [('plate velocity', ld(tt, vp)),
                             ('trench rollback', ld(tt, roll)),
-                            ('convergence', ld(tt, conv)),
-                            ('slab tip advance', a_tip)]),
-            ('load $\\rightarrow$ topography',
-             [('$w_\\tau=(dV/dx)/\\rho g$', ld(tt, w_tau)),
+                            ('convergence', ld(tt, conv))]),
+            ('flexure $\\rightarrow$ topography',
+             [('$V(x_T)$', ld(tt, Vt)), ('$M(x_T)$', ld(tt, Mt)),
               ('trench depth', ld(tt, wT))]),
             ('force response', [('trench pull', ld(tt, TP)),
-                                ('$\\Delta N_D$', ld(tt, ND))]),
+                                ('$-\\Delta N_D$', ld(tt, -ND))]),
         ]
         for ax, (lab, items) in zip(axes[:3, col], grp):
             ax.plot(tt, zs(a_vz), '-', color=C_SLAB, lw=2.8, alpha=0.30,
                     label='slab $v_z$ (reference)')
             for nm, y in items:
-                rr = float(np.corrcoef(a_vz, y)[0, 1])
-                ax.plot(tt, zs(y), '-', color=C[nm], lw=1.7,
+                ys = sm(y)
+                rr = float(np.corrcoef(a_vz, ys)[0, 1])
+                raw[nm] = (rr, float(np.corrcoef(ld(tt, vz), y)[0, 1]))
+                ax.plot(tt, zs(ys), '-', color=C[nm], lw=1.7,
                         label=f'{nm}  ({rr:+.2f})')
             ax.axhline(0, color='k', lw=0.8)
-            ax.set_ylabel(f'{lab}\n(detrended, normalised)', fontsize=8.5)
-            ax.legend(frameon=False, fontsize=7.5, loc='upper left', ncol=3)
+            ax.set_ylabel(f'{lab}\n(detrended, smoothed)', fontsize=8.5)
+            ax.legend(frameon=False, fontsize=8, loc='upper left', ncol=2)
             ax.grid(alpha=0.25, color='#BFC3D1', lw=0.6)
         axes[0, col].set_title(key, fontsize=11)
         for ax in axes[:2, col]:
@@ -144,27 +153,24 @@ def main():
         axes[2, col].set_xlim(axes[0, col].get_xlim())
         axes[2, col].set_xlabel('Model time [Myr]', fontsize=10.5)
 
-        allq = [it for _, items in grp for it in items]
-        names = [nm for nm, _ in allq]
-        r_vz = [float(np.corrcoef(a_vz, y)[0, 1]) for _, y in allq]
-        r_tip = [float(np.corrcoef(a_tip, y)[0, 1]) for _, y in allq]
+        names = [nm for _, items in grp for nm, _ in items]
+        vals = [raw[nm][0] for nm in names]
         a3 = axes[3, col]
-        yy = np.arange(len(names))
-        a3.barh(yy + 0.19, r_vz, height=0.36, color=C_SLAB, label='vs slab $v_z$')
-        a3.barh(yy - 0.19, r_tip, height=0.36, color='0.55',
-                label='vs tip advance')
-        a3.set_yticks(yy); a3.set_yticklabels(names, fontsize=8)
+        order = np.argsort(vals)
+        a3.barh([names[i] for i in order], [vals[i] for i in order],
+                color=[C[names[i]] for i in order], height=0.62)
         a3.axvline(0, color='k', lw=1.0); a3.set_xlim(-1, 1)
-        a3.set_xlabel('detrended $r$', fontsize=10)
-        a3.legend(frameon=False, fontsize=8, loc='lower right')
+        a3.set_xlabel('detrended $r$ with slab $v_z$ (smoothed)', fontsize=10)
+        a3.tick_params(axis='y', labelsize=8.5)
         a3.grid(alpha=0.25, color='#BFC3D1', lw=0.6, axis='x')
 
-        print(f'{key}: ' + ', '.join(f'{nm} {v:+.2f}' for nm, v in zip(names, r_vz)))
-        for nm, v1, v2 in zip(names, r_vz, r_tip):
+        print(f'{key}: ' + ', '.join(f'{nm} {raw[nm][0]:+.2f}'
+                                     f'({raw[nm][1]:+.2f} raw)' for nm in names))
+        for nm in names:
             slug = ''.join(ch for ch in nm.lower().replace(' ', '_')
                            if ch.isalnum() or ch == '_')
-            rows += [(key, f'corr_slabvz_{slug}', f'{v1:.3f}'),
-                     (key, f'corr_tiprate_{slug}', f'{v2:.3f}')]
+            rows += [(key, f'corr_slabvz_{slug}_smoothed', f'{raw[nm][0]:.3f}'),
+                     (key, f'corr_slabvz_{slug}_raw', f'{raw[nm][1]:.3f}')]
 
     fig.suptitle('What tracks the slab descent rate — all quantities detrended '
                  'and normalised', fontsize=11.5)
