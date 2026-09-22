@@ -18,15 +18,24 @@ enough the shortfall appears as compression at the trench.
      mantle, the same below 660 km, and the rate at which the tip
      advances -- all in cm/yr on one axis. Each stage is slower than the
      one above it.
-  3  the consequence: the slab's cross-sectional area, and the in-plane
-     resultant at the trench.
+  3  THE MECHANISM, detrended: the slab's upper-mantle descent against
+     the in-plane resultant at the trench, with the Delta N_D axis
+     inverted so the anti-correlation reads as tracking.
+
+⚠ Row 3 MUST be detrended. At levels almost everything here correlates
+with everything else, because all of it trends monotonically: slab area
+against Delta N_D gives r = +0.97 and means nothing (detrended it is
+~0). An earlier version of this figure plotted exactly that pairing --
+the most persuasive-looking panel carrying the least information, while
+the relationship that survives detrending was not shown at all.
 
 WHAT IT ESTABLISHES.
   * The tip advances at only ~18 % (STD) / ~20 % (WAL) of the convergence
     rate. Four fifths of what converges does NOT deepen the slab.
   * It is accommodated by the slab lengthening and flattening instead:
     dip 56 -> 26 deg (STD) and 74 -> 40 (WAL), with the cross-section
-    growing five- to six-fold.
+    growing five- to six-fold (tabulated; the dip panel carries the same
+    story visually).
   * The removal rate below 660 km is CAPPED and inert: 0.80 +/- 0.06
     (STD) / 1.00 +/- 0.09 cm/yr, trending +0.02 / +0.03 per 10 Myr. It
     responds to nothing.
@@ -50,8 +59,11 @@ cascade -- the convergence rate at the trench, the slab's mean vertical
 velocity in the upper mantle and below 660 km, and the rate at which the
 tip advances. Each stage is slower than the one above it, so most of what
 converges is accommodated by the slab lengthening and flattening rather
-than deepening. Bottom: the resulting growth of the slab cross-section,
-against the normal-stress-difference resultant across the trailing plate.
+than deepening. Bottom: the slab's upper-mantle descent rate against the
+normal-stress-difference resultant across the trailing plate, both with
+their secular trends removed and the resultant's axis inverted, so that
+episodes of slower descent coincide with greater compression at the
+trench.
 """
 import os, sys
 import numpy as np
@@ -121,13 +133,30 @@ def main():
         a1.set_ylabel('Rate [cm/yr]', fontsize=10)
         a1.legend(frameon=False, fontsize=8, loc='upper right')
 
-        a2.plot(ts, area, '-', color=C_AREA, lw=2.0)
-        a2.set_ylabel('slab area\n[$10^6$ km$^2$]', fontsize=9, color=C_AREA)
-        a2.tick_params(axis='y', labelcolor=C_AREA)
+        # Row 3 is the MECHANISM, and it must be plotted DETRENDED. At
+        # levels almost everything here correlates with everything else
+        # because all of it trends monotonically -- slab area against
+        # Delta N_D looks like r = +0.97 and is worth nothing (detrended
+        # it is ~0). The relationship that survives detrending is the
+        # slab's upper-mantle descent against the in-plane resultant.
+        # Delta N_D's axis is INVERTED so the anti-correlation reads as
+        # tracking; the label says so.
+        rr = float(np.corrcoef(ld(ts, vz_up), ld(ts, ND))[0, 1])
+        a2.plot(ts, ld(ts, vz_up), '-', color=C_UPPER, lw=1.9)
+        a2.axhline(0, color='k', lw=0.8)
+        a2.set_ylabel('detrended slab $v_z$\n200–600 km [cm/yr]', fontsize=9,
+                      color=C_UPPER)
+        a2.tick_params(axis='y', labelcolor=C_UPPER)
         a2.set_xlabel('Model time [Myr]', fontsize=11)
         a2b = a2.twinx()
-        a2b.plot(ts, ND, '-', color='k', lw=1.6)
-        a2b.set_ylabel('$\\Delta N_D$ [TN/m]', fontsize=9)
+        a2b.plot(ts, ld(ts, ND), '-', color='k', lw=1.6)
+        a2b.invert_yaxis()
+        a2b.set_ylabel('detrended $\\Delta N_D$ [TN/m]\n(axis INVERTED)', fontsize=8.5)
+        a2.text(0.02, 0.06, f'$r$ = {rr:+.2f}' +
+                ('  — slower descent, more compression' if rr < -0.5
+                 else '  — no relationship'),
+                transform=a2.transAxes, fontsize=9,
+                color='k' if rr < -0.5 else '0.45')
         for ax in (a0, a1, a2):
             ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
