@@ -1,0 +1,23 @@
+{
+  "table": "budget_time_decomposed.csv",
+  "script": "fig_budget_time_decomposed.py",
+  "figure": "fig_budget_time_decomposed.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 38,
+  "sigfig": 6,
+  "meta": {
+    "zc_km": "75",
+    "t_min_Myr": "8",
+    "sign": "positive = +x = resisting; negative = driving",
+    "decomposition": "GPE-like = trench pull + ridge push; ridge push = non-tilting - tilting",
+    "detrend": "fitted linear model per series"
+  }
+}
