@@ -1,8 +1,6 @@
 model,quantity,value
 STD,corr_slabvz_plate_velocity_smoothed,0.896
 STD,corr_slabvz_plate_velocity_raw,0.897
-STD,corr_slabvz_trench_rollback_smoothed,-0.736
-STD,corr_slabvz_trench_rollback_raw,-0.73
 STD,corr_slabvz_convergence_smoothed,0.58
 STD,corr_slabvz_convergence_raw,0.578
 STD,corr_slabvz_vx_t_smoothed,0.417
@@ -17,8 +15,6 @@ STD,corr_slabvz_delta_n_d_smoothed,0.896
 STD,corr_slabvz_delta_n_d_raw,0.895
 WAL,corr_slabvz_plate_velocity_smoothed,0.922
 WAL,corr_slabvz_plate_velocity_raw,0.92
-WAL,corr_slabvz_trench_rollback_smoothed,-0.2
-WAL,corr_slabvz_trench_rollback_raw,-0.196
 WAL,corr_slabvz_convergence_smoothed,0.774
 WAL,corr_slabvz_convergence_raw,0.773
 WAL,corr_slabvz_vx_t_smoothed,0.141

@@ -10,8 +10,7 @@ curves on one axis would be unreadable, so they are GROUPED by what kind
 of quantity they are, with the slab velocity repeated faintly in each
 group as the common reference:
 
-  1  KINEMATICS      plate velocity, trench rollback, convergence, and
-                     the slab TIP advance rate
+  1  KINEMATICS      plate velocity and convergence
   2  LOAD -> TOPOGRAPHY   the shear-supported depth w_tau = (dV/dx)/rho g
                      and the measured trench depth
   3  FORCE RESPONSE  trench pull and Delta N_D at the trench
@@ -76,7 +75,7 @@ ROOT = os.path.dirname(os.path.dirname(_HERE))
 RHO_G = 3300.0 * 9.8
 C_SLAB = '#0072B2'
 C = {'plate velocity': '#1B9E77', 'convergence': 'k',
-     'trench rollback': '#E7298A', '$V(x_T)$': '#7B3294',
+     '$V(x_T)$': '#7B3294',
      '$M(x_T)$': '#D55E00', 'trench depth': '#E7298A',
      'trench pull': '#0072B2', '$-\\Delta N_D$': '0.35'}
 
@@ -110,7 +109,6 @@ def main():
         mM = r['m_T'][:n] / 1e17               # bending moment
         ND = q['d_nd'][:n] / 1e12
 
-        roll = (np.gradient(d[f'{key}_xT'] / 1e3, t) / 10.0)[:n]
         Vt = r['v_T'][:n] / 1e12               # V as extracted (see docstring)
         Mt = r['m_T'][:n] / 1e17               # bending moment at the trench
         TP = -np.trapezoid(c['p_T'][:n, zc], z[zc], axis=1) / 1e12
@@ -126,7 +124,6 @@ def main():
 
         grp = [
             ('kinematics', [('plate velocity', ld(tt, vp)),
-                            ('trench rollback', ld(tt, roll)),
                             ('convergence', ld(tt, conv))]),
             ('flexure $\\rightarrow$ topography',
              [('$V(x_T)$', ld(tt, Vt)), ('$M(x_T)$', ld(tt, Mt)),

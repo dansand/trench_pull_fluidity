@@ -11,7 +11,7 @@
     "quantity",
     "value"
   ],
-  "n_rows": 32,
+  "n_rows": 28,
   "sigfig": 6,
   "meta": {
     "normalisation": "linear detrend, then / s.d.",
