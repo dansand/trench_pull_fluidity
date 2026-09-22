@@ -1,0 +1,21 @@
+{
+  "table": "slab_pulse_budget.csv",
+  "script": "kinematics/fig_slab_pulse_budget.py",
+  "figure": "kinematics/fig_slab_pulse_budget.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 24,
+  "sigfig": 6,
+  "meta": {
+    "unit": "one s.d. of the detrended slab descent rate",
+    "detrend": "linear, per series",
+    "identity": "TP + NT - TILT = dN_D + F_B"
+  }
+}
