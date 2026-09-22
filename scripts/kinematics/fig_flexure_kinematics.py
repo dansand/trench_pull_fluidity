@@ -24,9 +24,9 @@ between them is readable rather than having to be asserted.
 WHAT IT FINDS. The hypothesis is half right, and it is the other half
 that is interesting.
 
-  WAL  |V_T| is set by ROLLBACK, r = +0.85, and anti-correlates with the
-       partition fraction at -0.80 -- V is large when the trench is doing
-       the moving rather than the plate.
+  WAL  |V_T| is set by ROLLBACK, r = +0.85, and tracks the rollback
+       FRACTION 1-f at +0.80 -- V is large when the trench is doing the
+       moving rather than the plate.
        |M_T| is set by PLATE VELOCITY (+0.66) and convergence (+0.64).
        So the two flexural resultants answer to different halves of the
        kinematic partition.
@@ -69,7 +69,7 @@ from tables_io import write_table
 
 ROOT = os.path.dirname(os.path.dirname(_HERE))
 C = {'plate velocity': '#1B9E77', 'rollback': '#E7298A',
-     'convergence': 'k', 'partition $f$': '0.55'}
+     'convergence': 'k', 'rollback fraction $1-f$': '0.55'}
 C_V, C_M = '#7B3294', '#D55E00'
 
 
@@ -115,7 +115,12 @@ def main():
         kin = {'plate velocity': np.interp(t, tc, vp),
                'rollback': np.interp(t, tc, roll),
                'convergence': np.interp(t, tc, conv),
-               'partition $f$': np.interp(t, tc, vp / conv)}
+               # the ROLLBACK FRACTION rather than the plate fraction
+               # (Dan, 2026-09-22): 1 - f is what V actually tracks, and
+               # detrended it is exactly -f, so the correlation simply
+               # changes sign while the quantity gains a physical name --
+               # the share of convergence taken by the trench.
+               'rollback fraction $1-f$': np.interp(t, tc, 1.0 - vp / conv)}
         flex = {'$|V_T|$': fx['V'], '$|M_T|$': fx['M'],
                 '$w_T$ measured': fx['w'], '$w_T$ model': fx['wm']}
 
@@ -136,7 +141,7 @@ def main():
 
         a1 = axes[1, col]
         a1.plot(t, zs(ld(t, fx['V'])), '-', color=C_V, lw=2.2, label='$|V_T|$')
-        for nm in ('rollback', 'partition $f$'):
+        for nm in ('rollback', 'rollback fraction $1-f$'):
             rr = np.corrcoef(ld(t, fx['V']), ld(t, kin[nm]))[0, 1]
             a1.plot(t, zs(ld(t, kin[nm])), '-', color=C[nm], lw=1.6,
                     label=f'{nm}  ({rr:+.2f})')
