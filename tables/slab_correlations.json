@@ -1,0 +1,21 @@
+{
+  "table": "slab_correlations.csv",
+  "script": "kinematics/fig_slab_correlations.py",
+  "figure": "kinematics/fig_slab_correlations.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 12,
+  "sigfig": 6,
+  "meta": {
+    "normalisation": "linear detrend, then / s.d.",
+    "reference": "slab v_z, 200-600 km",
+    "V_sense": "-V, downward load on the trench-side face"
+  }
+}

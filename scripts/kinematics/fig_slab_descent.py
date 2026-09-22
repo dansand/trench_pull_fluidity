@@ -71,13 +71,14 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(_HERE))          # the shared scripts/ dir
 import column_profiles_cache as cpc
 import slab_geometry_cache as sgc
 from fig_budget_time import terms
 from tables_io import write_table
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(_HERE))   # repo root
 C_CONV = 'k'                # convergence at the trench
 C_UPPER = '#0072B2'         # slab, upper mantle
 C_DEEP = '#D55E00'          # slab, below 660
@@ -188,7 +189,7 @@ def main():
     fig.suptitle('The slab: tip advances at a fifth of the convergence rate, and '
                  'the removal rate below 660 km is capped', fontsize=11.5)
     fig.tight_layout()
-    out = os.path.join(ROOT, 'figures', 'fig_slab_descent.png')
+    out = os.path.join(ROOT, 'figures', 'kinematics', 'fig_slab_descent.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
     tab = write_table('slab_descent', rows[0], rows[1:],

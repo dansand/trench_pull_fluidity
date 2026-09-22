@@ -38,10 +38,11 @@ import numpy as np
 import natsort
 import pyvista as pv
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(_HERE))          # the shared scripts/ dir
 from fluidity_helpers import make_field_extractor
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(_HERE))   # repo root
 DATA = os.path.expanduser('~/DATA/numerical_models/OUTPUTS/')
 OUT = os.path.join(ROOT, 'notebooks', 'outputs', 'slab_geometry.npz')
 Y = 2_900_000.0

@@ -62,11 +62,12 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(_HERE))          # the shared scripts/ dir
 import column_profiles_cache as cpc
 from tables_io import write_table
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(_HERE))   # repo root
 RHO_G = 3300.0 * 9.8        # no ocean in these models (conventions §6.1)
 C_TRENCH = '#0072B2'        # non-isostatic / trench pull domain
 C_RIDGE = '#D55E00'         # isostatic / ridge push domain
@@ -169,7 +170,7 @@ def main():
                  'the statistic that is immune to the shared secular trend)',
                  fontsize=11)
     fig.tight_layout()
-    out = os.path.join(ROOT, 'figures', 'fig_speed_drivers.png')
+    out = os.path.join(ROOT, 'figures', 'kinematics', 'fig_speed_drivers.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('\nwritten:', out)
     tab = write_table('speed_drivers', rows[0], rows[1:],

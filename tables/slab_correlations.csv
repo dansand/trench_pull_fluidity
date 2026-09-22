@@ -1,0 +1,13 @@
+model,quantity,value
+STD,corr_slab_vz_plate_velocity,0.897
+STD,corr_slab_vz_convergence,0.578
+STD,corr_slab_vz_trench_depth,0.48
+STD,corr_slab_vz_minusv_trench_face_load,-0.411
+STD,corr_slab_vz_bending_moment_m,0.166
+STD,corr_slab_vz_delta_n_d,-0.895
+WAL,corr_slab_vz_plate_velocity,0.92
+WAL,corr_slab_vz_convergence,0.773
+WAL,corr_slab_vz_trench_depth,0.81
+WAL,corr_slab_vz_minusv_trench_face_load,-0.156
+WAL,corr_slab_vz_bending_moment_m,-0.616
+WAL,corr_slab_vz_delta_n_d,-0.126

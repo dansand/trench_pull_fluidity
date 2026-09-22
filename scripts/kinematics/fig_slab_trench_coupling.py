@@ -67,13 +67,14 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(_HERE))          # the shared scripts/ dir
 import column_profiles_cache as cpc
 import slab_geometry_cache as sgc
 from fig_budget_time import terms
 from tables_io import write_table
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(_HERE))   # repo root
 RHO_G = 3300.0 * 9.8
 C_VZ = '#0072B2'
 C_WT = '#E7298A'
@@ -173,7 +174,7 @@ def main():
     fig.suptitle('Slab descent, trench depth and the in-plane resultant — '
                  'coupled throughout in STD, breaking down in WAL', fontsize=11.5)
     fig.tight_layout()
-    out = os.path.join(ROOT, 'figures', 'fig_slab_trench_coupling.png')
+    out = os.path.join(ROOT, 'figures', 'kinematics', 'fig_slab_trench_coupling.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
     tab = write_table('slab_trench_coupling', rows[0], rows[1:],

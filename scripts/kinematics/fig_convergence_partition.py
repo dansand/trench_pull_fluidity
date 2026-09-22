@@ -63,11 +63,12 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(_HERE))          # the shared scripts/ dir
 import column_profiles_cache as cpc
 from tables_io import write_table
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(_HERE))   # repo root
 C_CONV = 'k'                # the sum
 C_PLATE = '#1B9E77'         # trailing-plate motion
 C_ROLL = '#E7298A'          # trench rollback
@@ -149,7 +150,7 @@ def main():
     fig.suptitle('The kinematic partition: convergence, and how it splits between '
                  'plate motion and trench rollback', fontsize=11.5)
     fig.tight_layout()
-    out = os.path.join(ROOT, 'figures', 'fig_convergence_partition.png')
+    out = os.path.join(ROOT, 'figures', 'kinematics', 'fig_convergence_partition.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
     tab = write_table('convergence_partition', rows[0], rows[1:],
