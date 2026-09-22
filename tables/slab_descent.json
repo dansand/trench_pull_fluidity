@@ -1,0 +1,20 @@
+{
+  "table": "slab_descent.csv",
+  "script": "fig_slab_descent.py",
+  "figure": "fig_slab_descent.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 28,
+  "sigfig": 6,
+  "meta": {
+    "slab_definition": "T < 1300 K (ambient 1573 K), below 150 km",
+    "convergence": "plate speed + trench rollback"
+  }
+}
