@@ -1,0 +1,22 @@
+{
+  "table": "compliance_time.csv",
+  "script": "kinematics/fig_compliance_time.py",
+  "figure": "kinematics/fig_compliance_time.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 18,
+  "sigfig": 6,
+  "meta": {
+    "model": "w_T = [C_V |V| alpha + C_M |M|] / (drho g alpha^2)",
+    "elastic_reference": "(C_V, C_M) = (2, 2)",
+    "alpha": "per step, from the measured x_I - x_T",
+    "fit": "per model, least squares, linearised form"
+  }
+}
