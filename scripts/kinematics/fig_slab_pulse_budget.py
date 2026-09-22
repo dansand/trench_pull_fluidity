@@ -43,10 +43,33 @@ REMAINING COMPRESSIONAL. The slab does not need to reverse the sign of
 the in-plane resultant to transmit a velocity change; it only needs to
 perturb it. That is the point worth making.
 
-⚠ WAL's numbers average across the 48-62 Myr regime in which its
-slab/trench coupling fails (fig_slab_trench_coupling). Its +0.71 trench
-pull coupling is real but the single number hides an interval where the
-relationship is absent.
+⚠⚠ THE WAL PARTITION IS NOT ROBUST AND SHOULD NOT BE QUOTED. Recomputed
+on subsets it swings wildly -- trench pull takes 17 % in the first half,
+154 % in the second, 123 % on speed-ups alone and -4 % on slow-downs --
+and the underlying regression barely exists: Delta N_D against the slab
+descent rate has R2 = 0.02 in WAL. Fitting a slope through that is
+meaningless, and the headline "74 % trench pull" is an artefact of the
+second half and the 60-70 Myr event. WAL's panel is retained only to show
+that the STD result is not universal.
+
+THE STD PARTITION IS ROBUST. Recomputed the same ways, Delta N_D supplies
+76 % (all points), 76 % (first half), 72 % (second half) and 79 %
+(largest third of fluctuations only). The regression is sound: Delta N_D
+against slab descent has R2 = 0.80 linear, and a quadratic adds only 0.02,
+so a single slope is adequate.
+
+  It IS asymmetric, which is worth knowing: Delta N_D supplies 54 % on
+  speed-ups and 80 % on slow-downs, with the trench pull taking 31 % of
+  speed-ups. The relaxation route dominates more when the slab slows than
+  when it accelerates.
+
+METHOD NOTE. "Typical" is a REGRESSION ACROSS THE WHOLE RECORD, not a
+picked event: ordinary least squares on every snapshot, evaluated at one
+standard deviation of the detrended descent rate. Because it is linear, a
+2 s.d. event gives exactly twice the force change. Note also that linear
+detrending removes only the secular trend, so the residual contains the
+~22 Myr oscillation, any curvature AND the noise -- it is not
+specifically short-wavelength.
 
 DRAFT CAPTION. The force budget of a typical slab speed-up, for STD and
 WAL. Each balance term is regressed on the slab descent rate, both
