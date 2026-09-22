@@ -55,6 +55,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.optimize import brentq
+from scipy.ndimage import median_filter
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(_HERE))
@@ -112,10 +113,21 @@ def main():
         t, a = ts['t_myr'][g], ts['alpha'][g]
         V, M, w = np.abs(ts['V_T'][g]), np.abs(ts['M'][g]), ts['w_T'][g]
 
-        # fit PER MODEL, in the prototype's linearised form
-        A = np.vstack([V * a, M]).T
-        Y = w * DRHO * G * a ** 2
+        # OUTLIER REJECTION (Dan, 2026-09-22). w_T carries isolated
+        # trench-pick excursions -- STD drops 574 m below its local median
+        # at t = 40 Myr and recovers immediately. Four such points in STD
+        # and five in WAL were destroying the fit: STD's R2 on w_T went
+        # from +0.45 to +0.11 and its detrended R2 from +0.29 to -0.04
+        # because of them. Rejected at 3 MAD about a 5-point running
+        # median, MARKED on the figure rather than quietly dropped.
+        resid = w - median_filter(w, size=5, mode='nearest')
+        mad = np.median(np.abs(resid - np.median(resid))) * 1.4826
+        keep = np.abs(resid) <= 3 * mad
+        A = np.vstack([V[keep] * a[keep], M[keep]]).T
+        Y = w[keep] * DRHO * G * a[keep] ** 2
         (cV, cM), *_ = np.linalg.lstsq(A, Y, rcond=None)
+        t, a, V, M, w = t[keep], a[keep], V[keep], M[keep], w[keep]
+        t_out, w_out = ts['t_myr'][g][~keep], ts['w_T'][g][~keep]
         w_model = (cV * V * a + cM * M) / (DRHO * G * a ** 2)
         w_V = cV * V * a / (DRHO * G * a ** 2)     # shear contribution
         w_M = cM * M / (DRHO * G * a ** 2)         # moment contribution
@@ -126,6 +138,7 @@ def main():
         # that R2 mostly measures how well alpha^2 is reproduced -- not how
         # well w_T is predicted. Both are reported; they differ enormously.
         R2_lin = r2(Y, A @ np.array([cV, cM]))
+        lev = float(np.median(V * a / M))
 
         ld = lambda y: y - np.polyval(np.polyfit(t, y, 1), t)
         R2_det = r2(ld(w), ld(w_model))
@@ -142,6 +155,8 @@ def main():
         a0.set_title(f'{key}   fitted $C_V$ = {cV:.2f}, $C_M$ = {cM:.2f}'
                      '   (elastic: 2, 2)', fontsize=10.5)
 
+        a1.plot(t_out, w_out, 'o', mfc='none', mec='r', ms=7, mew=1.4,
+                label=f'rejected ({len(t_out)})', zorder=5)
         a1.plot(t, w, '-', color=C_MEAS, lw=2.2, label='measured $w_T$')
         a1.plot(t, w_model, '--', color=C_MODEL, lw=2.0,
                 label=f'model  ($R^2$ = {R2_abs:+.2f} on $w_T$; '
@@ -167,7 +182,8 @@ def main():
         print(f'{key}: C_V {cV:.2f}, C_M {cM:.2f}; R2 absolute {R2_abs:+.3f}, '
               f'R2 DETRENDED {R2_det:+.3f} (r {rr:+.2f}); shear term carries '
               f'{share:.0f} % of the mean deflection; n={g.sum()}; '
-              f'R2 in the prototype linearised space {R2_lin:+.3f}')
+              f'R2 linearised {R2_lin:+.3f}; rejected {len(t_out)}; '
+              f'|V|a/|M| median {lev:.2f}')
         rows += [(key, 'C_V', f'{cV:.3f}'), (key, 'C_M', f'{cM:.3f}'),
                  (key, 'C_M_over_C_V', f'{cM/cV:.3f}'),
                  (key, 'r2_absolute', f'{R2_abs:.3f}'),
@@ -175,7 +191,9 @@ def main():
                  (key, 'r2_detrended', f'{R2_det:.3f}'),
                  (key, 'corr_detrended', f'{rr:.3f}'),
                  (key, 'shear_share_of_mean_deflection_percent', f'{share:.1f}'),
-                 (key, 'n_snapshots', str(int(g.sum())))]
+                 (key, 'n_snapshots_used', str(int(keep.sum()))),
+                 (key, 'n_outliers_rejected', str(int((~keep).sum()))),
+                 (key, 'V_term_over_M_term_median', f'{lev:.3f}')]
 
     fig.suptitle('Elastic compliance model for the trench deflection, fitted per '
                  'model — absolute fit versus detrended fit', fontsize=11.5)
