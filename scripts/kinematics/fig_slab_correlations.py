@@ -10,15 +10,27 @@ curves on one axis would be unreadable, so they are GROUPED by what kind
 of quantity they are, with the slab velocity repeated faintly in each
 group as the common reference:
 
-  1  KINEMATICS      trailing-plate velocity, convergence rate
-  2  TRENCH LOAD     trench depth, the downward shear load -V, and the
-                     bending moment M at the trench
-  3  SUMMARY         every correlation against the slab descent rate as a
-                     bar, so all six are comparable at a glance
+  1  KINEMATICS      plate velocity, trench rollback, convergence, and
+                     the slab TIP advance rate
+  2  LOAD -> TOPOGRAPHY   the shear-supported depth w_tau = (dV/dx)/rho g
+                     and the measured trench depth
+  3  FORCE RESPONSE  trench pull and Delta N_D at the trench
+  4  SUMMARY         every correlation as a bar, against BOTH the slab
+                     descent rate and the tip advance rate
 
-Delta N_D sits in the summary rather than in a time panel: it already has
-its own figure (fig_slab_trench_coupling) where it is plotted against the
-slab velocity directly.
+⚠ V ITSELF IS NOT THE RIGHT VARIABLE, and an earlier version of this
+figure plotted it. The flexure relation is w_tau = (dV/dx)/rho g -- the
+topography is set by the GRADIENT of the shear resultant, not by the
+resultant. Measured:
+
+    r(trench depth, V)      = -0.12 (STD) / -0.09 (WAL)   <- nothing
+    r(trench depth, dV/dx)  = +0.89        / +0.88        <- everything
+
+and dV/dx reproduces the trench depth to 95 % (1830 m against a measured
+1925 m in STD). Plotting -V produced a spurious-looking anti-correlation
+with the slab velocity; the sign was right and the variable was wrong.
+
+The bending moment is dropped for now (Dan, 2026-09-22).
 
 EVERYTHING IS LINEARLY DETRENDED AND THEN DIVIDED BY ITS OWN S.D. These
 quantities carry different units and very different secular trends; at
@@ -63,8 +75,9 @@ ROOT = os.path.dirname(os.path.dirname(_HERE))
 RHO_G = 3300.0 * 9.8
 C_SLAB = '#0072B2'
 C = {'plate velocity': '#1B9E77', 'convergence': 'k',
-     'trench depth': '#E7298A', '$-V$ (trench face load)': '#7B3294',
-     'bending moment $M$': '#D55E00', '$\\Delta N_D$': '0.35'}
+     'trench rollback': '#E7298A', 'slab tip advance': '#7B3294',
+     '$w_\\tau=(dV/dx)/\\rho g$': '#D55E00', 'trench depth': '#E7298A',
+     'trench pull': '#0072B2', '$\\Delta N_D$': '0.35'}
 
 
 def main():
@@ -76,8 +89,8 @@ def main():
     # NO sharex: row 3 is a bar chart whose x axis is a correlation, not
     # time. Sharing it with the time-series rows drives their limits to
     # +/-1 and pushes every curve off-screen.
-    fig, axes = plt.subplots(3, 2, figsize=(12.6, 10.0),
-                             gridspec_kw={'height_ratios': [1.2, 1.2, 0.95]})
+    fig, axes = plt.subplots(4, 2, figsize=(13.0, 12.6),
+                             gridspec_kw={'height_ratios': [1.1, 1.0, 1.0, 1.0]})
     rows = [('model', 'quantity', 'value')]
 
     for col, key in enumerate(('STD', 'WAL')):
@@ -96,48 +109,62 @@ def main():
         mM = r['m_T'][:n] / 1e17               # bending moment
         ND = q['d_nd'][:n] / 1e12
 
-        a_vz = ld(tt, vz)
-        grp1 = [('plate velocity', ld(tt, vp)), ('convergence', ld(tt, conv))]
-        grp2 = [('trench depth', ld(tt, wT)),
-                ('$-V$ (trench face load)', ld(tt, mV)),
-                ('bending moment $M$', ld(tt, mM))]
-        extra = [('$\\Delta N_D$', ld(tt, ND))]
+        tip = np.gradient(s[f'{key}_z_tip'][:n], tt) / 10.0     # cm/yr
+        roll = (np.gradient(d[f'{key}_xT'] / 1e3, t) / 10.0)[:n]
+        dVdx = np.trapezoid(d[f'{key}_dtxz_T'][:n][:, zc], z[zc], axis=1)
+        w_tau = dVdx / RHO_G                       # shear-supported depth, m
+        TP = -np.trapezoid(c['p_T'][:n, zc], z[zc], axis=1) / 1e12
 
-        a0, a1, a2 = (axes[row, col] for row in range(3))
-        for ax, grp, lab in ((a0, grp1, 'kinematics'), (a1, grp2, 'trench load')):
-            ax.plot(tt, zs(a_vz), '-', color=C_SLAB, lw=2.6, alpha=0.35,
+        a_vz, a_tip = ld(tt, vz), ld(tt, tip)
+        grp = [
+            ('kinematics', [('plate velocity', ld(tt, vp)),
+                            ('trench rollback', ld(tt, roll)),
+                            ('convergence', ld(tt, conv)),
+                            ('slab tip advance', a_tip)]),
+            ('load $\\rightarrow$ topography',
+             [('$w_\\tau=(dV/dx)/\\rho g$', ld(tt, w_tau)),
+              ('trench depth', ld(tt, wT))]),
+            ('force response', [('trench pull', ld(tt, TP)),
+                                ('$\\Delta N_D$', ld(tt, ND))]),
+        ]
+        for ax, (lab, items) in zip(axes[:3, col], grp):
+            ax.plot(tt, zs(a_vz), '-', color=C_SLAB, lw=2.8, alpha=0.30,
                     label='slab $v_z$ (reference)')
-            for nm, y in grp:
+            for nm, y in items:
                 rr = float(np.corrcoef(a_vz, y)[0, 1])
                 ax.plot(tt, zs(y), '-', color=C[nm], lw=1.7,
-                        label=f'{nm}  ($r$ = {rr:+.2f})')
+                        label=f'{nm}  ({rr:+.2f})')
             ax.axhline(0, color='k', lw=0.8)
-            ax.set_ylabel(f'{lab}\n(detrended, normalised)', fontsize=9)
-            ax.legend(frameon=False, fontsize=8, loc='upper left', ncol=2)
+            ax.set_ylabel(f'{lab}\n(detrended, normalised)', fontsize=8.5)
+            ax.legend(frameon=False, fontsize=7.5, loc='upper left', ncol=3)
             ax.grid(alpha=0.25, color='#BFC3D1', lw=0.6)
-        a0.set_title(key, fontsize=11)
-        a1.set_xlim(a0.get_xlim())
-        a0.tick_params(labelbottom=False)
-        a1.set_xlabel('Model time [Myr]', fontsize=10.5)
+        axes[0, col].set_title(key, fontsize=11)
+        for ax in axes[:2, col]:
+            ax.set_xlim(axes[0, col].get_xlim()); ax.tick_params(labelbottom=False)
+        axes[2, col].set_xlim(axes[0, col].get_xlim())
+        axes[2, col].set_xlabel('Model time [Myr]', fontsize=10.5)
 
-        allq = grp1 + grp2 + extra
+        allq = [it for _, items in grp for it in items]
         names = [nm for nm, _ in allq]
-        rr = [float(np.corrcoef(a_vz, y)[0, 1]) for _, y in allq]
-        order = np.argsort(rr)
-        a2.barh([names[i] for i in order], [rr[i] for i in order],
-                color=[C[names[i]] for i in order], height=0.62)
-        a2.axvline(0, color='k', lw=1.0)
-        a2.set_xlim(-1, 1)
-        a2.set_xlabel('$r$ with slab descent rate (detrended)', fontsize=10)
-        a2.tick_params(axis='y', labelsize=8.5)
-        a2.grid(alpha=0.25, color='#BFC3D1', lw=0.6, axis='x')
+        r_vz = [float(np.corrcoef(a_vz, y)[0, 1]) for _, y in allq]
+        r_tip = [float(np.corrcoef(a_tip, y)[0, 1]) for _, y in allq]
+        a3 = axes[3, col]
+        yy = np.arange(len(names))
+        a3.barh(yy + 0.19, r_vz, height=0.36, color=C_SLAB, label='vs slab $v_z$')
+        a3.barh(yy - 0.19, r_tip, height=0.36, color='0.55',
+                label='vs tip advance')
+        a3.set_yticks(yy); a3.set_yticklabels(names, fontsize=8)
+        a3.axvline(0, color='k', lw=1.0); a3.set_xlim(-1, 1)
+        a3.set_xlabel('detrended $r$', fontsize=10)
+        a3.legend(frameon=False, fontsize=8, loc='lower right')
+        a3.grid(alpha=0.25, color='#BFC3D1', lw=0.6, axis='x')
 
-        print(f'{key}: ' + ', '.join(f'{nm} {v:+.2f}' for nm, v in zip(names, rr)))
-        for nm, v in zip(names, rr):
-            slug = (nm.replace('$', '').replace('\\Delta ', 'delta_')
-                      .replace(' ', '_').replace('(', '').replace(')', '')
-                      .replace('-', 'minus').lower())
-            rows.append((key, f'corr_slab_vz_{slug}', f'{v:.3f}'))
+        print(f'{key}: ' + ', '.join(f'{nm} {v:+.2f}' for nm, v in zip(names, r_vz)))
+        for nm, v1, v2 in zip(names, r_vz, r_tip):
+            slug = ''.join(ch for ch in nm.lower().replace(' ', '_')
+                           if ch.isalnum() or ch == '_')
+            rows += [(key, f'corr_slabvz_{slug}', f'{v1:.3f}'),
+                     (key, f'corr_tiprate_{slug}', f'{v2:.3f}')]
 
     fig.suptitle('What tracks the slab descent rate — all quantities detrended '
                  'and normalised', fontsize=11.5)
