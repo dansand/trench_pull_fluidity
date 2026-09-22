@@ -79,12 +79,41 @@ def main():
         m = q['t'] >= T_MIN_MYR
         t = q['t'][m]
         ax.axhline(0, color='k', lw=1.6)
+        sl0 = lambda y: np.polyfit(t, y, 1)[0] * 10          # per 10 Myr
+        _g, _n, _f = (q['d_gpe'][m] * 1e-12, q['d_nd'][m] * 1e-12,
+                      q['f_b'][m] * 1e-12)
         ax.plot(t, q['gpe_term'][m] * 1e-12, color='b', lw=4, alpha=0.6,
-                label=r'$-\Delta\mathrm{GPE}^{*}$')
-        ax.plot(t, q['d_nd'][m] * 1e-12, color='k', lw=1.6, label=r'$\Delta N_D$')
-        ax.plot(t, q['f_b'][m] * 1e-12, color='red', lw=2, label=r'$F_B$')
+                label=r'$-\Delta\mathrm{GPE}^{*}$'
+                      f'  ({sl0(_g):+.2f}/10 Myr)')
+        ax.plot(t, q['d_nd'][m] * 1e-12, color='k', lw=1.6,
+                label=r'$\Delta N_D$' + f'  ({sl0(_n):+.2f})')
+        ax.plot(t, q['f_b'][m] * 1e-12, color='red', lw=2,
+                label=r'$F_B$' + f'  ({sl0(_f):+.2f})')
         ax.plot(t, q['closure'][m] * 1e-12, color='g', ls='--', lw=2.5,
                 label='closure')
+        # --- SECULAR TRENDS (Dan, 2026-09-22) ---------------------------
+        # A linear fit through each term, plus the Delta N_D trend
+        # MIRRORED into the driving half so its slope can be laid against
+        # the GPE* slope by eye. The vertical gap between those two lines
+        # IS the F_B trend: dGPE* = dN_D + F_B must hold for the slopes as
+        # well as the values, and it does, to 1-3 %.
+        fit = lambda y: np.polyval(np.polyfit(t, y, 1), t)
+        sl = lambda y: np.polyfit(t, y, 1)[0] * 10          # per 10 Myr
+        gpe_t, nd_t, fb_t = (q['d_gpe'][m] * 1e-12, q['d_nd'][m] * 1e-12,
+                             q['f_b'][m] * 1e-12)
+        ax.plot(t, -fit(gpe_t), color='b', ls='-', lw=1.0, alpha=0.9)
+        ax.plot(t, fit(nd_t), color='k', ls='-', lw=1.0, alpha=0.9)
+        ax.plot(t, fit(fb_t), color='red', ls='-', lw=1.0, alpha=0.9)
+        ax.plot(t, -fit(nd_t), color='k', ls=':', lw=1.8,
+                label=r'$\Delta N_D$ trend, mirrored')
+        ax.annotate('', xy=(t[-3], -fit(nd_t)[-3]), xytext=(t[-3], -fit(gpe_t)[-3]),
+                    arrowprops=dict(arrowstyle='<->', color='red', lw=1.2))
+        ax.text(t[-3], 0.5 * (-fit(nd_t)[-3] - fit(gpe_t)[-3]),
+                f'  $F_B$ trend\n  {sl(fb_t):+.2f}', color='red', fontsize=8,
+                va='center', ha='left')
+        print(f'   {key} slopes/10 Myr: dGPE* {sl(gpe_t):+.3f} = dN_D '
+              f'{sl(nd_t):+.3f} + F_B {sl(fb_t):+.3f} '
+              f'(sum {sl(nd_t)+sl(fb_t):+.3f})')
         ax.set_title(key, fontsize=11)
         ax.set_xlabel('Model time [Myr]', fontsize=11)
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
