@@ -1,0 +1,21 @@
+{
+  "table": "flexure_kinematics.csv",
+  "script": "kinematics/fig_flexure_kinematics.py",
+  "figure": "kinematics/fig_flexure_kinematics.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 32,
+  "sigfig": 6,
+  "meta": {
+    "detrend": "linear, per series",
+    "outliers": "3 MAD about a 5-point median on w_T",
+    "kinematics": "interpolated from the column cache"
+  }
+}
