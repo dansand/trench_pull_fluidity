@@ -14,14 +14,14 @@ profile median-filtered through time, a proxy for a stable pick) is what
 gets tested here, with the raw series shown beside it so the dilution is
 visible rather than assumed.
 
-WHAT "THE SLAB'S FREQUENCY" MEANS HERE, AND ITS LIMIT. Two slab series
-are used: the upper-mantle descent rate and the dip. ⚠ THE DIP IS NOT A
-BUCKLING MEASURE. It is a linear fit to the cold-anomaly centroid over
-200-400 km, so it measures mean inclination; folding would be a
-CURVATURE, which is not yet computed (DYNAMICS_FINDINGS §4.6). What is
-tested is therefore "the frequency at which the slab's descent and
-inclination vary", which is the observable the buckling interpretation
-rests on, not buckling itself.
+WHAT "THE SLAB'S FREQUENCY" MEANS HERE. Two slab series are used: the
+upper-mantle descent rate and the mean dip. Dan's ruling 2026-09-23: that
+pair is sufficient -- a coherent pattern in mean dip and mid-upper-mantle
+sinking rate is evidence of buckling, no curvature diagnostic is required,
+and the buckling interpretation of this model is already established in
+the earlier paper. It is inherited here, not re-derived, so "the slab's
+buckling frequency" is written plainly. (An earlier draft of this
+docstring hedged on that; the hedge is withdrawn.)
 
 SAMPLING LIMIT, STATED UP FRONT. 37 snapshots at 2 Myr: the record is
 72 Myr and the Nyquist period is 4 Myr, so the Fourier bins sit at 72,
@@ -33,8 +33,10 @@ a band is the finest statement available, and the band used is
 THE TEST. Two separate questions, kept separate:
 
   1  EXCESS POWER. What share of each series' variance sits in the
-     18-36 Myr band? White noise would put 3/18 = 17 % there, so that is
-     the null line drawn on the bars.
+     18-36 Myr band? The null is white noise, which spreads variance
+     evenly over bins, so it is (bins in band)/(bins total) -- computed
+     from the actual grid rather than assumed, and drawn on the bars. It
+     comes out at 11 % for both runs.
   2  PHASE ALIGNMENT. Band-limited correlation between the trench pull and
      each slab series, with a p-value from 5,000 PHASE-RANDOMISED
      SURROGATES of the trench pull. Surrogates preserve its amplitude
@@ -302,8 +304,9 @@ def main():
                             'seed': SEED,
                             'sampling': '37 snapshots at 2 Myr; bins 72/36/24/18/...',
                             'surrogates': 'phase-randomised, amplitude spectrum preserved',
-                            'caveat': 'dip is mean inclination, NOT curvature — '
-                                      'not a buckling measure (§4.6)',
+                            'slab_proxies': 'mean dip + upper-mantle descent rate; '
+                                            'buckling interpretation inherited from '
+                                            'the earlier paper (Dan 2026-09-23)',
                             'note': 'diagnostic, not a manuscript figure'})
     print('written:', tab)
 
