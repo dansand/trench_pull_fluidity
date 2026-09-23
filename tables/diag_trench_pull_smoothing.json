@@ -1,0 +1,22 @@
+{
+  "table": "diag_trench_pull_smoothing.csv",
+  "script": "diag_trench_pull_smoothing.py",
+  "figure": "diag_trench_pull_smoothing.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 34,
+  "sigfig": 6,
+  "meta": {
+    "roughness": "sd(step difference)/sd of the detrended series",
+    "hf_cut_Myr": "12",
+    "stabilised": "PROXY \u2014 x_I column profile median-filtered through time (size 3); NOT a re-pick",
+    "note": "diagnostic, not a manuscript figure"
+  }
+}
