@@ -23,14 +23,23 @@ the earlier paper. It is inherited here, not re-derived, so "the slab's
 buckling frequency" is written plainly. (An earlier draft of this
 docstring hedged on that; the hedge is withdrawn.)
 
-SAMPLING LIMIT, STATED UP FRONT. 37 snapshots at 2 Myr: the record is
-72 Myr and the Nyquist period is 4 Myr, so the Fourier bins sit at 72,
-36, 24, 18, 14.4, 12 Myr ... The ~25 Myr signal is bin 3. There is no
-frequency resolution to speak of and no amount of analysis creates any:
-a band is the finest statement available, and the band used is
-18-36 Myr (bins 2-4).
+SAMPLING LIMIT, AND WHY THE BAND WAS A BAD SUMMARY. 37 snapshots at
+2 Myr: the record is 72 Myr and the Nyquist period is 4 Myr, so the
+Fourier bins sit at 74, 37, 24.7, 18.5, 14.8, 12.3, 10.6 Myr ... There is
+no frequency resolution between them and no analysis creates any.
 
-THE TEST. Two separate questions, kept separate:
+⚠ The first version of this figure summarised with an 18-36 Myr band.
+That band contains exactly TWO bins -- 24.7 and 18.5 -- because 37.0 falls
+just outside it. Widening to 15-35 Myr changes nothing at all (same two
+bins); 10-40 Myr admits six but also raises the white-noise null from 11 %
+to 33 % and mixes in the 10-14 Myr content, which is a different
+phenomenon. A two-bin band-pass is two sinusoids, and two sinusoids look
+quasi-periodic whatever the input -- Dan raised exactly this on
+2026-09-23 and he is right. THE PER-BIN TABLE IS THE HONEST STATEMENT;
+the band is retained only as a one-number summary with its bin count
+printed.
+
+THE TEST. Three separate questions, kept separate:
 
   1  EXCESS POWER. What share of each series' variance sits in the
      18-36 Myr band? The null is white noise, which spreads variance
@@ -44,63 +53,98 @@ THE TEST. Two separate questions, kept separate:
      slab, so this asks whether the alignment is better than chance GIVEN
      both spectra. AR(1) is not used and must not be (§5.4).
 
+  3  IS THE BAND-PASSED PICTURE AN ILLUSION? The observed two-bin
+     reconstruction is drawn against reconstructions of phase-randomised
+     surrogates of the SAME series. If the surrogates look equally
+     oscillatory and equally "phase-shifted", the appearance carries no
+     information -- which is the control the first version lacked.
+
   1 without 2 is not enough: two series can both peak at 25 Myr and be in
   quadrature, which would mean they are not coupled at that frequency.
 
-  1  periodograms, variance-normalised, with the band shaded.
-  2  the band-passed series overlaid.
-  3  band-power shares against the white-noise null, and the band
-     correlations with their surrogate p-values.
+  1  per-bin periodograms as BARS (there is nothing between the bins, so
+     a connecting line overstates the resolution), slab peak bin marked.
+  2  SINGLE-BIN reconstruction at the slab's peak bin. One sinusoid per
+     series, so amplitude and phase are read directly and no illusion is
+     possible.
+  3  the two-bin band-pass against surrogate reconstructions -- the
+     illusion control.
 
-THE ANSWER FOR STD IS NO, AND IT IS EMPHATIC.
+THE ANSWER, REVISED 2026-09-23 AFTER DAN CHALLENGED THE BAND-PASS.
+The first version said "no, emphatically". The per-bin view says something
+more precise and more interesting: SMALL BUT IN PHASE.
 
-  share of variance in the 18-36 Myr band (white-noise null 11 %):
+  STD. The trench pull's own peak is at 74 Myr -- the record length, i.e.
+  residual curvature after linear detrending, not an oscillation. Its
+  spectrum near the slab's 24.7 Myr peak reads
 
-                              STD      WAL
-    slab descent rate        66 %     33 %
-    slab dip                 69 %     46 %
-    Delta N_D                68 %     51 %
-    trench pull, stabilised  20 %     40 %
-    trench pull, raw         15 %     31 %
+      74 Myr  25 %  <- its peak
+      37      11
+      24.7     4.4  <- the slab's peak; a LOCAL MINIMUM of the trench pull
+      18.5    15
+      14.8    12
+      10.6    13
 
-  and the single-bin form, which is sharper still. In STD the slab's
-  descent rate peaks in the 25 Myr bin with 42 % of its variance. In that
-  SAME bin: slab dip 42 %, Delta N_D 53 % -- and the trench pull 4.4 %.
-  The trench pull is not merely weak at the slab's frequency, it sits at a
-  local MINIMUM of its own spectrum there. Its power is at the record
-  length (24 %) and scattered through 12-14 Myr.
+  against slab descent 42 %, slab dip 42 % and Delta N_D 53 % in that same
+  24.7 Myr bin. But share of variance is not force. In absolute terms the
+  24.7 Myr component is
 
-  WAL does not rescue the idea. Its slab descent peaks at 15 Myr, its
-  trench pull at 36 Myr; both have band power but at different periods
-  inside the band, and the peak-bin shares are 22 % against 12 %.
+      Delta N_D     amplitude 0.296 TN/m, lag -10.4 Myr (near ANTIPHASE,
+                    which is the r = -0.90 seen in the band correlation)
+      trench pull   amplitude 0.037 TN/m, lag  -1.6 Myr (near IN PHASE)
 
-  No band correlation reaches significance in either run (best: STD
-  Delta N_D against slab descent, r = -0.90, p = 0.065). But the p-values
-  are the WEAKEST part of this figure, not the strongest -- with three
-  Fourier bins in the band and n = 37 the surrogate test has very little
-  power, which is exactly why r = -0.90 fails to clear 0.05. Read the
-  variance shares, which need no test: 68 % against 20 % is not a
-  marginal difference.
+  So the trench pull does respond at the buckling frequency, coherently
+  and almost without lag -- at ONE EIGHTH the amplitude of Delta N_D. The
+  correct statement is not "no response" but "a small in-phase response,
+  an order of magnitude below the in-plane one".
 
-WHAT IT MEANS. The slab's oscillation reaches the trailing plate through
-Delta N_D and essentially not at all through the trench pull. That is the
-same conclusion as DYNAMICS_FINDINGS §1.7 -- which found velocity changes
-paid for by Delta N_D relaxing, with the driving term unmoved -- arrived
-at independently and in the frequency domain. The two now agree.
+  WAL is a different animal and should not be averaged with STD. Its slab
+  descent peaks at 14.8 Myr while its dip peaks at 24.6; its trench pull
+  peaks at 37 Myr. At the descent peak the trench pull's amplitude
+  (0.131 TN/m) is comparable to Delta N_D's (0.156), so WAL does NOT
+  reproduce STD's eightfold separation.
 
-⚠ It also settles the reading of fig_slab_correlations that prompted this:
-the trench pull's apparent shared periodicity with the slab was the eye
-matching envelopes on a normalised axis. It does not survive a spectrum.
-And the x_I stabilisation does not change the verdict -- 20 % against
-15 % -- so this is not a measurement artefact either.
+⚠ DAN'S PHASE-SHIFT READING, AND WHY THE BAND-PASS MISLED. In the
+two-bin band-pass the trench pull looked like the slab's frequency shifted
+in phase. It is not: at 24.7 Myr the lag is only -1.6 Myr. What produced
+the appearance is that the band-passed trench pull is dominated by its
+18.5 Myr component (15 %) rather than its 24.7 Myr one (4.4 %), and an
+18.5 Myr sinusoid drifts steadily against a 24.7 Myr one -- across three
+cycles that drift reads to the eye as a fixed lag.
+
+⚠ AND THE ILLUSION IS REAL, QUANTIFIED. Pushed through this two-bin
+filter, PHASE-RANDOMISED SURROGATES of the trench pull correlate with the
+band-passed slab at a median |r| of 0.33 (STD) / 0.36 (WAL). The observed
+value is +0.43. Row 3 draws eight surrogates beside the observed series:
+they oscillate just as convincingly. Any narrow band-pass manufactures
+apparent coherence, and this one is about as narrow as a filter can be.
+
+ON WIDENING THE BAND (Dan's suggestion). 15-35 Myr selects the IDENTICAL
+two bins and changes nothing whatsoever. 10-40 Myr admits six bins, but
+the white-noise null rises from 11 % to 33 % and the band then includes
+the 10-14 Myr content, which is a separate phenomenon -- STD's trench
+pull jumps to 57 % on that band purely by absorbing power that has
+nothing to do with the slab. Neither helps. The per-bin table above is
+the statement that survives; a band is only ever a lossy summary of it.
+
+WHAT IT MEANS. The buckling cycle reaches the trailing plate
+overwhelmingly as a modulation of the in-plane resultant, with a small
+in-phase trench-pull response alongside it. That is DYNAMICS_FINDINGS
+§1.7 (76 % of a slab pulse absorbed by Delta N_D relaxing, 15 % by trench
+pull) recovered in the frequency domain -- and the 8:1 amplitude ratio
+here is close to the 76:15 split found there by regression.
 
 DRAFT CAPTION (if needed). Spectral test of the trench pull against the
 slab, STD (left) and WAL (right). Top: periodograms of the slab descent
 rate, slab dip, stabilised trench pull and raw trench pull, each
-normalised by its own variance, with the 18-36 Myr band shaded. Middle:
-the same series band-passed to that band. Bottom: share of variance in
-the band, against the white-noise expectation, and band-limited
-correlations with p-values from phase-randomised surrogates.
+normalised by its own variance and drawn as bars, since the record
+supports no resolution between bins; the slab's peak bin is shaded.
+Middle: each series reconstructed from that single bin alone, scaled by
+its own standard deviation, so amplitude and phase are directly
+comparable. Bottom: the two-bin band-pass of the trench pull against
+eight phase-randomised surrogates of itself, which oscillate equally
+convincingly -- the control showing that a narrow band-pass manufactures
+apparent coherence.
 """
 import os, sys
 import numpy as np
@@ -163,12 +207,22 @@ def surrogate(y, rng):
     return np.fft.irfft(np.abs(F) * np.exp(1j * ph), n=len(y))
 
 
+def onebin(tu, y, k):
+    """Reconstruct y from the SINGLE Fourier bin k (1-based on the DC-dropped
+    grid). One sinusoid, so amplitude and phase are read directly and the
+    two-sinusoid beating that makes a narrow band-pass look oscillatory
+    cannot occur."""
+    F = np.fft.rfft(y - y.mean())
+    G = np.zeros_like(F); G[k + 1] = F[k + 1]
+    return np.fft.irfft(G, n=len(y))
+
+
 def main():
     if not hasattr(np, 'trapezoid'):
         np.trapezoid = np.trapz
     d, s = cpc.load(), sgc.load()
     rng = np.random.default_rng(SEED)
-    fig, axes = plt.subplots(3, 2, figsize=(13.2, 11.4),
+    fig, axes = plt.subplots(3, 2, figsize=(13.6, 12.2),
                              gridspec_kw={'height_ratios': [1.25, 1.0, 1.0]})
     rows = [('model', 'quantity', 'value')]
 
@@ -183,115 +237,143 @@ def main():
         series = {
             'slab descent rate': s[f'{key}_vz_upper'][:n],
             'slab dip': s[f'{key}_dip'][:n],
+            '$\\Delta N_D$': q['d_nd'][:n] / 1e12,
             'trench pull (stabilised)': TP_stab,
             'trench pull (raw)': TP_raw,
-            '$\\Delta N_D$': q['d_nd'][:n] / 1e12,
         }
         U = {nm: uniform(t, y) for nm, y in series.items()}
         tu = U['slab descent rate'][0]
-        nbin = len(np.fft.rfftfreq(len(tu))) - 1
         per_all = 1.0 / np.fft.rfftfreq(len(tu), tu[1] - tu[0])[1:]
-        null = ((per_all >= BAND[0]) & (per_all <= BAND[1])).sum() / nbin
+        nbin = len(per_all)
+        inband = (per_all >= BAND[0]) & (per_all <= BAND[1])
+        null = inband.sum() / nbin
+        P = {nm: spectrum(*U[nm])[1] for nm in series}
+        kpk = int(np.argmax(P['slab descent rate']))
 
-        # --- row 1: periodograms ----------------------------------------
+        # --- row 1: per-bin bars ----------------------------------------
+        NB = 9
         a0 = axes[0, col]
-        a0.axvspan(BAND[0], BAND[1], color='#FFE9B0', alpha=0.55, zorder=0,
-                   label=f'{BAND[0]:.0f}–{BAND[1]:.0f} Myr band')
-        for nm, (tux, y) in U.items():
-            f, P = spectrum(tux, y)
-            a0.plot(1 / f, P, 'o-', color=C[nm], ms=3.5,
-                    lw=2.4 if 'slab descent' in nm else 1.6,
-                    alpha=0.55 if 'raw' in nm else 1.0, label=nm)
-        a0.set_xscale('log'); a0.set_xlim(72, 4)
-        a0.set_xticks([72, 36, 24, 18, 12, 8, 6, 4])
-        a0.set_xticklabels(['72', '36', '24', '18', '12', '8', '6', '4'])
-        a0.set_xlabel('Period [Myr]   (Fourier bins; no resolution between them)',
-                      fontsize=9.5)
-        a0.set_ylabel('share of variance', fontsize=10)
+        w = 0.8 / len(series)
+        xs = np.arange(NB)
+        for i, nm in enumerate(series):
+            a0.bar(xs + (i - (len(series) - 1) / 2) * w, 100 * P[nm][:NB], w,
+                   color=C[nm], label=nm,
+                   alpha=0.55 if 'raw' in nm else 1.0)
+        a0.axvspan(kpk - 0.5, kpk + 0.5, color='#FFE9B0', alpha=0.5, zorder=0)
+        a0.text(kpk, a0.get_ylim()[1] * 0.97,
+                f"slab's peak\n{per_all[kpk]:.0f} Myr", ha='center', va='top',
+                fontsize=8.5, color='0.35')
+        a0.set_xticks(xs)
+        a0.set_xticklabels([f'{p:.0f}' for p in per_all[:NB]])
+        a0.set_xlabel('Fourier bin, labelled by period [Myr] — nothing exists '
+                      'between the bars', fontsize=9)
+        a0.set_ylabel('share of variance [%]', fontsize=10)
         a0.set_title(f'{key}', fontsize=11)
         a0.legend(frameon=False, fontsize=8, loc='upper right')
 
-        # --- row 2: band-passed ------------------------------------------
+        # --- row 2: SINGLE-BIN reconstruction at the slab's peak --------
         a1 = axes[1, col]
-        for nm in ('slab descent rate', 'trench pull (stabilised)',
-                   'trench pull (raw)', '$\\Delta N_D$'):
+        ref = onebin(tu, U['slab descent rate'][1], kpk)
+        for nm in series:
             tux, y = U[nm]
-            bp = bandpass(tux, y)
-            a1.plot(tux, bp / y.std(), '-', color=C[nm],
-                    lw=2.4 if 'slab' in nm else 1.8,
-                    alpha=0.5 if 'raw' in nm else 1.0, label=nm)
+            ob = onebin(tux, y, kpk)
+            a1.plot(tux, ob / y.std(), '-', color=C[nm],
+                    lw=2.6 if 'slab descent' in nm else 1.9,
+                    alpha=0.5 if 'raw' in nm else 1.0,
+                    label=f'{nm}  ({100*P[nm][kpk]:.0f} %)')
         a1.axhline(0, color='k', lw=0.8)
-        a1.set_ylabel(f'band-passed {BAND[0]:.0f}–{BAND[1]:.0f} Myr\n'
-                      '(÷ full s.d.)', fontsize=9)
+        a1.set_ylabel(f'{per_all[kpk]:.0f} Myr component\n(÷ full s.d. of each)',
+                      fontsize=9)
         a1.set_xlabel('Model time [Myr]', fontsize=10.5)
-        a1.legend(frameon=False, fontsize=8, loc='upper left', ncol=2)
+        a1.legend(frameon=False, fontsize=7.5, loc='upper left', ncol=2)
+        a1.set_title('one sinusoid each — amplitude is directly comparable',
+                     fontsize=9, color='0.3')
 
-        # --- row 3: band share + surrogate-tested band correlation --------
+        # --- row 3: the illusion control --------------------------------
         a2 = axes[2, col]
-        names = list(series)
-        shares = [band_share(*U[nm]) for nm in names]
-        a2.barh(names, shares, color=[C[nm] for nm in names], height=0.6)
-        a2.axvline(null, color='r', ls='--', lw=1.4,
-                   label=f'white-noise null ({100*null:.0f} %)')
-        a2.set_xlabel(f'share of variance in the {BAND[0]:.0f}–{BAND[1]:.0f} Myr band',
-                      fontsize=9.5)
-        a2.tick_params(axis='y', labelsize=8)
-        a2.legend(frameon=False, fontsize=8, loc='lower right')
-        for i, v in enumerate(shares):
-            a2.text(v + 0.008, i, f'{100*v:.0f} %', va='center', fontsize=8)
+        tux, y = U['trench pull (stabilised)']
+        for j in range(8):
+            a2.plot(tux, bandpass(tux, surrogate(y, rng)) / y.std(), '-',
+                    color='#B0B0B0', lw=1.0, alpha=0.75,
+                    label='phase-randomised surrogates (8)' if j == 0 else None)
+        a2.plot(tux, bandpass(*U['slab descent rate'])
+                / U['slab descent rate'][1].std(), '-', color=C['slab descent rate'],
+                lw=2.6, label='slab descent rate')
+        a2.plot(tux, bandpass(tux, y) / y.std(), '-',
+                color=C['trench pull (stabilised)'], lw=2.4,
+                label='trench pull (stabilised), observed')
+        a2.axhline(0, color='k', lw=0.8)
+        a2.set_ylabel(f'{BAND[0]:.0f}–{BAND[1]:.0f} Myr band-pass\n(÷ full s.d.)',
+                      fontsize=9)
+        a2.set_xlabel('Model time [Myr]', fontsize=10.5)
+        a2.legend(frameon=False, fontsize=8, loc='upper left', ncol=2)
+        a2.set_title(f'illusion control — the band holds only {inband.sum()} bins; '
+                     'surrogates oscillate just as convincingly',
+                     fontsize=9, color='0.3')
 
-        print(f'\n=== {key}   band {BAND[0]:.0f}-{BAND[1]:.0f} Myr, '
-              f'white-noise null {100*null:.0f} %')
-        for nm, sh in zip(names, shares):
-            print(f'   band share  {nm:26s} {100*sh:5.1f} %'
-                  f'{"   <== below null" if sh < null else ""}')
-            rows.append((key, f'band_share_{nm.strip("$").replace(" ", "_").replace("\\", "")}',
-                         f'{sh:.4f}'))
-        rows.append((key, 'white_noise_null_share', f'{null:.4f}'))
+        # ---- numbers ----------------------------------------------------
+        print(f'\n=== {key}   bins: '
+              + ', '.join(f'{p:.1f}' for p in per_all[:7])
+              + f' ...   band {BAND[0]:.0f}-{BAND[1]:.0f} Myr holds '
+                f'{inband.sum()} bins (null {100*null:.0f} %)')
+        # Amplitude of the slab-bin component in PHYSICAL units, and its
+        # phase relative to the slab. For a single Fourier component that
+        # carries a fraction f of a series' variance, the amplitude is
+        # sqrt(2 f) * sd -- so a small share of a large series can still be
+        # a large force, and this is the check on that.
+        Fslab = np.fft.rfft(U['slab descent rate'][1]
+                            - U['slab descent rate'][1].mean())[kpk + 1]
+        for nm in series:
+            kp = int(np.argmax(P[nm]))
+            sd = U[nm][1].std()
+            amp = np.sqrt(2 * P[nm][kpk]) * sd
+            Fk = np.fft.rfft(U[nm][1] - U[nm][1].mean())[kpk + 1]
+            dphi = np.angle(Fk / Fslab)
+            lag = dphi / (2 * np.pi) * per_all[kpk]
+            print(f'   {nm:26s} peak {per_all[kp]:5.1f} Myr ({100*P[nm][kp]:4.1f} %)'
+                  f'   at the slab bin {100*P[nm][kpk]:5.1f} %'
+                  f'   band {100*P[nm][inband].sum():5.1f} %'
+                  f'   amp {amp:7.3f}   lag {lag:+5.1f} Myr')
+            sl = nm.strip('$').replace(' ', '_').replace('\\', '') \
+                   .replace('(', '').replace(')', '')
+            rows += [(key, f'peak_period_{sl}_Myr', f'{per_all[kp]:.1f}'),
+                     (key, f'peak_share_{sl}', f'{P[nm][kp]:.4f}'),
+                     (key, f'slab_bin_share_{sl}', f'{P[nm][kpk]:.4f}'),
+                     (key, f'band_share_{sl}', f'{P[nm][inband].sum():.4f}'),
+                     (key, f'slab_bin_amplitude_{sl}', f'{amp:.4f}'),
+                     (key, f'slab_bin_lag_vs_slab_{sl}_Myr', f'{lag:.2f}')]
+        rows += [(key, 'slab_peak_period_Myr', f'{per_all[kpk]:.1f}'),
+                 (key, 'band_bin_count', str(int(inband.sum()))),
+                 (key, 'white_noise_null_share', f'{null:.4f}')]
 
-        # THE SHARPEST FORM OF THE ANSWER: the single Fourier bin where the
-        # slab's descent rate peaks, and what every other series has there.
-        f_s, P_s = spectrum(*U['slab descent rate'])
-        kpk = int(np.argmax(P_s)); per_pk = 1.0 / f_s[kpk]
-        print(f'   slab descent peaks in the {per_pk:.0f} Myr bin '
-              f'({100*P_s[kpk]:.0f} % of its variance). In that same bin:')
-        for nm in names:
-            P = spectrum(*U[nm])[1]
-            print(f'      {nm:26s} {100*P[kpk]:5.1f} %')
-            rows.append((key, f'peak_bin_share_{nm.strip("$").replace(" ", "_").replace("\\", "")}',
-                         f'{P[kpk]:.4f}'))
-        rows.append((key, 'slab_peak_period_Myr', f'{per_pk:.1f}'))
-
-        # phase-alignment test
-        for tgt in ('slab descent rate', 'slab dip'):
-            bt = bandpass(*U[tgt])
-            for nm in ('trench pull (stabilised)', 'trench pull (raw)',
-                       '$\\Delta N_D$'):
-                tux, y = U[nm]
-                r = float(np.corrcoef(bandpass(tux, y), bt)[0, 1])
-                null_r = np.array([np.corrcoef(bandpass(tux, surrogate(y, rng)),
-                                               bt)[0, 1] for _ in range(N_SURR)])
-                p = float((np.abs(null_r) >= abs(r)).mean())
-                star = '  *' if p < 0.05 else ''
-                print(f'   band r({tgt:18s}, {nm:26s}) = {r:+.2f}   '
-                      f'p = {p:.3f}{star}')
-                sl = lambda x: x.strip('$').replace(' ', '_').replace('\\', '') \
-                                .replace('(', '').replace(')', '')
-                rows += [(key, f'band_corr_{sl(tgt)}_{sl(nm)}', f'{r:.3f}'),
-                         (key, f'band_corr_p_{sl(tgt)}_{sl(nm)}', f'{p:.4f}')]
+        # the illusion, quantified: how often does a surrogate beat the
+        # observed band correlation?
+        bt = bandpass(*U['slab descent rate'])
+        for nm in ('trench pull (stabilised)', '$\\Delta N_D$'):
+            tux2, y2 = U[nm]
+            r = float(np.corrcoef(bandpass(tux2, y2), bt)[0, 1])
+            nullr = np.array([np.corrcoef(bandpass(tux2, surrogate(y2, rng)),
+                                          bt)[0, 1] for _ in range(N_SURR)])
+            p = float((np.abs(nullr) >= abs(r)).mean())
+            print(f'   band r(slab descent, {nm:26s}) = {r:+.2f}  p = {p:.3f}'
+                  f'   [median |r| of surrogates {np.median(np.abs(nullr)):.2f}]')
+            sl = nm.strip('$').replace(' ', '_').replace('\\', '') \
+                   .replace('(', '').replace(')', '')
+            rows += [(key, f'band_corr_slab_{sl}', f'{r:.3f}'),
+                     (key, f'band_corr_p_slab_{sl}', f'{p:.4f}'),
+                     (key, f'surrogate_median_abs_r_{sl}',
+                      f'{np.median(np.abs(nullr)):.3f}')]
 
         for ax in axes[:, col]:
             ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
-    for row in (1,):
-        lo = min(ax.get_ylim()[0] for ax in axes[row, :])
-        hi = max(ax.get_ylim()[1] for ax in axes[row, :])
-        hi = max(abs(lo), abs(hi))
+    for row in (1, 2):
+        hi = max(max(abs(v) for v in ax.get_ylim()) for ax in axes[row, :])
         for ax in axes[row, :]:
             ax.set_ylim(-hi, hi)
 
-    fig.suptitle('Does the trench pull carry power at the slab\'s frequency? '
-                 f'({N_SURR:,} phase-randomised surrogates)', fontsize=11.5)
+    fig.suptitle("Does the trench pull carry power at the slab's buckling "
+                 "frequency? Per-bin, with an illusion control", fontsize=11.5)
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'diag_trench_pull_spectrum.png')
     fig.savefig(out, bbox_inches='tight', dpi=200)
@@ -302,7 +384,9 @@ def main():
                       models=('STD', 'WAL'),
                       meta={'band_Myr': list(BAND), 'n_surrogates': N_SURR,
                             'seed': SEED,
-                            'sampling': '37 snapshots at 2 Myr; bins 72/36/24/18/...',
+                            'sampling': '37 snapshots at 2 Myr; bins 74/37/24.7/18.5/...',
+                            'bins_in_band': 'TWO — 24.7 and 18.5 Myr; the per-bin '
+                                            'table is the honest statement',
                             'surrogates': 'phase-randomised, amplitude spectrum preserved',
                             'slab_proxies': 'mean dip + upper-mantle descent rate; '
                                             'buckling interpretation inherited from '

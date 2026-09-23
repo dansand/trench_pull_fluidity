@@ -11,7 +11,7 @@
     "quantity",
     "value"
   ],
-  "n_rows": 48,
+  "n_rows": 78,
   "sigfig": 6,
   "meta": {
     "band_Myr": [
@@ -20,7 +20,8 @@
     ],
     "n_surrogates": 5000,
     "seed": 20260923,
-    "sampling": "37 snapshots at 2 Myr; bins 72/36/24/18/...",
+    "sampling": "37 snapshots at 2 Myr; bins 74/37/24.7/18.5/...",
+    "bins_in_band": "TWO \u2014 24.7 and 18.5 Myr; the per-bin table is the honest statement",
     "surrogates": "phase-randomised, amplitude spectrum preserved",
     "slab_proxies": "mean dip + upper-mantle descent rate; buckling interpretation inherited from the earlier paper (Dan 2026-09-23)",
     "note": "diagnostic, not a manuscript figure"
