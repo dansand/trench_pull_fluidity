@@ -96,6 +96,23 @@ C_TRENCH = '#0072B2'
 C_XI = '#D55E00'
 C_STAB = '#1B9E77'
 C_V = '#7B3294'
+C_W = '#E7298A'
+RHO_G = 3300.0 * 9.8          # no ocean (conventions §6.1)
+
+
+def equiv_topo(szz_profiles):
+    """Equivalent topography sigma_zz(0)/rho g, POSITIVE DOWNWARD, with the
+    surface value linearly extrapolated to z = 0 from the two shallowest
+    cell centres (the cache's z grid starts at 500 m).
+
+    The mesh carries no elevation mass -- topography lives in the surface
+    normal stress -- so a depression of depth w registers as
+    sigma_zz(0) = +rho g w in the tension-positive register. W21 ruling:
+    this is the equivalent topography, validated against the boundary free
+    surface to 1 m. The sign matches fig_slab_correlations, which forms the
+    x_I-referenced version as -p_T(0)/rho g = (szz_T - szz_I)(0)/rho g."""
+    s0 = szz_profiles[:, 0] - 0.5 * (szz_profiles[:, 1] - szz_profiles[:, 0])
+    return s0 / RHO_G
 
 
 def rough(y):
@@ -117,9 +134,10 @@ def main():
     if not hasattr(np, 'trapezoid'):
         np.trapezoid = np.trapz
     d = cpc.load()
-    fig, axes = plt.subplots(4, 2, figsize=(13.4, 13.0), sharex='col')
+    fig, axes = plt.subplots(5, 2, figsize=(13.4, 16.2), sharex='col')
     rows = [('model', 'quantity', 'value')]
     ld = lambda t, y: y - np.polyval(np.polyfit(t, y, 1), t)
+    twins = []
 
     for col, key in enumerate(('STD', 'WAL')):
         c = cpc.derive(d, key)
@@ -198,8 +216,55 @@ def main():
                       f's.d. {ld(t, TP).std():.3f})')
         a3.axhline(0, color='k', lw=0.8)
         a3.set_ylabel('detrended [TN/m]\n(ABSOLUTE — not normalised)', fontsize=9.5)
-        a3.set_xlabel('Model time [Myr]', fontsize=11)
         a3.legend(frameon=False, fontsize=8.5, loc='upper left')
+
+        # --- row 5: stabilised trench pull against trench depth ---------
+        # Dan, 2026-09-23. The trench depth used here is the equivalent
+        # topography of the TRENCH COLUMN ALONE -- deliberately NOT the
+        # x_I-referenced version, which would share its reference with the
+        # trench pull and inflate the correlation for the very reason this
+        # figure exists. The x_I-referenced value is computed alongside and
+        # tabulated so the size of that inflation is on the record.
+        w_abs = equiv_topo(d[f'{key}_szz_T'])
+        w_rel = w_abs - equiv_topo(d[f'{key}_szz_I'])   # x_I-referenced
+        med = lambda y: median_filter(y, size=3, mode='nearest')
+        dtp, dw = ld(t, TP_stab), ld(t, w_abs)
+        r_raw = float(np.corrcoef(dtp, dw)[0, 1])
+        r_sm = float(np.corrcoef(med(dtp), med(dw))[0, 1])
+        r_rel = float(np.corrcoef(ld(t, TP), ld(t, w_rel))[0, 1])
+        r_unstab = float(np.corrcoef(ld(t, TP), dw)[0, 1])
+
+        a4 = axes[4, col]
+        a4.plot(t, dtp, '-', color=C_STAB, lw=1.0, alpha=0.40)
+        h1, = a4.plot(t, med(dtp), '-', color=C_STAB, lw=2.4,
+                      label='stabilised trench pull')
+        a4.set_ylabel('trench pull anomaly\n[TN/m]', fontsize=9.5, color=C_STAB)
+        a4.tick_params(axis='y', labelcolor=C_STAB)
+        a4b = a4.twinx(); twins.append(a4b)
+        a4b.plot(t, dw, '-', color=C_W, lw=1.0, alpha=0.40)
+        h2, = a4b.plot(t, med(dw), '-', color=C_W, lw=2.4,
+                       label='trench depth (trench column only)')
+        a4b.set_ylabel('trench depth anomaly [m]', fontsize=9.5, color=C_W)
+        a4b.tick_params(axis='y', labelcolor=C_W)
+        a4.axhline(0, color='k', lw=0.8)
+        a4.legend([h1, h2], [f'stabilised trench pull',
+                             f'trench depth (trench column only)'],
+                  frameon=False, fontsize=8.5, loc='upper left')
+        a4.set_title(f'faint = no extra smoothing ($r$ = {r_raw:+.2f});  '
+                     f'bold = 3-point median ($r$ = {r_sm:+.2f})',
+                     fontsize=9, color='0.3')
+        a4.set_xlabel('Model time [Myr]', fontsize=11)
+
+        print(f'   {key}: stabilised TP vs trench depth  r {r_raw:+.2f} raw, '
+              f'{r_sm:+.2f} median-smoothed; unstabilised TP vs same depth '
+              f'{r_unstab:+.2f}; both x_I-referenced {r_rel:+.2f}')
+        rows += [(key, 'corr_stabilised_trench_pull_depth_raw', f'{r_raw:.3f}'),
+                 (key, 'corr_stabilised_trench_pull_depth_smoothed', f'{r_sm:.3f}'),
+                 (key, 'corr_raw_trench_pull_depth', f'{r_unstab:.3f}'),
+                 (key, 'corr_trench_pull_depth_both_xI_referenced', f'{r_rel:.3f}'),
+                 (key, 'roughness_trench_depth_trench_column_only', f'{rough(dw):.3f}'),
+                 (key, 'roughness_trench_depth_xI_referenced',
+                  f'{rough(ld(t, w_rel)):.3f}')]
 
         for ax in axes[:, col]:
             ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
@@ -234,14 +299,16 @@ def main():
     # detrended rows (2 and 4) are additionally forced symmetric about
     # zero -- they are anomalies, and an asymmetric anomaly axis
     # misrepresents which way the excursions go.
-    for row in range(4):
-        pair = axes[row, :]
-        lo = min(ax.get_ylim()[0] for ax in pair)
-        hi = max(ax.get_ylim()[1] for ax in pair)
-        if row in (1, 3):
-            hi = max(abs(lo), abs(hi)); lo = -hi
-        for ax in pair:
-            ax.set_ylim(lo, hi)
+    for row in range(5):
+        pair = list(axes[row, :]) + (twins if row == 4 else [])
+        groups = [list(axes[row, :])] if row != 4 else [list(axes[row, :]), twins]
+        for grp in groups:
+            lo = min(ax.get_ylim()[0] for ax in grp)
+            hi = max(ax.get_ylim()[1] for ax in grp)
+            if row in (1, 3, 4):
+                hi = max(abs(lo), abs(hi)); lo = -hi
+            for ax in grp:
+                ax.set_ylim(lo, hi)
 
     fig.suptitle('Diagnostic — the trench pull\'s jaggedness is the $x_I$ reference, '
                  'not the trench column', fontsize=12)

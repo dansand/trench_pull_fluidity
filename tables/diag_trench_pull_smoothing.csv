@@ -3,6 +3,12 @@ STD,variance_removed_percent_3-point_running_median,23.6
 STD,variance_removed_percent_5-point_Savitzky–Golay,24.8
 STD,variance_removed_percent_Gaussian_\sigma_=_1_step,46.7
 STD,variance_removed_percent_Gaussian_\sigma_=_2_steps,66
+STD,corr_stabilised_trench_pull_depth_raw,0.877
+STD,corr_stabilised_trench_pull_depth_smoothed,0.865
+STD,corr_raw_trench_pull_depth,0.75
+STD,corr_trench_pull_depth_both_xI_referenced,0.945
+STD,roughness_trench_depth_trench_column_only,0.596
+STD,roughness_trench_depth_xI_referenced,0.834
 STD,roughness_trench_pull_raw,1.068
 STD,roughness_trench_pull_stabilised,0.646
 STD,hf_share_trench_pull_raw_percent,50.5
@@ -20,6 +26,12 @@ WAL,variance_removed_percent_3-point_running_median,25.2
 WAL,variance_removed_percent_5-point_Savitzky–Golay,17.3
 WAL,variance_removed_percent_Gaussian_\sigma_=_1_step,34.1
 WAL,variance_removed_percent_Gaussian_\sigma_=_2_steps,59.1
+WAL,corr_stabilised_trench_pull_depth_raw,0.873
+WAL,corr_stabilised_trench_pull_depth_smoothed,0.885
+WAL,corr_raw_trench_pull_depth,0.779
+WAL,corr_trench_pull_depth_both_xI_referenced,0.946
+WAL,roughness_trench_depth_trench_column_only,0.437
+WAL,roughness_trench_depth_xI_referenced,0.801
 WAL,roughness_trench_pull_raw,0.91
 WAL,roughness_trench_pull_stabilised,0.558
 WAL,hf_share_trench_pull_raw_percent,22.4

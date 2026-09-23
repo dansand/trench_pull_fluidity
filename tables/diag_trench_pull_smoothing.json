@@ -11,7 +11,7 @@
     "quantity",
     "value"
   ],
-  "n_rows": 34,
+  "n_rows": 46,
   "sigfig": 6,
   "meta": {
     "roughness": "sd(step difference)/sd of the detrended series",
