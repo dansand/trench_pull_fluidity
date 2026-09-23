@@ -29,6 +29,46 @@ From the single-step notebook / poster brand table: N_D **black** ·
 trench column orange · ridge column purple. Direction glyph
 ("interpreting a change") uses the same colours.
 
+## Negated quantities: same colour, DASHED (Dan, 2026-09-24)
+
+A quantity plotted as the **negative of its palette definition** keeps the
+palette colour but is drawn **dashed**, and is **labelled in both
+registers**. Established on `fig_budget_time` / `fig_budget_time_detrended`,
+where the driving term appears as
+
+    $\Delta\bar\sigma_{zz}\ (= -\Delta\mathrm{GPE}^{*})$
+
+in blue dashed. The reason: the balance palette assigns blue to ΔGPE\*,
+so plotting its negative solid-blue would make the colour assert the wrong
+sign — and colour is read before any label. The linestyle carries what the
+colour cannot.
+
+Why this arises at all: `fig_balance_snapshot` plots **+ΔGPE\*** against
+distance, while the budget-through-time figures need each curve to be its
+term's contribution to the force in +x, which for the driving term is
+−ΔGPE\* = +Δσ̄_zz. Writing it as Δσ̄_zz makes the balance all-additive,
+ΔN_D + Δσ̄_zz + F_B = 0, and matches the decomposition already used in
+the snapshot figure's fundamental-form panel (σ̄_xx = N_D + σ̄_zz).
+
+⚠ Linestyle is also the model encoding in **encoding 3** overlays (STD
+solid / WAL dashed). The two never collide in practice because encoding 3
+applies only where models share an axis, and these figures put the models
+in separate columns (encoding 1). A figure that needs both must say so in
+its caption.
+
+⚠ This does NOT resolve the sign-convention clash with
+`fig_ridge_column_stresses` panel (c), where positive means driving
+(PAPER_PLAN W28). That is a frame question, not a notation one (W31).
+
+## Legends carry symbols, not statistics (Dan, 2026-09-24)
+
+Trend slopes, standard deviations and other fitted numbers do **not**
+belong in legend entries. They go in the figure caption, the main text, or
+`tables/`. A legend should let the reader identify a curve and nothing
+else. Applied to `fig_budget_time` and `fig_budget_time_detrended`, whose
+legends previously carried per-curve trends and residual standard
+deviations.
+
 ## Domain palette — the schematic's two domains (Dan, 2026-09-21)
 
 The manuscript schematic colours the two additive domains of the balance,

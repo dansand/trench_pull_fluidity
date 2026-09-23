@@ -61,9 +61,14 @@ DRAFT CAPTION. The three terms of the vertically integrated force balance
 between the trench and ridge columns, for STD (left) and WAL (right).
 Each curve is that term's contribution to the net horizontal force in the
 analysis frame, signed so that negative acts toward the trench and drives
-the plate while positive resists; the balance
-Delta N_D - Delta GPE* + F_B = 0 means the plotted curves sum to the
-closure (green dashed). (a, b) The terms through time, with each fitted
+the plate while positive resists, so that the balance reads
+Delta N_D + Delta sigma_zz-bar + F_B = 0 and the plotted curves sum to the
+closure (green dashed). The driving term is plotted in the vertical
+normal-stress register, Delta sigma_zz-bar, which is identically
+-Delta GPE*; it is DASHED because the balance palette's blue denotes
+Delta GPE* itself, and the linestyle rather than the colour carries the
+change of sign. Secular trends per 10 Myr: Delta sigma_zz-bar -0.36 (STD)
+/ -0.40 (WAL), Delta N_D +0.56 / +0.46, F_B -0.19 / -0.06. (a, b) The terms through time, with each fitted
 secular trend drawn thin and the normal-stress-difference trend mirrored
 into the driving half (dotted) so that its slope can be read against the
 driving trend, the gap between them being the basal-traction trend.
@@ -123,11 +128,14 @@ def main():
                    zorder=0,
                    label=f'$\\pm${PERT_TNM:.1f} TN/m (perturbation scale)')
         a0.axhline(0, color='k', lw=1.6)
-        a0.plot(t, -gpe, color='b', lw=4, alpha=0.6,
-                label=r'$-\Delta\mathrm{GPE}^{*}$' + f'  ({sl(gpe):+.2f}/10 Myr)')
-        a0.plot(t, nd, color='k', lw=1.6,
-                label=r'$\Delta N_D$' + f'  ({sl(nd):+.2f})')
-        a0.plot(t, fb, color='red', lw=2, label='$F_B$' + f'  ({sl(fb):+.2f})')
+        # DASHED, and named in both registers (Dan, 2026-09-24). The
+        # balance palette assigns blue to Delta GPE*; this curve is its
+        # NEGATIVE, so plotting it solid blue would make the colour assert
+        # the wrong sign. Dashed marks "same quantity, negated register".
+        a0.plot(t, -gpe, color='b', lw=4, alpha=0.6, ls='--',
+                label=r'$\Delta\bar\sigma_{zz}\ (=-\Delta\mathrm{GPE}^{*})$')
+        a0.plot(t, nd, color='k', lw=1.6, label=r'$\Delta N_D$')
+        a0.plot(t, fb, color='red', lw=2, label='$F_B$')
         a0.plot(t, clo, color='g', ls='--', lw=2.5, label='closure')
         a0.plot(t, -fit(t, gpe), color='b', lw=1.0, alpha=0.9)
         a0.plot(t, fit(t, nd), color='k', lw=1.0, alpha=0.9)
@@ -147,13 +155,12 @@ def main():
         a1 = axes[1, col]
         a1.axhspan(-PERT_TNM, PERT_TNM, color='0.55', alpha=0.13, lw=0,
                    zorder=0)
-        res = {r'$-\Delta\mathrm{GPE}^{*}$': (ld(t, -gpe), 'b', 4, '-', 0.6),
+        res = {r'$\Delta\bar\sigma_{zz}\ (=-\Delta\mathrm{GPE}^{*})$': (ld(t, -gpe), 'b', 4, '--', 0.6),
                r'$\Delta N_D$': (ld(t, nd), 'k', 1.6, '-', 1.0),
                '$F_B$': (ld(t, fb), 'red', 2.0, '-', 1.0),
                'closure': (ld(t, clo), 'g', 2.2, '--', 1.0)}
         for nm, (y, c_, lw, ls, al) in res.items():
-            a1.plot(t, y, color=c_, lw=lw, ls=ls, alpha=al,
-                    label=f'{nm}  (s.d. {y.std():.3f})')
+            a1.plot(t, y, color=c_, lw=lw, ls=ls, alpha=al, label=nm)
         a1.axhline(0, color='k', lw=1.0)
         a1.set_xlabel('Model time [Myr]', fontsize=11)
         a1.grid(alpha=0.25, color=C_RULE, lw=0.6)
@@ -193,7 +200,7 @@ def main():
     for ax in axes[0, :]:
         for lab, dy, va in (('RESISTING', 0.975, 'top'),
                             ('DRIVING', 0.025, 'bottom')):
-            ax.text(0.74, dy, lab, transform=ax.transAxes, ha='center', va=va,
+            ax.text(0.86, dy, lab, transform=ax.transAxes, ha='center', va=va,
                     fontsize=15, fontweight='bold', color='0.78', zorder=0)
     # Plain, descriptive title (Dan, 2026-09-24) — the figure argues for
     # itself; the suptitle should only say what is plotted.

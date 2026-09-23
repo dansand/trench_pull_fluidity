@@ -82,13 +82,15 @@ def main():
         sl0 = lambda y: np.polyfit(t, y, 1)[0] * 10          # per 10 Myr
         _g, _n, _f = (q['d_gpe'][m] * 1e-12, q['d_nd'][m] * 1e-12,
                       q['f_b'][m] * 1e-12)
+        # DASHED, and named in both registers (Dan, 2026-09-24) -- see the
+        # note in fig_budget_time_detrended: blue is the balance palette's
+        # Delta GPE*, and this curve is its negative, so the linestyle
+        # carries the sign change that the colour otherwise would not.
         ax.plot(t, q['gpe_term'][m] * 1e-12, color='b', lw=4, alpha=0.6,
-                label=r'$-\Delta\mathrm{GPE}^{*}$'
-                      f'  ({sl0(_g):+.2f}/10 Myr)')
+                ls='--', label=r'$\Delta\bar\sigma_{zz}\ (=-\Delta\mathrm{GPE}^{*})$')
         ax.plot(t, q['d_nd'][m] * 1e-12, color='k', lw=1.6,
-                label=r'$\Delta N_D$' + f'  ({sl0(_n):+.2f})')
-        ax.plot(t, q['f_b'][m] * 1e-12, color='red', lw=2,
-                label=r'$F_B$' + f'  ({sl0(_f):+.2f})')
+                label=r'$\Delta N_D$')
+        ax.plot(t, q['f_b'][m] * 1e-12, color='red', lw=2, label=r'$F_B$')
         ax.plot(t, q['closure'][m] * 1e-12, color='g', ls='--', lw=2.5,
                 label='closure')
         # --- SECULAR TRENDS (Dan, 2026-09-22) ---------------------------
@@ -149,7 +151,7 @@ def main():
     axes[0].set_ylim(lo - 0.30 * abs(lo), hi + 0.30 * abs(hi))
     for ax in axes:
         for lab, dy, va in (('RESISTING', 0.975, 'top'), ('DRIVING', 0.025, 'bottom')):
-            ax.text(0.5, dy, lab, transform=ax.transAxes, ha='center', va=va,
+            ax.text(0.86, dy, lab, transform=ax.transAxes, ha='center', va=va,
                     fontsize=15, fontweight='bold', color='0.78',
                     zorder=0)
     fig.suptitle('The three balance terms between the trench and ridge columns, '
