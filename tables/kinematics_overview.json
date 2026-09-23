@@ -1,0 +1,23 @@
+{
+  "table": "kinematics_overview.csv",
+  "script": "kinematics/fig_kinematics_overview.py",
+  "figure": "kinematics/fig_kinematics_overview.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 38,
+  "sigfig": 6,
+  "meta": {
+    "plate_velocity": "|v_x| mean over top 20 km, trench->ridge",
+    "convergence": "plate velocity + trench rollback",
+    "rollback": "d(x_T)/dt, positive = retreat (mirrored frame)",
+    "dip": "mean inclination of the cold anomaly, 200-400 km",
+    "processing": "none \u2014 raw series, no detrend or smoothing"
+  }
+}
