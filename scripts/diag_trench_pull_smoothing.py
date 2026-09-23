@@ -229,6 +229,20 @@ def main():
                  (key, 'sd_V_trench_TNm', f'{ld(t, V).std():.4f}'),
                  (key, 'sd_nd_trench_TNm', f'{ld(t, ND).std():.4f}')]
 
+    # STD and WAL share a y scale row by row (Dan, 2026-09-23) so the two
+    # models can be compared by eye rather than by reading the ticks. The
+    # detrended rows (2 and 4) are additionally forced symmetric about
+    # zero -- they are anomalies, and an asymmetric anomaly axis
+    # misrepresents which way the excursions go.
+    for row in range(4):
+        pair = axes[row, :]
+        lo = min(ax.get_ylim()[0] for ax in pair)
+        hi = max(ax.get_ylim()[1] for ax in pair)
+        if row in (1, 3):
+            hi = max(abs(lo), abs(hi)); lo = -hi
+        for ax in pair:
+            ax.set_ylim(lo, hi)
+
     fig.suptitle('Diagnostic — the trench pull\'s jaggedness is the $x_I$ reference, '
                  'not the trench column', fontsize=12)
     fig.tight_layout()
