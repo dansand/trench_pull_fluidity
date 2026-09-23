@@ -1,0 +1,32 @@
+{
+  "table": "diag_wal_episode.csv",
+  "script": "diag_wal_episode.py",
+  "figure": "diag_wal_episode.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 82,
+  "sigfig": 6,
+  "meta": {
+    "loading_window_Myr": [
+      46.0,
+      62.0
+    ],
+    "release_window_Myr": [
+      62.0,
+      70.0
+    ],
+    "baseline_window_Myr": [
+      20.0,
+      50.0
+    ],
+    "trench_pull": "x_I-stabilised (\u00a75.10)",
+    "note": "diagnostic, not a manuscript figure"
+  }
+}
