@@ -59,15 +59,25 @@ sign structure (§5.3).
 
 DRAFT CAPTION. The three terms of the vertically integrated force balance
 between the trench and ridge columns, for STD (left) and WAL (right).
-Each curve is that term's contribution to the net horizontal force,
-signed so that negative acts toward the trench and drives the plate while
-positive resists. Top: the terms through time, with fitted secular trends
-(thin) and the normal-stress-difference trend mirrored into the driving
-half (dotted), the gap between it and the driving trend being the basal
-traction trend. Bottom: the same series with linear trends removed, on a
-common symmetric axis. The residual is carried by the two resisting
-terms, which vary in antiphase, while the driving term is comparatively
-quiet; the closure (green) is several times smaller than any of them.
+Each curve is that term's contribution to the net horizontal force in the
+analysis frame, signed so that negative acts toward the trench and drives
+the plate while positive resists; the balance
+Delta N_D - Delta GPE* + F_B = 0 means the plotted curves sum to the
+closure (green dashed). (a, b) The terms through time, with each fitted
+secular trend drawn thin and the normal-stress-difference trend mirrored
+into the driving half (dotted) so that its slope can be read against the
+driving trend, the gap between them being the basal-traction trend.
+(c, d) The same four series with their linear trends removed, on a common
+symmetric axis. The light grey band spans +/-0.5 TN/m in all four panels:
+in (c, d) it is the envelope of the perturbations, and in (a, b) the same
+band acts as a scale bar, showing that those perturbations are about a
+tenth of the GPE-like force they perturb. Through the residual the two
+resisting terms vary in near mirror image -- detrended
+r(Delta N_D, F_B) = -0.93 in STD -- while the driving term is three times
+quieter (residual s.d. 0.110 against 0.289 and 0.309 TN/m), and the
+closure is smaller again at 0.019, so the structure shown is signal
+rather than extraction error. WAL's residual (d) is dominated by the
+single 62-70 Myr episode rather than by a repeating cycle.
 """
 import os, sys
 import numpy as np
