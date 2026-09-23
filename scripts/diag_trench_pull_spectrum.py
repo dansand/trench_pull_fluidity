@@ -85,24 +85,43 @@ more precise and more interesting: SMALL BUT IN PHASE.
       14.8    12
       10.6    13
 
-  against slab descent 42 %, slab dip 42 % and Delta N_D 53 % in that same
-  24.7 Myr bin. But share of variance is not force. In absolute terms the
-  24.7 Myr component is
+  against slab descent 42 %, slab dip 42 %, Delta N_D 53 % and F_B 31 % in
+  that same 24.7 Myr bin. But share of variance is not force. In absolute
+  terms the 24.7 Myr component is
 
-      Delta N_D     amplitude 0.296 TN/m, lag -10.4 Myr (near ANTIPHASE,
-                    which is the r = -0.90 seen in the band correlation)
-      trench pull   amplitude 0.037 TN/m, lag  -1.6 Myr (near IN PHASE)
+      Delta N_D     amplitude 0.296 TN/m, lag -10.4 Myr -- near ANTIPHASE
+                    (the r = -0.90 of the band correlation)
+      F_B           amplitude 0.243 TN/m, lag  +1.7 Myr -- near IN PHASE
+      trench pull   amplitude 0.037 TN/m, lag  -1.6 Myr -- in phase, tiny
 
-  So the trench pull does respond at the buckling frequency, coherently
-  and almost without lag -- at ONE EIGHTH the amplitude of Delta N_D. The
-  correct statement is not "no response" but "a small in-phase response,
-  an order of magnitude below the in-plane one".
+  ⚠ F_B WAS ADDED AT DAN'S REQUEST 2026-09-23 AND IT COMPLETES THE
+  PICTURE. It is also the ONLY term whose band correlation with the slab
+  clears significance: r = +0.93, p = 0.049, against a surrogate median
+  |r| of 0.42.
+
+  THE BUDGET AT THE BUCKLING FREQUENCY (STD, amplitudes in TN/m):
+
+      drive 0.038  =  Delta N_D 0.296  +  F_B 0.243
+
+  which balances only because Delta N_D and F_B are 178 DEGREES APART --
+  their vector sum is 0.054, an order of magnitude below either. The
+  buckling cycle is almost entirely an EXCHANGE BETWEEN THE TWO
+  RESISTANCE TERMS at nearly constant drive. The trench pull's 0.037 is
+  the same size as the whole drive fluctuation, and both are ~13 % of the
+  terms being exchanged.
+
+  So the answer is not "no response" but: the trench pull responds in
+  phase, at an eighth of Delta N_D's amplitude, while the cycle itself is
+  carried by Delta N_D trading against F_B.
 
   WAL is a different animal and should not be averaged with STD. Its slab
   descent peaks at 14.8 Myr while its dip peaks at 24.6; its trench pull
   peaks at 37 Myr. At the descent peak the trench pull's amplitude
   (0.131 TN/m) is comparable to Delta N_D's (0.156), so WAL does NOT
-  reproduce STD's eightfold separation.
+  reproduce STD's eightfold separation. The exchange structure does
+  survive, more weakly: Delta N_D 0.156 against F_B 0.181, 150 deg apart,
+  vector sum 0.090 against a drive of 0.083; F_B again the best-correlated
+  term (r = +0.77, p = 0.095).
 
 ⚠ DAN'S PHASE-SHIFT READING, AND WHY THE BAND-PASS MISLED. In the
 two-bin band-pass the trench pull looked like the slab's frequency shifted
@@ -127,12 +146,17 @@ pull jumps to 57 % on that band purely by absorbing power that has
 nothing to do with the slab. Neither helps. The per-bin table above is
 the statement that survives; a band is only ever a lossy summary of it.
 
-WHAT IT MEANS. The buckling cycle reaches the trailing plate
-overwhelmingly as a modulation of the in-plane resultant, with a small
-in-phase trench-pull response alongside it. That is DYNAMICS_FINDINGS
-§1.7 (76 % of a slab pulse absorbed by Delta N_D relaxing, 15 % by trench
-pull) recovered in the frequency domain -- and the 8:1 amplitude ratio
-here is close to the 76:15 split found there by regression.
+WHAT IT MEANS. The buckling cycle reaches the trailing plate as an
+exchange between the in-plane resultant and basal drag, at a drive that
+is very nearly constant: when the slab descends faster the plate speeds
+up, basal drag rises, and the in-plane compression relaxes by almost
+exactly the same amount. The trench pull participates only weakly, in
+phase, at an eighth of that amplitude.
+
+This is DYNAMICS_FINDINGS §1.7 (76 % of a slab pulse absorbed by
+Delta N_D relaxing, 15 % by trench pull) recovered independently in the
+frequency domain, and the two agree numerically: the 8:1 amplitude ratio
+here against the 76:15 split found there by regression.
 
 DRAFT CAPTION (if needed). Spectral test of the trench pull against the
 slab, STD (left) and WAL (right). Top: periodograms of the slab descent
@@ -167,7 +191,7 @@ SEED = 20260923
 C_RULE = '#BFC3D1'
 C = {'slab descent rate': '#0072B2', 'slab dip': '#56B4E9',
      'trench pull (stabilised)': '#1B9E77', 'trench pull (raw)': '0.62',
-     '$\\Delta N_D$': 'k'}
+     '$\\Delta N_D$': 'k', '$F_B$': 'red'}
 
 
 def uniform(t, y):
@@ -238,6 +262,7 @@ def main():
             'slab descent rate': s[f'{key}_vz_upper'][:n],
             'slab dip': s[f'{key}_dip'][:n],
             '$\\Delta N_D$': q['d_nd'][:n] / 1e12,
+            '$F_B$': q['f_b'][:n] / 1e12,
             'trench pull (stabilised)': TP_stab,
             'trench pull (raw)': TP_raw,
         }
@@ -346,10 +371,34 @@ def main():
                  (key, 'band_bin_count', str(int(inband.sum()))),
                  (key, 'white_noise_null_share', f'{null:.4f}')]
 
+        # THE BUDGET AT THE BUCKLING FREQUENCY. The Fourier transform is
+        # linear, so if the balance dN_D - dGPE* + F_B = 0 holds in time it
+        # holds bin by bin. This is therefore arithmetic, not a new test --
+        # but it is the arithmetic that says which term absorbs the cycle.
+        Fk = lambda y: np.fft.rfft(y - y.mean())[kpk + 1]
+        gpe = Fk(uniform(t, q['d_gpe'][:n] / 1e12)[1])
+        nd, fb = Fk(U['$\\Delta N_D$'][1]), Fk(U['$F_B$'][1])
+        # Peak amplitude of a real Fourier component is 2|F_k|/N. (An
+        # earlier version used an extra sqrt(2) here and inflated every
+        # amplitude by 41 %; it is cross-checked below against the
+        # independent route A = sqrt(2 f) * sd.)
+        sc = 2.0 / len(tu)
+        print(f'   BUDGET at {per_all[kpk]:.0f} Myr [TN/m amplitude]: '
+              f'drive {abs(gpe)*sc:.3f}  =  dN_D {abs(nd)*sc:.3f} + F_B '
+              f'{abs(fb)*sc:.3f}   (vector sum {abs(nd + fb)*sc:.3f}; '
+              f'dN_D and F_B are {np.degrees(np.angle(nd / fb)):+.0f} deg apart)')
+        rows += [(key, 'bin_amplitude_drive_TNm', f'{abs(gpe)*sc:.4f}'),
+                 (key, 'bin_amplitude_delta_nd_TNm', f'{abs(nd)*sc:.4f}'),
+                 (key, 'bin_amplitude_f_b_TNm', f'{abs(fb)*sc:.4f}'),
+                 (key, 'bin_phase_nd_minus_fb_deg',
+                  f'{np.degrees(np.angle(nd / fb)):.1f}')]
+        chk = np.sqrt(2 * P['$\\Delta N_D$'][kpk]) * U['$\\Delta N_D$'][1].std()
+        assert abs(abs(nd) * sc - chk) < 1e-6, 'amplitude scaling disagrees'
+
         # the illusion, quantified: how often does a surrogate beat the
         # observed band correlation?
         bt = bandpass(*U['slab descent rate'])
-        for nm in ('trench pull (stabilised)', '$\\Delta N_D$'):
+        for nm in ('trench pull (stabilised)', '$\\Delta N_D$', '$F_B$'):
             tux2, y2 = U[nm]
             r = float(np.corrcoef(bandpass(tux2, y2), bt)[0, 1])
             nullr = np.array([np.corrcoef(bandpass(tux2, surrogate(y2, rng)),
