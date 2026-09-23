@@ -1,0 +1,24 @@
+{
+  "table": "budget_time_detrended.csv",
+  "script": "fig_budget_time_detrended.py",
+  "figure": "fig_budget_time_detrended.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 18,
+  "sigfig": 6,
+  "meta": {
+    "domain": "trench to ridge columns",
+    "zc_km": "75",
+    "t_min_Myr": "8",
+    "sign": "positive = +x = resisting; negative = driving",
+    "detrend": "fitted linear model per series, removed",
+    "axes": "shared per row; residual row symmetric about 0"
+  }
+}
