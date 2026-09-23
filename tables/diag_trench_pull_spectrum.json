@@ -1,0 +1,28 @@
+{
+  "table": "diag_trench_pull_spectrum.csv",
+  "script": "diag_trench_pull_spectrum.py",
+  "figure": "diag_trench_pull_spectrum.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 48,
+  "sigfig": 6,
+  "meta": {
+    "band_Myr": [
+      18.0,
+      36.0
+    ],
+    "n_surrogates": 5000,
+    "seed": 20260923,
+    "sampling": "37 snapshots at 2 Myr; bins 72/36/24/18/...",
+    "surrogates": "phase-randomised, amplitude spectrum preserved",
+    "caveat": "dip is mean inclination, NOT curvature \u2014 not a buckling measure (\u00a74.6)",
+    "note": "diagnostic, not a manuscript figure"
+  }
+}
