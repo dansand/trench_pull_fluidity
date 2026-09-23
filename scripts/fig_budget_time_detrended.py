@@ -82,6 +82,12 @@ from tables_io import write_table
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 C_RULE = '#BFC3D1'
+# Very light band spanning +/- PERT_TNM about zero, drawn across all times
+# on BOTH rows (Dan, 2026-09-24). On the residual row it is the envelope of
+# the perturbations; on the levels row it is a scale bar -- it shows at a
+# glance how small the perturbations are against the ~4 TN/m carried by the
+# driving term, which no amount of caption wording conveys as directly.
+PERT_TNM = 0.5
 
 
 def main():
@@ -103,6 +109,9 @@ def main():
 
         # ---------------- top: levels, as in fig_budget_time -------------
         a0 = axes[0, col]
+        a0.axhspan(-PERT_TNM, PERT_TNM, color='0.55', alpha=0.13, lw=0,
+                   zorder=0,
+                   label=f'$\\pm${PERT_TNM:.1f} TN/m (perturbation scale)')
         a0.axhline(0, color='k', lw=1.6)
         a0.plot(t, -gpe, color='b', lw=4, alpha=0.6,
                 label=r'$-\Delta\mathrm{GPE}^{*}$' + f'  ({sl(gpe):+.2f}/10 Myr)')
@@ -126,6 +135,8 @@ def main():
 
         # ---------------- bottom: the same lines, detrended ---------------
         a1 = axes[1, col]
+        a1.axhspan(-PERT_TNM, PERT_TNM, color='0.55', alpha=0.13, lw=0,
+                   zorder=0)
         res = {r'$-\Delta\mathrm{GPE}^{*}$': (ld(t, -gpe), 'b', 4, '-', 0.6),
                r'$\Delta N_D$': (ld(t, nd), 'k', 1.6, '-', 1.0),
                '$F_B$': (ld(t, fb), 'red', 2.0, '-', 1.0),
@@ -174,8 +185,9 @@ def main():
                             ('DRIVING', 0.025, 'bottom')):
             ax.text(0.74, dy, lab, transform=ax.transAxes, ha='center', va=va,
                     fontsize=15, fontweight='bold', color='0.78', zorder=0)
-    fig.suptitle('The three balance terms between the trench and ridge columns — '
-                 'levels and residual about the secular trend', fontsize=11.5)
+    # Plain, descriptive title (Dan, 2026-09-24) — the figure argues for
+    # itself; the suptitle should only say what is plotted.
+    fig.suptitle('Balance terms, trench to ridge', fontsize=10.5, color='0.35')
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_budget_time_detrended.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
