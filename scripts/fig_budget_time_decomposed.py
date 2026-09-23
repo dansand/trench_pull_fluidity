@@ -44,7 +44,29 @@ before.
           asking about actually lives -- with the domain curves and the
           two response terms on one axis.
 
-THE ANSWER: DAN'S SUSPICION IS RIGHT, AND ONLY PARTLY SUFFICIENT.
+🛑 READ THIS BEFORE QUOTING ANY NUMBER BELOW. Later the same day
+(2026-09-23) the x_I reference was found to contaminate exactly the
+statistic this figure headlines. Trench pull and ridge push are BOTH
+measured relative to the first isostatic column, which cancels from their
+sum and therefore enters them with OPPOSITE SIGN. That column is the
+noisiest in the cache -- roughness 1.04 against 0.54 for the trench
+column -- and on increments d(trench pull) tracks it at r = -0.94 and
+d(ridge push) at +0.99. Shared jitter with opposite signs MANUFACTURES
+anti-correlation.
+
+Controlling for the x_I column integral, r(trench pull, ridge push) falls
+from -0.65 to -0.21 in STD. (WAL goes the other way, -0.40 to -0.84.) So
+the STD cancellation quoted below is mostly an artefact and the WAL one
+is understated. DYNAMICS_FINDINGS §5.10 carries the full measurement and
+the options for fixing it; §1.6 records what survives.
+
+Unaffected, because they never touch x_I: the residual s.d. of the SUM,
+of Delta N_D and of F_B; the secular trends (the contamination is
+high-frequency); and the domain-versus-plate-speed sign structure of
+fig_gpe_decomposition -- shared noise attenuates a correlation with a
+third variable, it cannot create one.
+
+THE ORIGINAL READING, RETAINED FOR THE RECORD:
 
   residual s.d. [TN/m]              STD     WAL
     trench pull                     0.145   0.270
