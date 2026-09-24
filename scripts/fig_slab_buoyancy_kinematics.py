@@ -51,15 +51,27 @@ carries mass but does almost no work. Row 1 shows both bands on one axis
 and the contrast between their widths is the point.
 
 THE EFFECTIVE BUOYANCY (Dan, 2026-09-24). Because dE/dt is robust, a
-robust FORCE can be recovered from it by dividing by a reference sinking
-rate taken over a band that is unambiguously slab:
+robust FORCE can be recovered from it by dividing by a representative
+sinking rate. The reference is <v_z>_UM, the buoyancy-weighted rate over
+the MID-UPPER MANTLE, 250-450 km -- unambiguously slab, centred on the
+depth at which <v_z>(z) peaks (~330 km in both runs), and the SAME
+quantity the velocity panel plots. The subscript marks it as a
+representative average rather than a local value; an overbar is not used
+because in this project's register the overbar denotes a depth integral.
 
-    F_eff = (dE/dt) / (g * <v_z>_{200-660 km})
+    F_eff = (dE/dt) / (g * <v_z>_UM),  <v_z>_UM over 250-450 km
 
 It is the buoyancy that is actually doing work, expressed as a force. Its
 spread across the same z_top range is -10 % / -9 % rather than -40 % /
--45 %, and it lands near the deep-z_top value of F -- it discounts the
-translating plate automatically instead of excluding it by hand.
+-45 %: it discounts the translating plate automatically instead of
+excluding it by hand.
+
+⚠ It sits BELOW every value of F, at 57 (STD) / 44 (WAL) TN/m against
+71-119 / 59-104, because the reference rate is taken where the slab sinks
+FASTEST. F_eff is therefore a conservative measure of the buoyancy doing
+work, not an estimate of the total present. Both are reported; the
+argument needs only that one is convention-dependent and the other is
+not.
 
   1  buoyancy force: the z_top band (wide) against the effective buoyancy
      (narrow). TWO QUANTITIES ONLY. An earlier version also carried the
@@ -84,10 +96,11 @@ translating plate automatically instead of excluding it by hand.
 WHAT IT SHOWS.
 
   - **The Dahlen gap, quantified.** Upper-mantle buoyancy is 86 (STD) /
-    72 (WAL) TN/m at z_top = 100 km, or 72 / 60 TN/m as effective
-    buoyancy -- against the 2-3 TN/m that reaches the trailing plate in
-    the force balance. A factor of 25-35 is consumed within the
-    subduction system.
+    72 (WAL) TN/m at z_top = 100 km, or 57 / 44 TN/m on the conservative
+    effective measure -- against the 2-3 TN/m that reaches the trailing
+    plate in the force balance. Between fifteen and forty times the
+    delivered force is consumed within the subduction system, depending
+    which measure and which run.
   - **WAL puts twice as much into the lower mantle**: 62.8 against
     34.5 TN/m of buoyancy and 18.1 against 8.8 kW/m of release. That is
     the folding-into-the-lower-mantle regime of the source study showing
@@ -182,8 +195,11 @@ CM_S = 3.17098e-10           # 1 cm/yr in m/s
 G = 9.8
 Z_TOPS = (75e3, 100e3, 125e3)
 Z_660 = 660e3
-REF_BAND = (200e3, 660e3)    # unambiguously slab, for the reference v_z
-VZ_BAND = (250e3, 450e3)     # mid-upper mantle, centred on the <v_z> maximum
+# ONE reference band for both the effective buoyancy and the velocity
+# panel (Dan, 2026-09-24): the figure divides dE/dt by <v_z> and also plots
+# <v_z>, so they must be the same quantity. Centred on the <v_z> maximum,
+# which sits at ~330 km in both runs.
+VZ_BAND = (250e3, 450e3)     # mid-upper mantle, the reference for <v_z>_UM
 C_UM = '#0072B2'
 C_LM = '#CC79A7'
 C_EFF = 'k'
@@ -226,7 +242,7 @@ def main():
     for col, key in enumerate(('STD', 'WAL')):
         t = s[f'{key}_t']; F = s[f'{key}_dFdz']; E = s[f'{key}_dEdz']
         band = lambda a, lo, hi: a[:, (z >= lo) & (z < hi)].sum(1) * dz
-        ref = (z >= REF_BAND[0]) & (z < REF_BAND[1])
+        ref = (z >= VZ_BAND[0]) & (z < VZ_BAND[1])
         vref = E[:, ref].sum(1) / F[:, ref].sum(1)              # m/s
         Fum = np.array([band(F, zt, Z_660) / 1e12 for zt in Z_TOPS])
         Pum = np.array([band(E, zt, Z_660) / 1e3 for zt in Z_TOPS])
@@ -257,7 +273,7 @@ def main():
             a0.plot(t, Fum[k_], '-', color=C_UM, lw=0.7, alpha=0.9)
         a0.plot(t, Fum[1], '-', color=C_UM, lw=2.0)
         a0.fill_between(t, Feff[0], Feff[2], color=C_EFF, alpha=0.30, lw=0,
-                        label='effective buoyancy $(dE/dt)/g\\langle v_z\\rangle$')
+                        label='effective buoyancy $(dE/dt)/g\\langle v_z\\rangle_{\\mathrm{UM}}$')
         a0.plot(t, Feff[1], '-', color=C_EFF, lw=1.8)
         a0.set_ylabel('Buoyancy force [TN/m]', fontsize=10)
         a0.set_title(key, fontsize=11.5)
@@ -368,7 +384,7 @@ def main():
             ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
         med = np.median
-        print(f'== {key}  <v_z>(200-660) median {med(vref)/CM_S:.2f} cm/yr')
+        print(f'== {key}  <v_z>_UM(250-450) median {med(vref)/CM_S:.2f} cm/yr')
         for i, zt in enumerate(Z_TOPS):
             print(f'   z_top {zt/1e3:3.0f}: F {med(Fum[i]):6.1f}   '
                   f'F_eff {med(Feff[i]):6.1f} TN/m   dE/dt {med(Pum[i]):5.1f} kW/m')
@@ -390,7 +406,7 @@ def main():
                  (key, 'cumulative_transfer_across_660_TNm', f'{cum660[-1]:.2f}'),
                  (key, 'F_lower_median_TNm', f'{med(Flm):.2f}'),
                  (key, 'dEdt_lower_median_kWm', f'{med(Plm):.2f}'),
-                 (key, 'vz_ref_200_660_median_cmyr', f'{med(vref)/CM_S:.3f}'),
+                 (key, 'vz_ref_mid_upper_median_cmyr', f'{med(vref)/CM_S:.3f}'),
                  (key, 'ztop_spread_F_percent', f'{100*med(Fum[2]/Fum[0]-1):.1f}'),
                  (key, 'ztop_spread_dEdt_percent', f'{100*med(Pum[2]/Pum[0]-1):.1f}'),
                  (key, 'ztop_spread_Feff_percent', f'{100*med(Feff[2]/Feff[0]-1):.1f}'),
