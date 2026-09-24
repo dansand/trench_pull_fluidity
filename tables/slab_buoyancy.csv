@@ -8,6 +8,10 @@ STD,dEdt_upper_ztop100_median_kWm,27.14
 STD,F_upper_ztop125_median_TNm,71.33
 STD,F_eff_ztop125_median_TNm,67.89
 STD,dEdt_upper_ztop125_median_kWm,25.64
+STD,F_total_below100_start_TNm,35.08
+STD,F_total_below100_end_TNm,223.67
+STD,F_total_below100_gain_TNm,188.6
+STD,cumulative_transfer_across_660_TNm,90.89
 STD,F_lower_median_TNm,34.51
 STD,dEdt_lower_median_kWm,8.76
 STD,vz_ref_200_660_median_cmyr,1.309
@@ -24,6 +28,10 @@ WAL,dEdt_upper_ztop100_median_kWm,27.56
 WAL,F_upper_ztop125_median_TNm,59.15
 WAL,F_eff_ztop125_median_TNm,56.64
 WAL,dEdt_upper_ztop125_median_kWm,26
+WAL,F_total_below100_start_TNm,55.06
+WAL,F_total_below100_end_TNm,244.54
+WAL,F_total_below100_gain_TNm,189.48
+WAL,cumulative_transfer_across_660_TNm,120.44
 WAL,F_lower_median_TNm,62.82
 WAL,dEdt_lower_median_kWm,18.13
 WAL,vz_ref_200_660_median_cmyr,1.523

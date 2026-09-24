@@ -38,7 +38,7 @@ spread across the same z_top range is -10 % / -9 % rather than -40 % /
 translating plate automatically instead of excluding it by hand.
 
   1  buoyancy force: the z_top band (wide), the effective buoyancy (narrow),
-     and the lower mantle.
+     the lower mantle, and the ACCUMULATED total below z_top.
   2  PE release rate, upper and lower mantle, with its own z_top band.
   3  where the release happens: dE/dz against depth and time, 660 marked.
 
@@ -62,6 +62,39 @@ WHAT IT SHOWS.
     only a quarter: the same cold material falls faster. Row 3 localises
     it.
 
+ACCUMULATED BUOYANCY -- AND WHY IT IS NOT A TIME-INTEGRATED FLUX
+(Dan's question, 2026-09-24). The grey curve in row 1 is the total
+buoyancy of cold material below z_top: a STOCK, and the right answer to
+"which model has put more buoyancy into the mantle".
+
+  total below 100 km    STD  35.1 -> 223.7 TN/m   (gain 188.6)
+                        WAL  55.1 -> 244.5 TN/m   (gain 189.5)
+
+⚠ It is tempting to obtain the same thing by integrating the buoyancy
+flux across z_top over time. That is WRONG HERE and the arithmetic says
+so: the advective input across 100 km totals 131 (STD) / 133 (WAL) TN/m
+against stock gains of 189 / 190. The missing third is not an error --
+cold material is also CREATED below z_top in place, by the plate's
+thermal boundary layer thickening past that depth as it ages, over the
+whole plate rather than at the trench. A flux across one horizon cannot
+see a distributed source. Quote the stock.
+
+⚠⚠ THE TWO MODELS ACCUMULATE AT THE SAME RATE. The gains over the run
+are 188.6 and 189.5 TN/m -- indistinguishable. WAL's higher total is a
+head start: its slab reached 660 km at ~1.5 Myr against ~4-5 Myr in STD
+(Cerpa et al.), so it was already 20 TN/m ahead at t = 8. The weak layer
+does not change how much buoyancy enters the mantle.
+
+WHERE THEY DO DIFFER IS THE DEPTH IT GOES TO. dE/dz at a single depth
+has units of buoyancy flux (kg/s^3 = N/m/s), so its time integral is a
+force per unit length; across 660 km that gives the buoyancy each model
+has delivered to the lower mantle:
+
+  cumulative transfer across 660 km   STD  90.9    WAL  120.4 TN/m
+
+WAL moves 32 % more through the transition zone on the same input. That
+is the folding-regime contrast stated as a budget.
+
 ⚠ Delta rho > 0 only, so cold material that RISES contributes negative
 release; this is correct and is why row 2 can dip.
 ⚠ The 5 km grid resolves the ~100 km anomaly with ~20 cells, adequate for
@@ -75,9 +108,10 @@ runs, STD (left) and WAL (right). (a, b) Buoyancy force of cold material
 in the upper mantle, shaded across upper integration depths of 75 to
 125 km, with the effective buoyancy -- the release rate divided by the
 slab's mean sinking rate over 200-660 km -- shaded over the same range,
-and the lower-mantle buoyancy below 660 km. The wide band shows that the
-buoyancy force depends strongly on where the plate is judged to end; the
-narrow one shows that the effective buoyancy does not. (c, d) Rate of
+the lower-mantle buoyancy below 660 km, and in grey the accumulated total
+below the upper integration depth. The wide band shows that the buoyancy
+force depends strongly on where the plate is judged to end; the narrow one
+shows that the effective buoyancy does not. (c, d) Rate of
 potential-energy release for the same regions. (e, f) Release rate per
 unit depth against time, with the 660 km discontinuity marked.
 """
@@ -86,7 +120,6 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.colors import TwoSlopeNorm
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(_HERE)); sys.path.insert(0, _HERE)
@@ -108,9 +141,18 @@ C_RULE = '#BFC3D1'
 def main():
     s = sgc.load()
     z = s['z_prof']; dz = z[1] - z[0]
-    global NORM
-    _lim = max(np.abs(s[f'{k}_dEdz']).max() for k in ('STD', 'WAL')) * 1e3
-    NORM = TwoSlopeNorm(vcenter=0.0, vmin=-0.25 * _lim, vmax=_lim)
+    # SEQUENTIAL from zero, shared between the models. The release rate is
+    # non-negative in both runs to rounding (STD min -3e-4, WAL exactly 0),
+    # so an earlier diverging scale with a hardcoded negative vmin showed a
+    # negative range that does not exist. The guard below fires if a rebuild
+    # ever produces real negatives -- cold material rising -- at which point
+    # a diverging scale becomes the honest choice again.
+    global VMAX
+    _all = np.concatenate([s[f'{k}_dEdz'].ravel() for k in ('STD', 'WAL')]) * 1e3
+    VMAX = _all.max()
+    if _all.min() < -0.01 * VMAX:
+        print(f'  ** dE/dz has real negatives (min {_all.min():.3f}); '
+              f'switch back to a diverging scale')
     # constrained layout, not tight_layout: the row-3 colourbar spans both
     # panels and tight_layout places such a colourbar inside the axes.
     fig, axes = plt.subplots(3, 2, figsize=(13.0, 11.6), sharex='col',
@@ -127,6 +169,18 @@ def main():
         Pum = np.array([band(E, zt, Z_660) / 1e3 for zt in Z_TOPS])
         Feff = np.array([band(E, zt, Z_660) / vref / 1e12 for zt in Z_TOPS])
         Flm, Plm = band(F, Z_660, z[-1] + dz) / 1e12, band(E, Z_660, z[-1] + dz) / 1e3
+        # ACCUMULATED buoyancy: the stock of cold material below z_top. This
+        # is the quantity that answers "which model has put more buoyancy
+        # into the mantle" -- see the docstring for why it is NOT the time
+        # integral of the flux across z_top.
+        Ftot = np.array([band(F, zt, z[-1] + dz) / 1e12 for zt in Z_TOPS])
+        # Cumulative buoyancy TRANSFERRED across 660 km. dEdz at a single
+        # depth has units of buoyancy flux (kg/s^3 = N/m/s), so its time
+        # integral is a force per unit length.
+        j660 = int(np.argmin(np.abs(z - Z_660)))
+        f660 = E[:, j660]
+        cum660 = np.concatenate([[0.0], np.cumsum(
+            0.5 * (f660[1:] + f660[:-1]) * np.diff(t) * 3.15576e13)]) / 1e12
 
         a0, a1, a2 = (axes[r, col] for r in range(3))
 
@@ -137,6 +191,8 @@ def main():
                         label='effective buoyancy $(dE/dt)/g\\langle v_z\\rangle$')
         a0.plot(t, Feff[1], '-', color=C_EFF, lw=1.8)
         a0.plot(t, Flm, '--', color=C_LM, lw=2.0, label='below 660 km')
+        a0.plot(t, Ftot[1], '-', color='0.45', lw=2.6,
+                label='total below $z_{top}$ (accumulated)')
         a0.set_ylabel('Buoyancy force [TN/m]', fontsize=10)
         a0.set_title(key, fontsize=11.5)
         a0.legend(frameon=False, fontsize=8.5, loc='upper left')
@@ -150,18 +206,19 @@ def main():
 
         # --- row 3: where the release happens -----------------------------
         # dEdz is stored as W/m per METRE of depth; x1000 for per km.
-        # Colour scale is SHARED between the models (computed over both in
-        # main() below) so the panels can be compared directly.
+        # Colour scale is SHARED between the models so the panels compare
+        # directly, and sequential from zero -- see main().
         Ei = E * 1e3
-        im = a2.pcolormesh(t, z / 1e3, Ei.T, cmap='RdBu_r', shading='nearest',
-                           norm=NORM)
+        im = a2.pcolormesh(t, z / 1e3, Ei.T, cmap='Reds', shading='nearest',
+                           vmin=0.0, vmax=VMAX)
         a2.axhline(Z_660 / 1e3, color='k', lw=1.4, ls='--')
         a2.text(t[1], Z_660 / 1e3 - 25, '660 km', fontsize=8.5, va='bottom')
         a2.set_ylim(1800, 0)
         a2.set_ylabel('Depth [km]', fontsize=10)
         a2.set_xlabel('Model time [Myr]', fontsize=11)
         if col == 1:
-            fig.colorbar(im, ax=axes[2, :].tolist(), pad=0.02, shrink=0.92,
+            fig.colorbar(im, ax=axes[2, :].tolist(), orientation='horizontal',
+                         pad=0.09, shrink=0.55, aspect=45,
                          label='$dE/dz$ [W m$^{-1}$ km$^{-1}$]')
 
         for ax in (a0, a1):
@@ -179,7 +236,14 @@ def main():
         print(f'   z_top spread 75->125:  F {100*med(Fum[2]/Fum[0]-1):+.0f} %   '
               f'dE/dt {100*med(Pum[2]/Pum[0]-1):+.0f} %   '
               f'F_eff {100*med(Feff[2]/Feff[0]-1):+.0f} %')
-        rows += [(key, 'F_lower_median_TNm', f'{med(Flm):.2f}'),
+        print(f'   accumulated total below 100 km: {Ftot[1][0]:5.1f} -> '
+              f'{Ftot[1][-1]:5.1f} TN/m (gain {Ftot[1][-1]-Ftot[1][0]:5.1f});  '
+              f'cumulative transfer across 660 km {cum660[-1]:5.1f} TN/m')
+        rows += [(key, 'F_total_below100_start_TNm', f'{Ftot[1][0]:.2f}'),
+                 (key, 'F_total_below100_end_TNm', f'{Ftot[1][-1]:.2f}'),
+                 (key, 'F_total_below100_gain_TNm', f'{Ftot[1][-1]-Ftot[1][0]:.2f}'),
+                 (key, 'cumulative_transfer_across_660_TNm', f'{cum660[-1]:.2f}'),
+                 (key, 'F_lower_median_TNm', f'{med(Flm):.2f}'),
                  (key, 'dEdt_lower_median_kWm', f'{med(Plm):.2f}'),
                  (key, 'vz_ref_200_660_median_cmyr', f'{med(vref)/CM_S:.3f}'),
                  (key, 'ztop_spread_F_percent', f'{100*med(Fum[2]/Fum[0]-1):.1f}'),
