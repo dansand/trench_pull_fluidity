@@ -1,0 +1,15 @@
+model,quantity,value
+STD,nd_trench_TNm,-0.744
+STD,nd_ridge_TNm,0.516
+STD,nd_max_TNm,1.407
+STD,fb_at_ridge_TNm,2.194
+STD,gpe_shifted_at_ridge_TNm,2.72
+STD,identity_max_deviation_TNm,0.1481
+STD,reference_snapshot_Myr,40
+WAL,nd_trench_TNm,-1.779
+WAL,nd_ridge_TNm,0.297
+WAL,nd_max_TNm,0.308
+WAL,fb_at_ridge_TNm,1.146
+WAL,gpe_shifted_at_ridge_TNm,1.398
+WAL,identity_max_deviation_TNm,0.1649
+WAL,reference_snapshot_Myr,40

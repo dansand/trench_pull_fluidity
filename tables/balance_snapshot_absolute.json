@@ -1,0 +1,20 @@
+{
+  "table": "balance_snapshot_absolute.csv",
+  "script": "fig_balance_snapshot_absolute.py",
+  "figure": "fig_balance_snapshot_absolute.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 14,
+  "sigfig": 6,
+  "meta": {
+    "identity": "N_D(x) = N_D(x_T) + dGPE*(x) - F_B(x); the plotted gap is F_B",
+    "reference": "row 4 is ABSOLUTE; rows 2-3 are Delta forms zeroed at the trench"
+  }
+}

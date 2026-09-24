@@ -135,16 +135,12 @@ the trench: the topographic pressure term carries the balance and
 Delta N_D is secondary. The residual (green dashed), with its
 trench-anchor constant removed over the declared mid-subducting-plate
 window, shows where extraction is imperfect, principally the trench zone.
-(g, h) The same balance in ABSOLUTE form. The normal-stress-difference
-resultant is plotted as its own columnwise value N_D(x) rather than as a
-difference, and the GPE-like term is shifted onto it by the trench value,
-so both curves begin at N_D(x_T) at x = 0. Because
-N_D(x) = N_D(x_T) + Delta GPE*(x) - F_B(x), the shaded gap between them is
-the accumulated basal traction. This panel shows what the Delta forms
+(g, h) The normal-stress-difference resultant as its own columnwise value
+N_D(x), rather than as a difference. This shows what the Delta forms
 cannot: the resultant is COMPRESSIONAL at the trench (-0.74 and
--1.78 TN/m) and stays modest across the whole plate, so the plate-wide
-change in N_D is not delivered as a large tension-like resultant at the
-hinge. The arrows in (c-f) give the direction in which each term acts at
+-1.78 TN/m in the two runs) and stays modest across the whole plate, so
+the plate-wide change in N_D is not delivered as a large tension-like
+resultant at the hinge. The arrows in (c-f) give the direction in which each term acts at
 this time step.
 
 VARIANT of fig_balance_snapshot (Dan, 2026-09-25): a fourth row added,
@@ -164,6 +160,7 @@ from scipy.integrate import cumulative_trapezoid
 from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from tables_io import write_table
 from fluidity_helpers import (make_field_extractor, mirror_fields_in_x, pick_trench_3step,
                            find_first_isostatic_column, find_ridge_x, surface_fs)
 
@@ -338,10 +335,14 @@ def compute(key):
 def main():
     if not hasattr(np, 'trapz'):
         np.trapz = np.trapezoid
+    # The parent fig_balance_snapshot writes no table; this variant does,
+    # because its caption quotes row-4 values (Dan's verifiable-numbers
+    # pattern). Flagged: the parent's numbers are still unbacked.
+    rows = [('model', 'quantity', 'value')]
     # FOUR rows (Dan, 2026-09-25); the topography row is shortened since
     # the w_tau overlay is off in this variant and it carries one curve.
-    fig, axes = plt.subplots(4, 2, figsize=(10.5, 11.2), sharex=True,
-                             gridspec_kw={'height_ratios': [0.72, 1.3, 1.6, 1.6]})
+    fig, axes = plt.subplots(4, 2, figsize=(10.5, 10.2), sharex=True,
+                             gridspec_kw={'height_ratios': [0.72, 1.3, 1.6, 0.92]})
     lims = {0: [], 1: [], 2: [], 3: []}   # per-row plotted data, for axis limits
     for col, key in enumerate(('STD', 'WAL')):
         r = compute(key)
@@ -437,17 +438,18 @@ def main():
         dev = float(np.abs(Fd - (gpe_shift - FB))[vis].max())
         assert dev < 3e11, (f'{key}: N_D != N_D(x_T) + dGPE* - F_B, '
                             f'max deviation {dev*1e-12:.3f} TN/m')
+        # JUST N_D (Dan, 2026-09-25). The shifted GPE curve and the F_B
+        # gap were dropped: row 3 already shows that the Delta forms track
+        # each other, so repeating the comparison here added a second
+        # reading of the same fact. What this row is FOR is the absolute
+        # level -- where N_D actually sits -- and one curve says it.
         ax4 = axes[3, col]
-        ax4.fill_between(xkm, Fd * 1e-12, gpe_shift * 1e-12, color='red',
-                         alpha=0.13, lw=0, label=r'gap $=F_B$')
-        ax4.plot(xkm, gpe_shift * 1e-12, color='b', lw=4, alpha=0.6,
-                 label=r'$N_D(x_T)+\Delta\mathrm{GPE}^{*}(x)$')
         ax4.plot(xkm, Fd * 1e-12, color='k', lw=1.8, label=r'$N_D(x)$')
         ax4.axhline(0, color='k', lw=0.5)
         ax4.plot(0, Fd_T * 1e-12, 'o', color='k', ms=5, zorder=6)
         for xc in (0, xi_km, xr_km):
             ax4.axvline(xc, color='k', lw=0.5)
-        lims[3] += [Fd[vis] * 1e-12, gpe_shift[vis] * 1e-12]
+        lims[3] += [Fd[vis] * 1e-12]
         ax4.set_xlabel('Distance from trench [km]  ' + r'($\sqrt{x}$ scale)',
                        fontsize=11)
         ax4.set_xlim(0, 3500)
@@ -455,6 +457,14 @@ def main():
               f'{float(np.interp(xR, x, Fd))*1e-12:+.2f}; gap at x_R (= F_B) '
               f'{float(np.interp(xR, x, FB))*1e-12:+.2f}; identity holds to '
               f'{dev*1e-12:.3f} TN/m (the closure residual)')
+        rows += [(key, 'nd_trench_TNm', f'{Fd_T*1e-12:.3f}'),
+                 (key, 'nd_ridge_TNm', f'{float(np.interp(xR, x, Fd))*1e-12:.3f}'),
+                 (key, 'nd_max_TNm', f'{Fd[vis].max()*1e-12:.3f}'),
+                 (key, 'fb_at_ridge_TNm', f'{float(np.interp(xR, x, FB))*1e-12:.3f}'),
+                 (key, 'gpe_shifted_at_ridge_TNm',
+                  f'{float(np.interp(xR, x, gpe_shift))*1e-12:.3f}'),
+                 (key, 'identity_max_deviation_TNm', f'{dev*1e-12:.4f}'),
+                 (key, 'reference_snapshot_Myr', f'{t_myr:.1f}')]
         # the glyph is now a statement about THIS snapshot, so it is drawn
         # per model from that model's own plate-wide values at the ridge
         # column -- not once for the pair (Dan, 2026-09-21)
@@ -508,7 +518,7 @@ def main():
     axes[1, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
     axes[2, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
     axes[3, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
-    axes[3, 0].legend(loc='lower right', fontsize=8)
+    axes[3, 0].legend(loc='lower right', fontsize=8.5)
     if SHOW_W_TAU:
         axes[0, 0].legend(loc='lower right', fontsize=8, framealpha=0.9)
     axes[1, 0].legend(loc='lower left', fontsize=8)
@@ -517,6 +527,15 @@ def main():
     out = os.path.join(ROOT, 'figures', 'fig_balance_snapshot_absolute.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
     print('written:', out)
+    tab = write_table('balance_snapshot_absolute', rows[0], rows[1:],
+                      script='fig_balance_snapshot_absolute.py',
+                      figure='fig_balance_snapshot_absolute.png',
+                      models=('STD', 'WAL'),
+                      meta={'identity': 'N_D(x) = N_D(x_T) + dGPE*(x) - F_B(x); '
+                                        'the plotted gap is F_B',
+                            'reference': 'row 4 is ABSOLUTE; rows 2-3 are Delta '
+                                         'forms zeroed at the trench'})
+    print('written:', tab)
 
 if __name__ == '__main__':
     main()
