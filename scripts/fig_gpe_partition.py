@@ -111,6 +111,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.transforms import blended_transform_factory
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import column_profiles_cache as cpc
@@ -172,8 +173,12 @@ def main():
 
         a1.plot(t, supp, '-', color=C_TILT, lw=2.2)
         a1.axhline(np.median(supp), color=C_TILT, ls=':', lw=1.2)
-        a1.text(t[-1], np.median(supp), f'  median {np.median(supp):.2f}',
-                color=C_TILT, fontsize=8.5, va='center')
+        # x in AXES fraction, y in DATA units, so the label sits just inside
+        # the right spine whatever the time axis does (it previously used
+        # t[-1] in data coordinates and spilled outside the panel).
+        a1.text(0.985, np.median(supp), f'median {np.median(supp):.2f}',
+                transform=blended_transform_factory(a1.transAxes, a1.transData),
+                color=C_TILT, fontsize=8.5, ha='right', va='bottom')
         a1.set_xlabel('Model time [Myr]', fontsize=11)
         a1.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
