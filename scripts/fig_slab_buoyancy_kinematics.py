@@ -76,7 +76,10 @@ translating plate automatically instead of excluding it by hand.
   3  where the release happens: dE/dz against depth and time, 660 marked.
      The shared colour scale is inset once, in the left panel.
   4  kinematics: plate velocity, convergence, and the mid-upper-mantle
-     sinking rate.
+     sinking rate, with the TRENCH-ADVANCE WINDOW shaded where it occurs.
+     WAL advances at 7 of 37 snapshots (48-62 Myr), immediately before its
+     release; STD never does, so the shading is absent there and its
+     absence is the contrast.
 
 WHAT IT SHOWS.
 
@@ -157,7 +160,9 @@ scale shown inset in (e). (g, h) Plate velocity, convergence rate, and the
 buoyancy-weighted sinking rate of the slab over the mid-upper mantle
 (250-450 km), shaded by the spread of that rate across the interval.
 Convergence and plate velocity require no depth convention and are drawn
-without a band; the sinking rate does, and the shading is that ambiguity.
+without a band; the sinking rate does, and the purple shading is that
+ambiguity. The grey band in (h) marks the interval over which the trench
+advances rather than retreats; the standard case has no such interval.
 """
 import os, sys
 import numpy as np
@@ -304,6 +309,21 @@ def main():
                 label='convergence')
         a2.plot(tc[:n], vp[:n], '-', color=C_PLATE, lw=2.0,
                 label='plate velocity')
+        # TRENCH-ADVANCE WINDOW (Dan, 2026-09-24): shaded wherever the
+        # rollback rate is negative. Detected from the data rather than
+        # hardcoded, so it is model-agnostic — STD has no such interval
+        # (0 of 37 snapshots) and the shading simply does not appear there,
+        # which is itself the contrast.
+        adv = roll[:n] < 0
+        if adv.any():
+            edges = np.flatnonzero(np.diff(np.r_[0, adv.view(np.int8), 0]))
+            for i0, i1 in zip(edges[::2], edges[1::2]):
+                a2.axvspan(tc[i0], tc[min(i1, n - 1)], color='0.5', alpha=0.16,
+                           lw=0, zorder=0,
+                           label='trench advancing' if i0 == edges[0] else None)
+            print(f'   trench ADVANCES at {adv.sum()} of {n} snapshots, '
+                  f't = {tc[:n][adv].min():.0f}–{tc[:n][adv].max():.0f} Myr')
+        rows.append((key, 'trench_advance_snapshots', str(int(adv.sum()))))
         a2.set_ylabel('Velocity [cm/yr]', fontsize=10)
         a2.set_xlabel('Model time [Myr]', fontsize=11)
         a2.legend(frameon=False, fontsize=8.5, loc='upper left', ncol=3)

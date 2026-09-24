@@ -1,4 +1,5 @@
 model,quantity,value
+STD,trench_advance_snapshots,0
 STD,vz_mid_upper_median_cmyr,1.673
 STD,vz_mid_upper_min_cmyr,0.991
 STD,vz_mid_upper_max_cmyr,3.2
@@ -25,6 +26,7 @@ STD,ztop_spread_F_percent,-40.2
 STD,ztop_spread_dEdt_percent,-9.8
 STD,ztop_spread_Feff_percent,-9.8
 STD,lower_share_of_release_median,0.254
+WAL,trench_advance_snapshots,7
 WAL,vz_mid_upper_median_cmyr,1.992
 WAL,vz_mid_upper_min_cmyr,1.593
 WAL,vz_mid_upper_max_cmyr,4.318
