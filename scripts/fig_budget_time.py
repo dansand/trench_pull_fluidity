@@ -111,8 +111,8 @@ def main():
         ax.annotate('', xy=(t[-3], -fit(nd_t)[-3]), xytext=(t[-3], -fit(gpe_t)[-3]),
                     arrowprops=dict(arrowstyle='<->', color='red', lw=1.2))
         ax.text(t[-3], 0.5 * (-fit(nd_t)[-3] - fit(gpe_t)[-3]),
-                f'  $F_B$ trend\n  {sl(fb_t):+.2f}', color='red', fontsize=8,
-                va='center', ha='left')
+                f'$F_B$ trend\n{sl(fb_t):+.2f}  ', color='red', fontsize=8,
+                va='center', ha='right')
         print(f'   {key} slopes/10 Myr: dGPE* {sl(gpe_t):+.3f} = dN_D '
               f'{sl(nd_t):+.3f} + F_B {sl(fb_t):+.3f} '
               f'(sum {sl(nd_t)+sl(fb_t):+.3f})')

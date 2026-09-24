@@ -146,8 +146,8 @@ def main():
                     xytext=(t[-3], -fit(t, gpe)[-3]),
                     arrowprops=dict(arrowstyle='<->', color='red', lw=1.2))
         a0.text(t[-3], 0.5 * (-fit(t, nd)[-3] - fit(t, gpe)[-3]),
-                f'  $F_B$ trend\n  {sl(fb):+.2f}', color='red', fontsize=8,
-                va='center', ha='left')
+                f'$F_B$ trend\n{sl(fb):+.2f}  ', color='red', fontsize=8,
+                va='center', ha='right')
         a0.set_title(key, fontsize=11)
         a0.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
