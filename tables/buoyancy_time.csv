@@ -1,0 +1,17 @@
+model,quantity,value
+STD,F_total_start_TNm,35.08
+STD,F_total_end_TNm,223.67
+STD,F_total_gain_TNm,188.6
+STD,F_upper_end_TNm,131.97
+STD,F_lower_end_TNm,91.7
+STD,cumulative_across_660_TNm,90.89
+STD,lower_share_of_release_end,0.477
+STD,lower_share_of_release_median,0.254
+WAL,F_total_start_TNm,55.06
+WAL,F_total_end_TNm,244.54
+WAL,F_total_gain_TNm,189.48
+WAL,F_upper_end_TNm,120.19
+WAL,F_lower_end_TNm,124.35
+WAL,cumulative_across_660_TNm,120.44
+WAL,lower_share_of_release_end,0.567
+WAL,lower_share_of_release_median,0.412

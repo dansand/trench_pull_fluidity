@@ -1,0 +1,22 @@
+{
+  "table": "buoyancy_time.csv",
+  "script": "kinematics/diag_buoyancy_time.py",
+  "figure": "kinematics/diag_buoyancy_time.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 16,
+  "sigfig": 6,
+  "meta": {
+    "z_top_km": "100",
+    "rho_ambient": "3171.3",
+    "panel_a": "stock of cold material (NOT a time-integrated flux; see docstring)",
+    "panel_b": "time integral of the buoyancy flux across 660 km, from t = 8 Myr"
+  }
+}
