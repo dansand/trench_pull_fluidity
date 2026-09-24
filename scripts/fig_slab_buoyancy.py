@@ -131,7 +131,8 @@ DRAFT CAPTION. Slab buoyancy and potential-energy release through the
 runs, STD (left) and WAL (right). (a, b) Buoyancy force of cold material
 in the upper mantle, shaded across upper integration depths of 75 to
 125 km, with the effective buoyancy -- the release rate divided by the
-slab's mean sinking rate over 200-660 km -- shaded over the same range,
+slab's mean sinking rate over the mid-upper mantle, 250-450 km -- shaded
+over the same range,
 both shaded across the same range of upper integration depths. The wide
 band shows that the buoyancy force depends strongly on where the plate is
 judged to end; the narrow one shows that the effective buoyancy does not. (c, d) Rate of
