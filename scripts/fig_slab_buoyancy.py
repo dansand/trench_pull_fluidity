@@ -252,7 +252,8 @@ def main():
             a0.plot(t, Fum[k_], '-', color=C_UM, lw=0.7, alpha=0.9)
         a0.plot(t, Fum[1], '-', color=C_UM, lw=2.0)
         a0.fill_between(t, Feff[0], Feff[2], color=C_EFF, alpha=0.30, lw=0,
-                        label='effective buoyancy $(dE/dt)/g\\langle v_z\\rangle_{\\mathrm{UM}}$')
+                        label='effective, upper mantle: '
+                              '$(dE/dt)/g\\langle v_z\\rangle_{\\mathrm{UM}}$')
         a0.plot(t, Feff[1], '-', color=C_EFF, lw=1.8)
         a0.set_ylabel('Buoyancy force [TN/m]', fontsize=10)
         a0.set_title(key, fontsize=11.5)
