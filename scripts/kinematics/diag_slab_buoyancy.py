@@ -136,6 +136,7 @@ C_UM = '#0072B2'
 C_LM = '#CC79A7'
 C_EFF = 'k'
 C_RULE = '#BFC3D1'
+C_MODEL = {'STD': '#002147', 'WAL': '#E5007D'}   # FIGURE_STYLE encoding 2
 
 
 def main():
@@ -155,11 +156,18 @@ def main():
               f'switch back to a diverging scale')
     # constrained layout, not tight_layout: the row-3 colourbar spans both
     # panels and tight_layout places such a colourbar inside the axes.
-    fig, axes = plt.subplots(3, 2, figsize=(13.0, 11.6), sharex='col',
-                             layout='constrained',
-                             gridspec_kw={'height_ratios': [1.15, 1.0, 1.25]})
+    fig = plt.figure(figsize=(13.0, 13.4), layout='constrained')
+    gs = fig.add_gridspec(4, 2, height_ratios=[1.15, 1.0, 1.25, 0.9])
+    axes = np.array([[fig.add_subplot(gs[r, c]) for c in range(2)]
+                     for r in range(3)])
+    # Row 4 SPANS both columns and overlays the models, breaking the
+    # columns-are-models convention of rows 1-3 deliberately: the depth
+    # partition is a COMPARISON between the runs, and a comparison read
+    # across two panels cannot be quantified by eye (Dan, 2026-09-24).
+    a3 = fig.add_subplot(gs[3, :])
     rows = [('model', 'quantity', 'value')]
 
+    a3b = a3.twinx()
     for col, key in enumerate(('STD', 'WAL')):
         t = s[f'{key}_t']; F = s[f'{key}_dFdz']; E = s[f'{key}_dEdz']
         band = lambda a, lo, hi: a[:, (z >= lo) & (z < hi)].sum(1) * dz
@@ -216,6 +224,13 @@ def main():
         a2.set_ylim(1800, 0)
         a2.set_ylabel('Depth [km]', fontsize=10)
         a2.set_xlabel('Model time [Myr]', fontsize=11)
+        a3.plot(t, cum660, '-', color=C_MODEL[key], lw=2.6, label=key)
+        a3.annotate(f'{cum660[-1]:.0f} TN/m', xy=(t[-1], cum660[-1]),
+                    xytext=(-8, 9 if key == 'WAL' else -18),
+                    textcoords='offset points', ha='right', va='center',
+                    color=C_MODEL[key], fontsize=10.5, fontweight='bold',
+                    annotation_clip=False)
+        a3b.plot(t, Plm / (Plm + Pum[1]), ':', color=C_MODEL[key], lw=1.8)
         if col == 1:
             fig.colorbar(im, ax=axes[2, :].tolist(), orientation='horizontal',
                          pad=0.09, shrink=0.55, aspect=45,
@@ -239,7 +254,9 @@ def main():
         print(f'   accumulated total below 100 km: {Ftot[1][0]:5.1f} -> '
               f'{Ftot[1][-1]:5.1f} TN/m (gain {Ftot[1][-1]-Ftot[1][0]:5.1f});  '
               f'cumulative transfer across 660 km {cum660[-1]:5.1f} TN/m')
-        rows += [(key, 'F_total_below100_start_TNm', f'{Ftot[1][0]:.2f}'),
+        rows += [(key, 'lower_share_of_release_end',
+                  f'{(Plm / (Plm + Pum[1]))[-1]:.3f}'),
+                 (key, 'F_total_below100_start_TNm', f'{Ftot[1][0]:.2f}'),
                  (key, 'F_total_below100_end_TNm', f'{Ftot[1][-1]:.2f}'),
                  (key, 'F_total_below100_gain_TNm', f'{Ftot[1][-1]-Ftot[1][0]:.2f}'),
                  (key, 'cumulative_transfer_across_660_TNm', f'{cum660[-1]:.2f}'),
@@ -251,6 +268,16 @@ def main():
                  (key, 'ztop_spread_Feff_percent', f'{100*med(Feff[2]/Feff[0]-1):.1f}'),
                  (key, 'lower_share_of_release_median',
                   f'{med(Plm / (Plm + Pum[1])):.3f}')]
+
+    a3.set_ylabel('Cumulative buoyancy\nacross 660 km [TN/m]', fontsize=9.5)
+    a3.set_xlabel('Model time [Myr]', fontsize=11)
+    a3.legend(frameon=False, fontsize=9.5, loc='upper left')
+    a3.grid(alpha=0.25, color=C_RULE, lw=0.6)
+    a3b.set_ylabel('lower-mantle share of\nrelease (dotted)', fontsize=9)
+    a3b.set_ylim(0, 1)
+    a3.set_title('Where the buoyancy ends up — solid: cumulative transfer '
+                 'across 660 km; dotted: share of release below it',
+                 fontsize=9.5, color='0.3')
 
     for row in (0, 1):
         lo = min(ax.get_ylim()[0] for ax in axes[row, :])
