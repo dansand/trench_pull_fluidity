@@ -1,6 +1,7 @@
 model,quantity,value
-STD,vz_weighted_ztop75_median_cmyr,0.75
-STD,vz_weighted_ztop125_median_cmyr,1.182
+STD,vz_mid_upper_median_cmyr,1.673
+STD,vz_mid_upper_min_cmyr,0.991
+STD,vz_mid_upper_max_cmyr,3.2
 STD,plate_velocity_median_cmyr,1.691
 STD,convergence_median_cmyr,3.475
 STD,F_upper_ztop75_median_TNm,119.18
@@ -24,8 +25,9 @@ STD,ztop_spread_F_percent,-40.2
 STD,ztop_spread_dEdt_percent,-9.8
 STD,ztop_spread_Feff_percent,-9.8
 STD,lower_share_of_release_median,0.254
-WAL,vz_weighted_ztop75_median_cmyr,0.853
-WAL,vz_weighted_ztop125_median_cmyr,1.343
+WAL,vz_mid_upper_median_cmyr,1.992
+WAL,vz_mid_upper_min_cmyr,1.593
+WAL,vz_mid_upper_max_cmyr,4.318
 WAL,plate_velocity_median_cmyr,2.478
 WAL,convergence_median_cmyr,3.409
 WAL,F_upper_ztop75_median_TNm,104.07

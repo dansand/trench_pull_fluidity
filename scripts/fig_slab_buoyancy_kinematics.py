@@ -19,8 +19,14 @@ of the release rate stops being an assertion.
 
   plate velocity   |v_x| averaged over the top 20 km, trench to ridge
   convergence      plate velocity + trench rollback
-  <v_z>            buoyancy-weighted sinking rate over z_top to 660 km,
-                   banded across z_top exactly as rows 1 and 2
+  <v_z>            buoyancy-weighted sinking rate over the MID-UPPER
+                   MANTLE (250-450 km), shaded by the spread of the
+                   per-depth rate across that interval. NOT banded across
+                   z_top: banding a velocity over z_top measures how much
+                   slow plate material is included, not how fast the slab
+                   sinks. <v_z>(z) peaks at ~330 km in both runs (1.82 STD
+                   / 2.08 WAL cm/yr), so the maximum sits in the
+                   mid-upper mantle and the band is centred on it.
 
 Dan's request, 2026-09-24: quantify slab pull as a buoyancy force through
 time, and the rate of potential-energy release with its depth dependence
@@ -145,11 +151,8 @@ curve is shaded: the lower-mantle region is bounded at 660~km and below,
 so it carries no dependence on the upper integration depth. The
 upper-mantle shading spans the same $z_{top}$ range as (a, b) and is
 narrow because the release rate is nearly independent of that choice. (e, f) Plate velocity, convergence rate, and
-the buoyancy-weighted sinking rate over the same upper-mantle interval,
-shaded across the same range of upper integration depths; the release rate
-in (c, d) is the product of the buoyancy in (a, b) and this sinking rate,
-and the two shaded ranges move in opposite senses so that the product is
-nearly invariant. (g, h) Release rate per unit depth against time, with the
+the buoyancy-weighted sinking rate of the slab over the mid-upper mantle
+(250-450 km), shaded by the spread of that rate across the interval. (g, h) Release rate per unit depth against time, with the
 660 km discontinuity marked.
 """
 import os, sys
@@ -170,6 +173,7 @@ G = 9.8
 Z_TOPS = (75e3, 100e3, 125e3)
 Z_660 = 660e3
 REF_BAND = (200e3, 660e3)    # unambiguously slab, for the reference v_z
+VZ_BAND = (250e3, 450e3)     # mid-upper mantle, centred on the <v_z> maximum
 C_UM = '#0072B2'
 C_LM = '#CC79A7'
 C_EFF = 'k'
@@ -270,13 +274,23 @@ def main():
         roll = np.gradient(d[f'{key}_xT'] / 1e3, tc) / 10.0
         n = min(len(t), len(tc))
         assert np.allclose(t[:n], tc[:n], atol=0.3), f'{key}: time axes differ'
-        vzw = np.array([band(E, zt, Z_660) / band(F, zt, Z_660) / CM_S
-                        for zt in Z_TOPS])
-        a2.fill_between(t, vzw[0], vzw[2], color=C_VZ, alpha=0.28, lw=0,
-                        label='slab $\\langle v_z\\rangle$, $z_{top}$ = 75–125 km')
-        for k_ in (0, 2):
-            a2.plot(t, vzw[k_], '-', color=C_VZ, lw=0.7, alpha=0.9)
-        a2.plot(t, vzw[1], '-', color=C_VZ, lw=2.2)
+        # MID-UPPER-MANTLE sinking rate, NOT the z_top-banded integral
+        # (Dan, 2026-09-24): banding a velocity over z_top measures how much
+        # plate is included, not how fast the slab sinks. <v_z>(z) peaks at
+        # ~330 km in both runs -- the maximum lies in the mid-upper mantle --
+        # so the curve is the buoyancy-weighted rate over VZ_BAND and the
+        # shading is the spread of the per-depth rate ACROSS that interval.
+        mid = (z >= VZ_BAND[0]) & (z < VZ_BAND[1])
+        vzm = E[:, mid].sum(1) / F[:, mid].sum(1) / CM_S
+        per = np.where(F[:, mid] > 0, E[:, mid] / np.where(F[:, mid] > 0,
+                                                           F[:, mid], 1), np.nan) / CM_S
+        vlo, vhi = np.nanmin(per, axis=1), np.nanmax(per, axis=1)
+        a2.fill_between(t, vlo, vhi, color=C_VZ, alpha=0.28, lw=0,
+                        label=f'slab $\\langle v_z\\rangle$, '
+                              f'{VZ_BAND[0]/1e3:.0f}–{VZ_BAND[1]/1e3:.0f} km')
+        for y_ in (vlo, vhi):
+            a2.plot(t, y_, '-', color=C_VZ, lw=0.7, alpha=0.9)
+        a2.plot(t, vzm, '-', color=C_VZ, lw=2.2)
         a2.plot(tc[:n], (vp + roll)[:n], '-', color=C_CONV, lw=2.0,
                 label='convergence')
         a2.plot(tc[:n], vp[:n], '-', color=C_PLATE, lw=2.0,
@@ -284,11 +298,12 @@ def main():
         a2.set_ylabel('Velocity [cm/yr]', fontsize=10)
         a2.legend(frameon=False, fontsize=8.5, loc='upper left', ncol=3)
         a2.grid(alpha=0.25, color=C_RULE, lw=0.6)
-        print(f'   <v_z> over z_top 75->125 km: {np.median(vzw[0]):.2f} -> '
-              f'{np.median(vzw[2]):.2f} cm/yr (+{100*(np.median(vzw[2])/np.median(vzw[0])-1):.0f} %)'
+        print(f'   <v_z> {VZ_BAND[0]/1e3:.0f}-{VZ_BAND[1]/1e3:.0f} km: '
+              f'{np.median(vzm):.2f} cm/yr [{vzm.min():.2f}-{vzm.max():.2f}]'
               f'   plate {np.median(vp):.2f}  convergence {np.median(vp+roll):.2f} cm/yr')
-        rows += [(key, 'vz_weighted_ztop75_median_cmyr', f'{np.median(vzw[0]):.3f}'),
-                 (key, 'vz_weighted_ztop125_median_cmyr', f'{np.median(vzw[2]):.3f}'),
+        rows += [(key, 'vz_mid_upper_median_cmyr', f'{np.median(vzm):.3f}'),
+                 (key, 'vz_mid_upper_min_cmyr', f'{vzm.min():.3f}'),
+                 (key, 'vz_mid_upper_max_cmyr', f'{vzm.max():.3f}'),
                  (key, 'plate_velocity_median_cmyr', f'{np.median(vp):.3f}'),
                  (key, 'convergence_median_cmyr', f'{np.median(vp + roll):.3f}')]
 
