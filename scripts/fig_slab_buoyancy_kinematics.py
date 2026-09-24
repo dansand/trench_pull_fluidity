@@ -6,8 +6,8 @@ tables/slab_buoyancy_kinematics.csv. Both versions are kept; this one
 carries the velocities, the other is the compact form.
 
 Needs BOTH caches: scripts/kinematics/slab_geometry_cache.py (buoyancy and
-release profiles) and scripts/column_profiles_cache.py (plate velocity and
-trench position).
+release profiles) and scripts/column_profiles_cache.py (subducting-plate
+velocity and trench position).
 
 THE KINEMATICS ROW IS NOT DECORATION -- IT CLOSES THE ALGEBRA. Row 2 is
 row 1 times row 3: dE/dt = g F <v_z>. The z_top bands in rows 1 and 3
@@ -17,8 +17,9 @@ plate material, so F falls by 40-45 % while <v_z> rises from 0.76 to
 row 2's band is narrow. Read the three rows together and the robustness
 of the release rate stops being an assertion.
 
-  plate velocity   |v_x| averaged over the top 20 km, trench to ridge
-  convergence      plate velocity + trench rollback
+  SP velocity      subducting-plate velocity: |v_x| averaged over the top
+                   20 km, trench to ridge
+  convergence      SP velocity + trench rollback
   <v_z>            buoyancy-weighted sinking rate over the MID-UPPER
                    MANTLE (250-450 km), shaded by the spread of the
                    per-depth rate across that interval. NOT banded across
@@ -87,7 +88,7 @@ not.
      both bands are labelled and edged.
   3  where the release happens: dE/dz against depth and time, 660 marked.
      The shared colour scale is inset once, in the left panel.
-  4  kinematics: plate velocity, convergence, and the mid-upper-mantle
+  4  kinematics: subducting-plate velocity, convergence, and the mid-upper-mantle
      sinking rate, with the TRENCH-ADVANCE WINDOW shaded where it occurs.
      WAL advances at 7 of 37 snapshots (48-62 Myr), immediately before its
      release; STD never does, so the shading is absent there and its
@@ -170,10 +171,10 @@ so it carries no dependence on the upper integration depth. The
 upper-mantle shading spans the same $z_{top}$ range as (a, b) and is
 narrow because the release rate is nearly independent of that choice. (e, f) Release rate per unit depth against
 time, with the 660 km discontinuity marked; both panels share the colour
-scale shown inset in (e). (g, h) Plate velocity, convergence rate, and the
+scale shown inset in (e). (g, h) Subducting-plate velocity, convergence rate, and the
 buoyancy-weighted sinking rate of the slab over the mid-upper mantle
 (250-450 km), shaded by the spread of that rate across the interval.
-Convergence and plate velocity require no depth convention and are drawn
+Convergence and subducting-plate velocity require no depth convention and are drawn
 without a band; the sinking rate does, and the purple shading is that
 ambiguity. The grey band in (h) marks the interval over which the trench
 advances rather than retreats; the standard case has no such interval.
@@ -325,7 +326,7 @@ def main():
         a2.plot(tc[:n], (vp + roll)[:n], '-', color=C_CONV, lw=2.0,
                 label='convergence')
         a2.plot(tc[:n], vp[:n], '-', color=C_PLATE, lw=2.0,
-                label='plate velocity')
+                label='SP velocity')
         # TRENCH-ADVANCE WINDOW (Dan, 2026-09-24): shaded wherever the
         # rollback rate is negative. Detected from the data rather than
         # hardcoded, so it is model-agnostic — STD has no such interval
@@ -376,13 +377,13 @@ def main():
         # redundant, and the deep mantle at early times is empty, so the
         # inset covers no data.
         if col == 0:
-            cax = inset_axes(a3, width='34%', height='4.5%', loc='lower left',
+            cax = inset_axes(a3, width='68%', height='9%', loc='lower left',
                              bbox_to_anchor=(0.045, 0.105, 1, 1),
                              bbox_transform=a3.transAxes, borderpad=0)
             cb = fig.colorbar(im, cax=cax, orientation='horizontal')
-            cb.ax.tick_params(labelsize=7.5, length=2.5, pad=1.5)
-            cb.set_label('$dE/dz$ [W m$^{-1}$ km$^{-1}$]', fontsize=7.5,
-                         labelpad=2)
+            cb.ax.tick_params(labelsize=9, length=3.5, pad=2)
+            cb.set_label('$dE/dz$ [W m$^{-1}$ km$^{-1}$]', fontsize=9,
+                         labelpad=3)
 
         for ax in (a0, a1):
             ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
