@@ -1,0 +1,30 @@
+{
+  "table": "slab_buoyancy_kinematics.csv",
+  "script": "fig_slab_buoyancy_kinematics.py",
+  "figure": "fig_slab_buoyancy_kinematics.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 50,
+  "sigfig": 6,
+  "meta": {
+    "rho_ambient": "3171.3",
+    "z_tops_km": [
+      75,
+      100,
+      125
+    ],
+    "reference_band_km": [
+      200,
+      660
+    ],
+    "identity": "dE/dt = g F <v_z>",
+    "note": "gross buoyancy, NOT the force delivered to the trailing plate"
+  }
+}
