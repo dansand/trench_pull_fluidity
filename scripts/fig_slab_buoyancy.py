@@ -47,7 +47,10 @@ translating plate automatically instead of excluding it by hand.
      kinematics/diag_buoyancy_time. The contrast between the two band
      WIDTHS is the whole content of this row and anything else competes
      with it.
-  2  PE release rate, upper and lower mantle, with its own z_top band.
+  2  PE release rate, upper and lower mantle. THE UPPER-MANTLE CURVE
+     CARRIES THE SAME z_top BAND as row 1 -- it is ~10 % wide against
+     row 1's ~45 %, which is the comparison the figure exists to make, so
+     both bands are labelled and edged.
   3  where the release happens: dE/dz against depth and time, 660 marked.
 
 WHAT IT SHOWS.
@@ -119,7 +122,11 @@ slab's mean sinking rate over 200-660 km -- shaded over the same range,
 both shaded across the same range of upper integration depths. The wide
 band shows that the buoyancy force depends strongly on where the plate is
 judged to end; the narrow one shows that the effective buoyancy does not. (c, d) Rate of
-potential-energy release for the same regions. (e, f) Release rate per
+potential-energy release for the same regions. Only the upper-mantle
+curve is shaded: the lower-mantle region is bounded at 660~km and below,
+so it carries no dependence on the upper integration depth. The
+upper-mantle shading spans the same $z_{top}$ range as (a, b) and is
+narrow because the release rate is nearly independent of that choice. (e, f) Release rate per
 unit depth against time, with the 660 km discontinuity marked.
 """
 import os, sys
@@ -198,6 +205,8 @@ def main():
 
         a0.fill_between(t, Fum[0], Fum[2], color=C_UM, alpha=0.28, lw=0,
                         label='upper mantle, $z_{top}$ = 75–125 km')
+        for k_ in (0, 2):
+            a0.plot(t, Fum[k_], '-', color=C_UM, lw=0.7, alpha=0.9)
         a0.plot(t, Fum[1], '-', color=C_UM, lw=2.0)
         a0.fill_between(t, Feff[0], Feff[2], color=C_EFF, alpha=0.30, lw=0,
                         label='effective buoyancy $(dE/dt)/g\\langle v_z\\rangle$')
@@ -206,9 +215,21 @@ def main():
         a0.set_title(key, fontsize=11.5)
         a0.legend(frameon=False, fontsize=8.5, loc='upper left')
 
-        a1.fill_between(t, Pum[0], Pum[2], color=C_UM, alpha=0.28, lw=0)
-        a1.plot(t, Pum[1], '-', color=C_UM, lw=2.2, label='upper mantle')
-        a1.plot(t, Plm, '--', color=C_LM, lw=2.0, label='below 660 km')
+        # The z_top band is drawn here too, and LABELLED AS SUCH. It is only
+        # ~10 % wide, so without a legend entry and edge lines it reads as a
+        # thick line -- which hides the very comparison the figure makes
+        # (Dan, 2026-09-24). Row 1's band and this one span the same range.
+        a1.fill_between(t, Pum[0], Pum[2], color=C_UM, alpha=0.28, lw=0,
+                        label='upper mantle, $z_{top}$ = 75–125 km')
+        for k_ in (0, 2):
+            a1.plot(t, Pum[k_], '-', color=C_UM, lw=0.7, alpha=0.9)
+        a1.plot(t, Pum[1], '-', color=C_UM, lw=2.2)
+        # BOTH SOLID, distinguished by colour (Dan, 2026-09-24): a dashed
+        # lower-mantle curve read as an arbitrary style difference. The one
+        # real difference is that only the upper-mantle curve carries a
+        # band, because the 660 km-to-base region has no z_top dependence
+        # at all -- there is nothing to shade. The caption says so.
+        a1.plot(t, Plm, '-', color=C_LM, lw=2.2, label='below 660 km')
         a1.axhline(0, color='k', lw=0.8)
         a1.set_ylabel('PE release rate [kW/m]', fontsize=10)
         a1.legend(frameon=False, fontsize=8.5, loc='upper left')
