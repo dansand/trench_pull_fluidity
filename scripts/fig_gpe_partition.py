@@ -92,19 +92,28 @@ without saying which denominator each uses.
 ridge-pick caveat; and WAL's 62-70 Myr excursion is the loading-and-
 release episode (§2c), not a cycle.
 
-DRAFT CAPTION. The plate-wide driving term decomposed, for STD (left) and
-WAL (right). (a, b) The GPE-like force between the trench and ridge
-columns (black) separated into its two domains: the non-isostatic or
-trench pull domain (blue) and the isostatic or ridge push domain (orange
-solid), which sum to it exactly. The orange dashed curve is the ridge
-domain before the plate tilt -- the force the cooling density structure
-supplies over the same depth. The purple curve is the tilt itself, drawn
-below zero because it is a negative contribution to the driving force:
-the solid orange curve is the dashed one plus it. Every curve on the
-panel is a contribution to the driving force, positive driving.
-(c, d) The tilt as a fraction of the isostatic part: the
-suppression of ridge push by the adverse asthenospheric pressure
-gradient, and the quantity the weak asthenospheric layer changes.
+DRAFT CAPTION. The GPE-like driving force decomposed, for STD (left) and
+WAL (right). Every curve is a contribution to the driving force, positive
+driving, following Equation~(balance) in which the driving term appears as
+$\Delta\mathrm{GPE}^{*} \equiv -\Delta\bar\sigma_{zz}$. (a, b) The
+GPE-like force between the trench and ridge columns (black), separated at
+the first isostatic column into the non-isostatic or trench pull domain
+(blue) and the isostatic or ridge push domain (orange), which sum to it
+exactly. The dashed orange curve is the isostatic domain before the plate
+tilt -- the force the cooling density structure supplies over the same
+depth -- and the purple curve is the tilt itself, drawn below zero because
+it is a negative contribution: the solid orange curve is the dashed one
+plus it. Median trench pull is 2.11 and 1.74~TN/m against ridge pushes of
+1.32 and 1.45, from totals of 3.34 and 3.08. The trench pull is thus the
+larger domain throughout in STD and on 78 per cent of snapshots in WAL,
+although the isostatic domain supplies most of the secular growth in both.
+(c, d) The tilt as a fraction of the isostatic part: the suppression of
+ridge push by the adverse asthenospheric pressure gradient, and the
+quantity the weak asthenospheric layer changes. It falls through both
+runs, from about 0.7 to 0.18 in STD and 0.56 to 0.08 in WAL, with run
+medians of 0.33 and 0.19 -- the tilt weakens while the isostatic part
+grows, so the two effects reinforce.
+
 """
 import os, sys
 import numpy as np
