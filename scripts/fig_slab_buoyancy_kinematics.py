@@ -73,9 +73,10 @@ translating plate automatically instead of excluding it by hand.
      CARRIES THE SAME z_top BAND as row 1 -- it is ~10 % wide against
      row 1's ~45 %, which is the comparison the figure exists to make, so
      both bands are labelled and edged.
-  3  kinematics: plate velocity, convergence, and the buoyancy-weighted
-     sinking rate that multiplies row 1 to give row 2.
-  4  where the release happens: dE/dz against depth and time, 660 marked.
+  3  where the release happens: dE/dz against depth and time, 660 marked.
+     The shared colour scale is inset once, in the left panel.
+  4  kinematics: plate velocity, convergence, and the mid-upper-mantle
+     sinking rate.
 
 WHAT IT SHOWS.
 
@@ -150,16 +151,20 @@ potential-energy release for the same regions. Only the upper-mantle
 curve is shaded: the lower-mantle region is bounded at 660~km and below,
 so it carries no dependence on the upper integration depth. The
 upper-mantle shading spans the same $z_{top}$ range as (a, b) and is
-narrow because the release rate is nearly independent of that choice. (e, f) Plate velocity, convergence rate, and
-the buoyancy-weighted sinking rate of the slab over the mid-upper mantle
-(250-450 km), shaded by the spread of that rate across the interval. (g, h) Release rate per unit depth against time, with the
-660 km discontinuity marked.
+narrow because the release rate is nearly independent of that choice. (e, f) Release rate per unit depth against
+time, with the 660 km discontinuity marked; both panels share the colour
+scale shown inset in (e). (g, h) Plate velocity, convergence rate, and the
+buoyancy-weighted sinking rate of the slab over the mid-upper mantle
+(250-450 km), shaded by the spread of that rate across the interval.
+Convergence and plate velocity require no depth convention and are drawn
+without a band; the sinking rate does, and the shading is that ambiguity.
 """
 import os, sys
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _HERE); sys.path.insert(0, os.path.join(_HERE, 'kinematics'))
@@ -209,8 +214,8 @@ def main():
     d = cpc.load()
     fig, axes = plt.subplots(4, 2, figsize=(13.0, 12.2), sharex='col',
                              layout='constrained',
-                             gridspec_kw={'height_ratios': [1.0, 0.86, 0.86,
-                                                            0.95]})
+                             gridspec_kw={'height_ratios': [1.0, 0.86, 1.02,
+                                                            0.86]})
     rows = [('model', 'quantity', 'value')]
 
     for col, key in enumerate(('STD', 'WAL')):
@@ -235,7 +240,11 @@ def main():
         cum660 = np.concatenate([[0.0], np.cumsum(
             0.5 * (f660[1:] + f660[:-1]) * np.diff(t) * 3.15576e13)]) / 1e12
 
-        a0, a1, a2, a3 = (axes[r, col] for r in range(4))
+        # Row order (Dan, 2026-09-24): buoyancy, release rate, depth-time
+        # map, velocities. The velocities sit UNDER the map so the reader
+        # meets the release and its depth structure before the kinematics
+        # that scale it.
+        a0, a1, a3, a2 = (axes[r, col] for r in range(4))
 
         a0.fill_between(t, Fum[0], Fum[2], color=C_UM, alpha=0.28, lw=0,
                         label='upper mantle, $z_{top}$ = 75–125 km')
@@ -296,6 +305,7 @@ def main():
         a2.plot(tc[:n], vp[:n], '-', color=C_PLATE, lw=2.0,
                 label='plate velocity')
         a2.set_ylabel('Velocity [cm/yr]', fontsize=10)
+        a2.set_xlabel('Model time [Myr]', fontsize=11)
         a2.legend(frameon=False, fontsize=8.5, loc='upper left', ncol=3)
         a2.grid(alpha=0.25, color=C_RULE, lw=0.6)
         print(f'   <v_z> {VZ_BAND[0]/1e3:.0f}-{VZ_BAND[1]/1e3:.0f} km: '
@@ -321,11 +331,18 @@ def main():
         # four rows inside the height of the three-row version.
         a3.set_ylim(1400, 0)
         a3.set_ylabel('Depth [km]', fontsize=10)
-        a3.set_xlabel('Model time [Myr]', fontsize=11)
-        if col == 1:
-            fig.colorbar(im, ax=axes[3, :].tolist(), orientation='horizontal',
-                         pad=0.09, shrink=0.55, aspect=45,
-                         label='$dE/dz$ [W m$^{-1}$ km$^{-1}$]')
+        # ONE colourbar, inset into the lower-left of the left-hand map
+        # (Dan, 2026-09-24). Both maps share the scale, so a second is
+        # redundant, and the deep mantle at early times is empty, so the
+        # inset covers no data.
+        if col == 0:
+            cax = inset_axes(a3, width='34%', height='4.5%', loc='lower left',
+                             bbox_to_anchor=(0.045, 0.105, 1, 1),
+                             bbox_transform=a3.transAxes, borderpad=0)
+            cb = fig.colorbar(im, cax=cax, orientation='horizontal')
+            cb.ax.tick_params(labelsize=7.5, length=2.5, pad=1.5)
+            cb.set_label('$dE/dz$ [W m$^{-1}$ km$^{-1}$]', fontsize=7.5,
+                         labelpad=2)
 
         for ax in (a0, a1):
             ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
@@ -360,7 +377,9 @@ def main():
                  (key, 'lower_share_of_release_median',
                   f'{med(Plm / (Plm + Pum[1])):.3f}')]
 
-    for row in (0, 1, 2):
+    # rows 0, 1 and 3 are line panels and share a y scale between the
+    # models; row 2 is the map, whose limits are set in the loop.
+    for row in (0, 1, 3):
         lo = min(ax.get_ylim()[0] for ax in axes[row, :])
         hi = max(ax.get_ylim()[1] for ax in axes[row, :])
         for ax in axes[row, :]:
