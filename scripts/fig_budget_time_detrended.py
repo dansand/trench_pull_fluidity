@@ -145,9 +145,15 @@ def main():
         a0.annotate('', xy=(t[-3], -fit(t, nd)[-3]),
                     xytext=(t[-3], -fit(t, gpe)[-3]),
                     arrowprops=dict(arrowstyle='<->', color='red', lw=1.2))
-        a0.text(t[-3], 0.5 * (-fit(t, nd)[-3] - fit(t, gpe)[-3]),
-                f'$F_B$ trend\n{sl(fb):+.2f}  ', color='red', fontsize=8,
-                va='center', ha='right')
+        # Label ABOVE the arrow (Dan, 2026-09-24): centred on it and offset
+        # by 20 % of the arrow's own height, which puts it in the empty
+        # region between the mirrored trend and zero and leaves room for a
+        # readable size. Placing it beside the arrow cramped it against the
+        # right spine and forced an 8 pt label.
+        _lo, _hi = sorted((-fit(t, nd)[-3], -fit(t, gpe)[-3]))
+        a0.text(t[-3], _hi + 0.20 * (_hi - _lo),
+                f'$F_B$ trend\n{sl(fb):+.2f}', color='red', fontsize=10.5,
+                va='bottom', ha='center')
         a0.set_title(key, fontsize=11)
         a0.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
