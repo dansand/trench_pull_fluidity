@@ -157,27 +157,28 @@ whole point of the contrast above, and the figure must never be captioned
 as though it measured slab pull on the trailing plate.
 
 DRAFT CAPTION. Slab buoyancy, potential-energy release and kinematics
-through the runs, STD (left) and WAL (right). (a, b) Buoyancy force of cold material
-in the upper mantle, shaded across upper integration depths of 75 to
-125 km, with the effective buoyancy -- the release rate divided by the
-slab's mean sinking rate over the mid-upper mantle, 250-450 km -- shaded
-over the same range,
-both shaded across the same range of upper integration depths. The wide
-band shows that the buoyancy force depends strongly on where the plate is
-judged to end; the narrow one shows that the effective buoyancy does not. (c, d) Rate of
-potential-energy release for the same regions. Only the upper-mantle
-curve is shaded: the lower-mantle region is bounded at 660~km and below,
-so it carries no dependence on the upper integration depth. The
-upper-mantle shading spans the same $z_{top}$ range as (a, b) and is
-narrow because the release rate is nearly independent of that choice. (e, f) Release rate per unit depth against
-time, with the 660 km discontinuity marked; both panels share the colour
-scale shown inset in (e). (g, h) Subducting-plate velocity, convergence rate, and the
-buoyancy-weighted sinking rate of the slab over the mid-upper mantle
-(250-450 km), shaded by the spread of that rate across the interval.
-Convergence and subducting-plate velocity require no depth convention and are drawn
-without a band; the sinking rate does, and the purple shading is that
-ambiguity. The grey band in (h) marks the interval over which the trench
-advances rather than retreats; the standard case has no such interval.
+through the runs, STD (left) and WAL (right). (a, b) Buoyancy force of
+cold material in the upper mantle, shaded across upper integration depths
+$z_{top}$ of 75 to 125 km, against the effective buoyancy -- the release
+rate divided by the slab's mean sinking rate over the mid-upper mantle,
+$\langle v_z\rangle_{\mathrm{UM}}$ on 250-450 km -- shaded across the same
+range. The wide band shows that the buoyancy force depends strongly on
+where the plate is judged to end; the narrow one shows that the effective
+buoyancy does not. (c, d) Rate of potential-energy release for the same
+regions. Only the upper-mantle curve is shaded, because the lower-mantle
+region is bounded at 660 km and below and so carries no dependence on
+$z_{top}$; its shading spans the same range as (a, b) and is narrow
+because the release rate is nearly independent of that choice. (e, f)
+Release rate per unit depth against time, with the 660 km discontinuity
+marked; both panels share the colour scale shown inset in (e).
+(g, h) Subducting-plate velocity, convergence rate, and
+$\langle v_z\rangle_{\mathrm{UM}}$, the latter shaded by the spread of the
+sinking rate across 250-450 km. Convergence and plate velocity require no
+depth convention and are drawn without a band; the sinking rate does, and
+the shading is that ambiguity. The grey band in (h) marks the interval
+over which the trench advances rather than retreats, which the standard
+case never does. Density anomalies are relative to ambient mantle at
+3171.3 kg m^-3 and clipped at zero, so only cold material contributes.
 """
 import os, sys
 import numpy as np
