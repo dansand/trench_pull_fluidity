@@ -39,8 +39,14 @@ spread across the same z_top range is -10 % / -9 % rather than -40 % /
 -45 %, and it lands near the deep-z_top value of F -- it discounts the
 translating plate automatically instead of excluding it by hand.
 
-  1  buoyancy force: the z_top band (wide), the effective buoyancy (narrow),
-     the lower mantle, and the ACCUMULATED total below z_top.
+  1  buoyancy force: the z_top band (wide) against the effective buoyancy
+     (narrow). TWO QUANTITIES ONLY. An earlier version also carried the
+     lower-mantle curve and the accumulated total; both were cut on
+     2026-09-24 (Dan: "quite a lot going on there"). The lower mantle is
+     already in row 2, and the accumulated totals have their own figure,
+     kinematics/diag_buoyancy_time. The contrast between the two band
+     WIDTHS is the whole content of this row and anything else competes
+     with it.
   2  PE release rate, upper and lower mantle, with its own z_top band.
   3  where the release happens: dE/dz against depth and time, 660 marked.
 
@@ -110,10 +116,9 @@ runs, STD (left) and WAL (right). (a, b) Buoyancy force of cold material
 in the upper mantle, shaded across upper integration depths of 75 to
 125 km, with the effective buoyancy -- the release rate divided by the
 slab's mean sinking rate over 200-660 km -- shaded over the same range,
-the lower-mantle buoyancy below 660 km, and in grey the accumulated total
-below the upper integration depth. The wide band shows that the buoyancy
-force depends strongly on where the plate is judged to end; the narrow one
-shows that the effective buoyancy does not. (c, d) Rate of
+both shaded across the same range of upper integration depths. The wide
+band shows that the buoyancy force depends strongly on where the plate is
+judged to end; the narrow one shows that the effective buoyancy does not. (c, d) Rate of
 potential-energy release for the same regions. (e, f) Release rate per
 unit depth against time, with the 660 km discontinuity marked.
 """
@@ -197,9 +202,6 @@ def main():
         a0.fill_between(t, Feff[0], Feff[2], color=C_EFF, alpha=0.30, lw=0,
                         label='effective buoyancy $(dE/dt)/g\\langle v_z\\rangle$')
         a0.plot(t, Feff[1], '-', color=C_EFF, lw=1.8)
-        a0.plot(t, Flm, '--', color=C_LM, lw=2.0, label='below 660 km')
-        a0.plot(t, Ftot[1], '-', color='0.45', lw=2.6,
-                label='total below $z_{top}$ (accumulated)')
         a0.set_ylabel('Buoyancy force [TN/m]', fontsize=10)
         a0.set_title(key, fontsize=11.5)
         a0.legend(frameon=False, fontsize=8.5, loc='upper left')
