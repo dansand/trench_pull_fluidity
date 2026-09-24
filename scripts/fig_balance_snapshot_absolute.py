@@ -136,7 +136,10 @@ Delta N_D is secondary. The residual (green dashed), with its
 trench-anchor constant removed over the declared mid-subducting-plate
 window, shows where extraction is imperfect, principally the trench zone.
 (g, h) The normal-stress-difference resultant as its own columnwise value
-N_D(x), rather than as a difference. This shows what the Delta forms
+N_D(x), rather than as a difference. The panel is labelled tension-like
+above zero and compression-like below: N_D is a difference between normal
+stresses, so a positive value means the horizontal normal stress exceeds
+the vertical one rather than that the plate is in tension. This shows what the Delta forms
 cannot: the resultant is COMPRESSIONAL at the trench (-0.74 and
 -1.78 TN/m in the two runs) and stays modest across the whole plate, so
 the plate-wide change in N_D is not delivered as a large tension-like
@@ -444,7 +447,7 @@ def main():
         # reading of the same fact. What this row is FOR is the absolute
         # level -- where N_D actually sits -- and one curve says it.
         ax4 = axes[3, col]
-        ax4.plot(xkm, Fd * 1e-12, color='k', lw=1.8, label=r'$N_D(x)$')
+        ax4.plot(xkm, Fd * 1e-12, color='k', lw=1.8)
         ax4.axhline(0, color='k', lw=0.5)
         ax4.plot(0, Fd_T * 1e-12, 'o', color='k', ms=5, zorder=6)
         for xc in (0, xi_km, xr_km):
@@ -511,6 +514,12 @@ def main():
         for c in (0, 1):
             if row == 0:
                 axes[row, c].set_ylim(hi + pad, lo - pad)   # w positive down
+            elif row == 3:
+                # SYMMETRIC about zero (Dan, 2026-09-25): the panel is
+                # labelled tension-like above and compression-like below, so
+                # unequal halves would misrepresent which way N_D leans.
+                m = max(abs(lo), abs(hi)) + pad
+                axes[row, c].set_ylim(-m, m)
             else:
                 axes[row, c].set_ylim(lo - pad, hi + pad)
 
@@ -518,7 +527,19 @@ def main():
     axes[1, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
     axes[2, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
     axes[3, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
-    axes[3, 0].legend(loc='lower right', fontsize=8.5)
+    # No legend on row 4: one curve, already named by the y label. The two
+    # words below carry the sign reading instead (Dan, 2026-09-25).
+    # "-like" on BOTH halves, symmetrically: N_D is a normal-stress
+    # DIFFERENCE, so a positive value means sigma_xx exceeds sigma_zz, not
+    # that the plate is in tension, and the same caveat applies in reverse.
+    # SYMBOLOGY §4.4 already locks "tension-like" for exactly this reason;
+    # "compression-like" is its symmetric partner.
+    for c in (0, 1):
+        for lab, dy, va in (('TENSION-LIKE', 0.94, 'top'),
+                            ('COMPRESSION-LIKE', 0.06, 'bottom')):
+            axes[3, c].text(0.5, dy, lab, transform=axes[3, c].transAxes,
+                            ha='center', va=va, fontsize=11.5,
+                            fontweight='bold', color='0.80', zorder=0)
     if SHOW_W_TAU:
         axes[0, 0].legend(loc='lower right', fontsize=8, framealpha=0.9)
     axes[1, 0].legend(loc='lower left', fontsize=8)
