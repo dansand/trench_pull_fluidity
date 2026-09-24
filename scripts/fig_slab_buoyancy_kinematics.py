@@ -366,7 +366,7 @@ def main():
         im = a3.pcolormesh(t, z / 1e3, Ei.T, cmap='Reds', shading='nearest',
                            vmin=0.0, vmax=VMAX)
         a3.axhline(Z_660 / 1e3, color='k', lw=1.4, ls='--')
-        a3.text(t[1], Z_660 / 1e3 - 25, '660 km', fontsize=8.5, va='bottom')
+        a3.text(t[1], Z_660 / 1e3 - 28, '660 km', fontsize=11, va='bottom')
         # 1400 km, not 1800: the deepest slab tip in either run is 1312 km
         # (WAL, 78 Myr), so the bottom 400 km was dead space — cut to keep
         # four rows inside the height of the three-row version.
@@ -377,8 +377,10 @@ def main():
         # redundant, and the deep mantle at early times is empty, so the
         # inset covers no data.
         if col == 0:
+            # Raised so the label below it stays inside the panel
+            # (Dan, 2026-09-24); size unchanged.
             cax = inset_axes(a3, width='68%', height='9%', loc='lower left',
-                             bbox_to_anchor=(0.045, 0.105, 1, 1),
+                             bbox_to_anchor=(0.045, 0.20, 1, 1),
                              bbox_transform=a3.transAxes, borderpad=0)
             cb = fig.colorbar(im, cax=cax, orientation='horizontal')
             cb.ax.tick_params(labelsize=9, length=3.5, pad=2)
