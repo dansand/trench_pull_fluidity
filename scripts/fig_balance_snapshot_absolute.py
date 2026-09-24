@@ -447,7 +447,7 @@ def main():
         # reading of the same fact. What this row is FOR is the absolute
         # level -- where N_D actually sits -- and one curve says it.
         ax4 = axes[3, col]
-        ax4.plot(xkm, Fd * 1e-12, color='k', lw=1.8)
+        ax4.plot(xkm, Fd * 1e-12, color='k', lw=1.8, label=r'$N_D(x)$')
         ax4.axhline(0, color='k', lw=0.5)
         ax4.plot(0, Fd_T * 1e-12, 'o', color='k', ms=5, zorder=6)
         for xc in (0, xi_km, xr_km):
@@ -527,13 +527,19 @@ def main():
     axes[1, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
     axes[2, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
     axes[3, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
-    # No legend on row 4: one curve, already named by the y label. The two
-    # words below carry the sign reading instead (Dan, 2026-09-25).
+    # The row-4 legend is NOT optional (Dan, 2026-09-25): the y label says
+    # only 'Force per unit distance', so nothing else on the panel
+    # identifies which resultant this is -- and the point of the row is
+    # that it is N_D ABSOLUTE, not one of the Delta forms above it. Placed
+    # upper left, clear of the curve in both models and of the two words.
+    # Those words carry the sign reading, not the identification.
     # "-like" on BOTH halves, symmetrically: N_D is a normal-stress
     # DIFFERENCE, so a positive value means sigma_xx exceeds sigma_zz, not
     # that the plate is in tension, and the same caveat applies in reverse.
     # SYMBOLOGY §4.4 already locks "tension-like" for exactly this reason;
     # "compression-like" is its symmetric partner.
+    axes[3, 0].legend(loc='upper left', fontsize=9)
+    axes[3, 1].legend(loc='upper left', fontsize=9)
     for c in (0, 1):
         for lab, dy, va in (('TENSION-LIKE', 0.94, 'top'),
                             ('COMPRESSION-LIKE', 0.06, 'bottom')):
