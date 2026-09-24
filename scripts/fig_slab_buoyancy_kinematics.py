@@ -343,7 +343,10 @@ def main():
         rows.append((key, 'trench_advance_snapshots', str(int(adv.sum()))))
         a2.set_ylabel('Velocity [cm/yr]', fontsize=10)
         a2.set_xlabel('Model time [Myr]', fontsize=11)
-        a2.legend(frameon=False, fontsize=8.5, loc='upper left', ncol=3)
+        # ncol=2 for a 2x2 block: with four entries, ncol=3 left one
+        # orphaned on a second row (Dan, 2026-09-24). matplotlib fills
+        # column-major, so the pairs stay sensible.
+        a2.legend(frameon=False, fontsize=8.5, loc='upper left', ncol=2)
         a2.grid(alpha=0.25, color=C_RULE, lw=0.6)
         print(f'   <v_z> {VZ_BAND[0]/1e3:.0f}-{VZ_BAND[1]/1e3:.0f} km: '
               f'{np.median(vzm):.2f} cm/yr [{vzm.min():.2f}-{vzm.max():.2f}]'
