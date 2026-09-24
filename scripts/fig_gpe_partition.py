@@ -17,10 +17,18 @@ replace `fig_partition_time` in the SI rather than sit beside it.
 
   1  the decomposition. Black: the plate-wide driving term. Blue: the
      non-isostatic (trench pull) domain. Orange solid: the ridge push as
-     it enters the balance. Orange dashed: the same domain with the tilt
-     removed -- the isostatic part the density structure supplies over
-     the same depth. The purple band between them IS the tilt.
+     it enters the balance. Orange dashed: the same domain BEFORE the
+     tilt. Purple, below zero: the tilt itself.
   2  the suppression fraction, tilt / isostatic part -- the channel dial.
+
+⚠ ONE REGISTER ON THIS FIGURE (Dan, 2026-09-24): every curve is a
+contribution TO THE DRIVING FORCE, positive = driving. The tilt is
+therefore drawn NEGATIVE, below zero, because that is what it does to the
+isostatic part. It gets its own line rather than a shaded band for two
+reasons: a band leaves its sign implicit, and its temporal behaviour
+differs from the curves it would sit between, which a band hides. The
+static limit (density integrated below z_c) has been dropped -- reference
+clutter at this point in the argument.
 
 ⚠ ONE INTEGRATION DEPTH THROUGHOUT (z_c), SO EVERY LEVEL IS EXACTLY
 ADDITIVE. The reader will check that blue + orange sums to black, and it
@@ -34,9 +42,16 @@ ridge side to z*, the sign-change depth, and reports a STATIC ridge push
 read off the deep plateau. Both are sanctioned -- conventions W17 records
 that the two agree within ~2 % -- but partition's quantities are not
 mutually additive with a z_c-based trench pull, and additivity is the
-whole point here. The static limit is drawn as a faint dotted line for
-continuity with the SI figure; the gap between it and the dashed curve is
-the density tail below z_c, which does not enter the balance.
+whole point here. The static limit lives in the SI figure.
+
+⚠ THE REGISTER DIFFERS FROM `fig_budget_time_detrended`, WHICH IS A
+STANDING PROBLEM, NOT A CHOICE MADE HERE. That figure plots each term's
+contribution to the net force in +x, in which driving is NEGATIVE (the
+analysis frame is mirrored, so the plate moves toward -x). This figure
+plots driving as POSITIVE, which is what a decomposition needs and what
+`fig_balance_snapshot` already does. The root cause is the mirrored frame
+(PAPER_PLAN W31); W28 records the same clash against
+`fig_ridge_column_stresses`. Un-mirroring would collapse all of it.
 
 ⚠ NO RESIDUAL PANEL, deliberately. Trench pull and ridge push are both
 referenced to the first isostatic column, which cancels from their sum
@@ -61,13 +76,17 @@ WHAT IT SHOWS.
     from ~0.6-0.7 early to ~0.18 (STD) / ~0.08 (WAL) late as the channel
     evolves. The STD/WAL separation is the weak-layer dial working in the
     direction the mechanism predicts.
+  - Drawing the tilt as its own curve shows that the fraction falls for
+    TWO reasons at once, which the band version concealed: the isostatic
+    part grows, AND the tilt itself weakens. STD's tilt deepens to
+    -1.05 TN/m near 12 Myr and recovers to about -0.45 by 80 Myr.
 
 ⚠ DENOMINATOR. The suppression fraction plotted here is tilt / isostatic
 part, both at z_c, which is the conventions §6b definition and is exactly
 additive with the curves above. `fig_partition_time` (SI) divides by the
-STATIC ridge push instead, which is larger, so its fraction is lower.
-Both are tabulated (`tilt_over_static_median`) so the two can be
-reconciled; do not compare the two numbers without saying which is which.
+STATIC ridge push instead, which is larger, so its fraction is lower --
+0.29 (STD) / 0.17 (WAL) on identical data. Do not compare the two numbers
+without saying which denominator each uses.
 
 ⚠ WAL ridge-referenced quantities after 70 Myr carry the standing
 ridge-pick caveat; and WAL's 62-70 Myr excursion is the loading-and-
@@ -78,12 +97,12 @@ WAL (right). (a, b) The GPE-like force between the trench and ridge
 columns (black) separated into its two domains: the non-isostatic or
 trench pull domain (blue) and the isostatic or ridge push domain (orange
 solid), which sum to it exactly. The orange dashed curve is the ridge
-domain with the plate tilt removed -- the force the cooling density
-structure supplies over the same depth -- so the purple band between the
-two orange curves is the tilt contained within the measured ridge push.
-The faint dotted curve is the static limit obtained by integrating the
-density structure below the plate, shown for reference; it does not enter
-the balance. (c, d) The tilt as a fraction of the isostatic part: the
+domain before the plate tilt -- the force the cooling density structure
+supplies over the same depth. The purple curve is the tilt itself, drawn
+below zero because it is a negative contribution to the driving force:
+the solid orange curve is the dashed one plus it. Every curve on the
+panel is a contribution to the driving force, positive driving.
+(c, d) The tilt as a fraction of the isostatic part: the
 suppression of ridge push by the adverse asthenospheric pressure
 gradient, and the quantity the weak asthenospheric layer changes.
 """
@@ -122,7 +141,6 @@ def main():
         TOT = TP + RP                           # = Delta GPE* over 0..z_c
         TILT = -c['dP'] * (z[zc][-1] - z[zc][0]) / 1e12
         DENS = RP + TILT                        # isostatic part, same depth
-        STATIC = cpc.partition(d, key)['static'] / 1e12
         supp = TILT / DENS
 
         assert np.allclose(I(d[f'{key}_szz_T']) - I(d[f'{key}_szz_R']), TOT,
@@ -130,19 +148,25 @@ def main():
         assert np.allclose(DENS - TILT, RP, atol=1e-9), \
             f'{key}: density part - tilt is not the measured ridge push'
 
+        # ONE REGISTER ON THIS FIGURE: every curve is a contribution TO THE
+        # DRIVING FORCE, positive = driving (Dan, 2026-09-24). The tilt is
+        # therefore drawn as a NEGATIVE contribution, below zero, because
+        # that is what it does — it removes force from the isostatic part.
+        # Its own line rather than a shaded band, because its temporal
+        # behaviour differs from the terms it sits between and a band hides
+        # that. The static limit is dropped: reference clutter at this point.
         a0, a1 = axes[0, col], axes[1, col]
-        a0.fill_between(t, RP, DENS, color=C_TILT, alpha=0.30, lw=0,
-                        label='tilt (removed from the ridge domain)')
-        a0.plot(t, STATIC, ':', color=C_RIDGE, lw=1.2, alpha=0.75,
-                label='static limit (density below $z_c$; not in the balance)')
+        a0.axhline(0, color='k', lw=1.2)
         a0.plot(t, DENS, '--', color=C_RIDGE, lw=1.6,
-                label='isostatic part, tilt removed')
+                label='isostatic part, before tilt')
         a0.plot(t, RP, '-', color=C_RIDGE, lw=2.2,
                 label='ridge push (isostatic domain)')
         a0.plot(t, TP, '-', color=C_TRENCH, lw=2.2,
                 label='trench pull (non-isostatic domain)')
         a0.plot(t, TOT, '-', color=C_TOTAL, lw=2.6,
                 label=r'$\Delta\mathrm{GPE}^{*}$ (= blue + orange)')
+        a0.plot(t, -TILT, '-', color=C_TILT, lw=2.0,
+                label='tilt (removed from the isostatic part)')
         a0.set_title(key, fontsize=11.5)
         a0.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
@@ -161,13 +185,12 @@ def main():
         print(f'{key}: medians  total {np.median(TOT):.2f}  trench pull '
               f'{np.median(TP):.2f}  ridge push {np.median(RP):.2f}  '
               f'isostatic part {np.median(DENS):.2f}  tilt {np.median(TILT):.2f}'
-              f'  static {np.median(STATIC):.2f} TN/m;  suppression median '
+              f' TN/m;  suppression median '
               f'{np.median(supp):.2f} (range {supp.min():.2f}-{supp.max():.2f});'
-              f'  tilt/static median {np.median(TILT / STATIC):.2f};'
               f'  ridge push exceeds trench pull at {100*frac_ridge:.0f} % of steps')
         for nm, y in (('total_gpe_like', TOT), ('trench_pull', TP),
                       ('ridge_push_measured', RP), ('isostatic_part', DENS),
-                      ('tilt', TILT), ('static_limit', STATIC),
+                      ('tilt', TILT),
                       ('suppression_fraction', supp)):
             rows += [(key, f'{nm}_median', f'{np.median(y):.4f}'),
                      (key, f'{nm}_q1', f'{np.percentile(y, 25):.4f}'),
@@ -178,7 +201,7 @@ def main():
                  # tilt/static is the denominator used by fig_partition_time
                  # (SI) and PAPER_PLAN; tilt/isostatic-part is plotted here.
                  # Both are tabulated so the two figures can be reconciled.
-                 (key, 'tilt_over_static_median', f'{np.median(TILT / STATIC):.4f}')]
+                 ]
 
     for row in range(2):
         lo = min(ax.get_ylim()[0] for ax in axes[row, :])
@@ -204,8 +227,6 @@ def main():
                                           'isostatic part - tilt = ridge push; '
                                           'both asserted at render',
                             'tilt': '|Delta P| * z_c on the analysis grid',
-                            'static_limit': 'cpc.partition static (plateau asymptote), '
-                                            'reference only — not additive with the rest',
                             'no_residual_panel': 'deliberate; see DYNAMICS_FINDINGS §5.10'})
     print('written:', tab)
 
