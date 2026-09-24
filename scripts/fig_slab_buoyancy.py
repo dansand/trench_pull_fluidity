@@ -37,14 +37,29 @@ quantity the velocity panel plots. The subscript marks it as a
 representative average rather than a local value; an overbar is not used
 because in this project's register the overbar denotes a depth integral.
 
-    F_eff = (dE/dt) / (g * <v_z>_UM),  <v_z>_UM over 250-450 km
+⚠ THE REFERENCE IS ONE CONSTANT PER RUN, not a per-snapshot value. A
+moving denominator would make F_eff(t) mix two signals -- dE/dt and
+<v_z> rise together when the slab accelerates, so the ratio partly
+cancels its own variation. Held fixed, F_eff is the release rate in force
+units and its time dependence is the release rate's alone.
+
+⚠ EACH RUN USES ITS OWN REFERENCE (1.67 STD / 1.99 WAL cm/yr), so F_eff
+is a within-model participation measure. Do NOT read the STD-vs-WAL
+difference in F_eff as a difference in buoyancy doing work: the release
+rates are nearly equal (27.1 vs 27.6 kW/m) and almost all of the F_eff
+gap is the reference difference. For a cross-model force comparison use
+the release rates directly, or a shared reference.
+
+    F_eff = (dE/dt) / (g * <v_z>_UM),  <v_z>_UM = the RUN MEDIAN of the
+                                       buoyancy-weighted sinking rate over
+                                       250-450 km -- one constant per run
 
 It is the buoyancy that is actually doing work, expressed as a force. Its
 spread across the same z_top range is -10 % / -9 % rather than -40 % /
 -45 %: it discounts the translating plate automatically instead of
 excluding it by hand.
 
-⚠ It sits BELOW every value of F, at 57 (STD) / 44 (WAL) TN/m against
+⚠ It sits BELOW every value of F, at 51 (STD) / 44 (WAL) TN/m against
 71-119 / 59-104, because the reference rate is taken where the slab sinks
 FASTEST. F_eff is therefore a conservative measure of the buoyancy doing
 work, not an estimate of the total present. Both are reported; the
@@ -68,7 +83,7 @@ not.
 WHAT IT SHOWS.
 
   - **The Dahlen gap, quantified.** Upper-mantle buoyancy is 86 (STD) /
-    72 (WAL) TN/m at z_top = 100 km, or 57 / 44 TN/m on the conservative
+    72 (WAL) TN/m at z_top = 100 km, or 51 / 44 TN/m on the conservative
     effective measure -- against the 2-3 TN/m that reaches the trailing
     plate in the force balance. Between fifteen and forty times the
     delivered force is consumed within the subduction system, depending
@@ -201,8 +216,17 @@ def main():
     for col, key in enumerate(('STD', 'WAL')):
         t = s[f'{key}_t']; F = s[f'{key}_dFdz']; E = s[f'{key}_dEdz']
         band = lambda a, lo, hi: a[:, (z >= lo) & (z < hi)].sum(1) * dz
+        # ONE CONSTANT REFERENCE RATE PER RUN (Dan, 2026-09-24), the run
+        # MEDIAN of <v_z>_UM -- not a per-snapshot value. With a moving
+        # denominator, F_eff(t) mixes two signals: when the slab speeds up
+        # both dE/dt and <v_z> rise and the ratio partly cancels its own
+        # variation. A fixed yardstick makes F_eff the release rate
+        # faithfully expressed in force units, which is the only thing the
+        # conversion is for. The median is used rather than the mean
+        # because WAL's 62-70 Myr episode skews the mean.
         ref = (z >= VZ_BAND[0]) & (z < VZ_BAND[1])
-        vref = E[:, ref].sum(1) / F[:, ref].sum(1)              # m/s
+        vref_t = E[:, ref].sum(1) / F[:, ref].sum(1)           # m/s, per step
+        vref = np.median(vref_t)                               # m/s, constant
         Fum = np.array([band(F, zt, Z_660) / 1e12 for zt in Z_TOPS])
         Pum = np.array([band(E, zt, Z_660) / 1e3 for zt in Z_TOPS])
         Feff = np.array([band(E, zt, Z_660) / vref / 1e12 for zt in Z_TOPS])
@@ -274,7 +298,8 @@ def main():
             ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
         med = np.median
-        print(f'== {key}  <v_z>_UM(250-450) median {med(vref)/CM_S:.2f} cm/yr')
+        print(f'== {key}  reference <v_z>_UM(250-450) = {vref/CM_S:.2f} cm/yr '
+              f'(run median, constant)')
         for i, zt in enumerate(Z_TOPS):
             print(f'   z_top {zt/1e3:3.0f}: F {med(Fum[i]):6.1f}   '
                   f'F_eff {med(Feff[i]):6.1f} TN/m   dE/dt {med(Pum[i]):5.1f} kW/m')
@@ -296,7 +321,7 @@ def main():
                  (key, 'cumulative_transfer_across_660_TNm', f'{cum660[-1]:.2f}'),
                  (key, 'F_lower_median_TNm', f'{med(Flm):.2f}'),
                  (key, 'dEdt_lower_median_kWm', f'{med(Plm):.2f}'),
-                 (key, 'vz_ref_mid_upper_median_cmyr', f'{med(vref)/CM_S:.3f}'),
+                 (key, 'vz_ref_mid_upper_cmyr', f'{vref/CM_S:.3f}'),
                  (key, 'ztop_spread_F_percent', f'{100*med(Fum[2]/Fum[0]-1):.1f}'),
                  (key, 'ztop_spread_dEdt_percent', f'{100*med(Pum[2]/Pum[0]-1):.1f}'),
                  (key, 'ztop_spread_Feff_percent', f'{100*med(Feff[2]/Feff[0]-1):.1f}'),
