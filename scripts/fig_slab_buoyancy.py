@@ -138,9 +138,12 @@ is the folding-regime contrast stated as a budget.
 release; this is correct and is why row 2 can dip.
 ⚠ The 5 km grid resolves the ~100 km anomaly with ~20 cells, adequate for
 an integral but not for a gradient.
-⚠ Gross buoyancy is NOT the force delivered to the plate. That is the
-whole point of the contrast above, and the figure must never be captioned
-as though it measured slab pull on the trailing plate.
+⚠ BOTH ROW-1 CURVES ARE MEASURES OF WHAT IS CONVENTIONALLY CALLED SLAB
+PULL, and the axis now says so -- in quotes, because the paper's argument
+is that this is NOT the force delivered to the trailing plate. Naming it
+is what makes the contrast legible: a reader who does not recognise the
+quantity cannot see that 86 TN/m of it yields 2-3 TN/m at the plate.
+Never caption either curve as slab pull ON the trailing plate.
 
 DRAFT CAPTION. Slab buoyancy and potential-energy release through the
 runs, STD (left) and WAL (right). (a, b) Buoyancy force of cold material
@@ -255,7 +258,11 @@ def main():
                         label='effective, upper mantle: '
                               '$(dE/dt)/g\\langle v_z\\rangle_{\\mathrm{UM}}$')
         a0.plot(t, Feff[1], '-', color=C_EFF, lw=1.8)
-        a0.set_ylabel('Buoyancy force [TN/m]', fontsize=10)
+        # Name the conventional term on the axis (Dan, 2026-09-24): both
+        # curves in this row are measures of what the literature calls slab
+        # pull, and the figure never said so. Quoted, because the paper's
+        # argument is that it is NOT the force delivered to the plate.
+        a0.set_ylabel('Buoyancy force —\n"slab pull" [TN/m]', fontsize=10)
         a0.set_title(key, fontsize=11.5)
         a0.legend(frameon=False, fontsize=8.5, loc='upper left')
 
