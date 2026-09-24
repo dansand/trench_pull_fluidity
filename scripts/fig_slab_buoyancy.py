@@ -1,8 +1,10 @@
-"""diag_slab_buoyancy — slab buoyancy, potential-energy release, and where it happens.
+"""fig_slab_buoyancy — slab buoyancy, potential-energy release, and where it happens.
 
-DIAGNOSTIC (diag_, not yet a manuscript figure). Writes
-figures/kinematics/diag_slab_buoyancy.png and tables/slab_buoyancy.csv
-from the slab cache (scripts/kinematics/slab_geometry_cache.py).
+MANUSCRIPT FIGURE (promoted from diag_ on 2026-09-24, Dan: "definite
+include for the SI, maybe even main"). Writes figures/fig_slab_buoyancy.png
+and tables/slab_buoyancy.csv from the slab cache
+(scripts/kinematics/slab_geometry_cache.py -- the cache stays in the
+kinematics directory; only the figure is manuscript material).
 
 Dan's request, 2026-09-24: quantify slab pull as a buoyancy force through
 time, and the rate of potential-energy release with its depth dependence
@@ -122,11 +124,11 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.dirname(_HERE)); sys.path.insert(0, _HERE)
+sys.path.insert(0, _HERE); sys.path.insert(0, os.path.join(_HERE, 'kinematics'))
 import slab_geometry_cache as sgc
 from tables_io import write_table
 
-ROOT = os.path.dirname(os.path.dirname(_HERE))
+ROOT = os.path.dirname(_HERE)
 CM_S = 3.17098e-10           # 1 cm/yr in m/s
 G = 9.8
 Z_TOPS = (75e3, 100e3, 125e3)
@@ -159,7 +161,7 @@ def main():
     # 3 rows, columns are models. A 4th row overlaying the models was tried
     # 2026-09-24 and removed the same day: it distracted from the three
     # panels that carry the figure. The depth-partition comparison it held
-    # now has its own figure, diag_buoyancy_time.
+    # now has its own figure, kinematics/diag_buoyancy_time.
     fig, axes = plt.subplots(3, 2, figsize=(13.0, 11.6), sharex='col',
                              layout='constrained',
                              gridspec_kw={'height_ratios': [1.15, 1.0, 1.25]})
@@ -267,12 +269,12 @@ def main():
 
     fig.suptitle('Slab buoyancy and potential-energy release', fontsize=10.5,
                  color='0.35')
-    out = os.path.join(ROOT, 'figures', 'kinematics', 'diag_slab_buoyancy.png')
+    out = os.path.join(ROOT, 'figures', 'fig_slab_buoyancy.png')
     fig.savefig(out, bbox_inches='tight', dpi=200)
     print('written:', out)
     tab = write_table('slab_buoyancy', rows[0], rows[1:],
-                      script='kinematics/diag_slab_buoyancy.py',
-                      figure='kinematics/diag_slab_buoyancy.png',
+                      script='fig_slab_buoyancy.py',
+                      figure='fig_slab_buoyancy.png',
                       models=('STD', 'WAL'),
                       meta={'rho_ambient': 3171.300, 'z_tops_km': [75, 100, 125],
                             'reference_band_km': [200, 660],

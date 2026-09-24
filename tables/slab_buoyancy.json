@@ -1,7 +1,7 @@
 {
   "table": "slab_buoyancy.csv",
-  "script": "kinematics/diag_slab_buoyancy.py",
-  "figure": "kinematics/diag_slab_buoyancy.png",
+  "script": "fig_slab_buoyancy.py",
+  "figure": "fig_slab_buoyancy.png",
   "models": [
     "STD",
     "WAL"
