@@ -91,6 +91,11 @@ C_RULE = '#BFC3D1'
 def main():
     d = cpc.load()
     fig, axes = plt.subplots(2, 1, figsize=(9, 7.6), sharex=True)
+    # BENDING MOMENT back in panel (a) (Dan, 2026-09-25): that panel is the
+    # trench itself -- the horizontal load, the vertical shear load and the
+    # moment are the three resultants acting there. M is in N, not N/m, so
+    # it needs its own axis.
+    a0b = axes[0].twinx()
     rows = [('model', 'quantity', 'value')]
     for key in ('STD', 'WAL'):
         col = C[key]
@@ -103,6 +108,12 @@ def main():
         face_load = -r['v_T']
         axes[0].plot(t[m], r['nd_T'][m] * 1e-12, '-', label=f'{key}  $N_D(x_T)$', **kw)
         axes[0].plot(t[m], face_load[m] * 1e-12, '--', label=f'{key}  $-V(x_T)$', **kw)
+        # -M, not M: the extracted moment is negative at every step in both
+        # runs (-0.67 to -1.77 x 1e17 N), so plotting its negation keeps the
+        # panel's quantities positive and matches the -V convention already
+        # used here. The sign is constant, so nothing is lost.
+        a0b.plot(t[m], -r['m_T'][m] / 1e17, '-.', color=col, lw=1.7, alpha=0.85,
+                 label=f'{key}  $-M(x_T)$')
         # the gap between the trench and first-isostatic curves IS the
         # trench pull increment, Delta N_D across the non-isostatic domain
         axes[1].fill_between(t[m], r['nd_T'][m] * 1e-12, r['nd_I'][m] * 1e-12,
@@ -120,7 +131,10 @@ def main():
         med = lambda a: np.median(a[m]) / 1e12
         print(f'{key}: N_D trench {med(r["nd_T"]):+.2f}, x_I {med(r["nd_I"]):+.2f}, '
               f'ridge {med(r["nd_R"]):+.2f} TN/m; downward shear load at the '
-              f'trench face {med(face_load):+.2f} (extracted V {med(r["v_T"]):+.2f})')
+              f'trench face {med(face_load):+.2f} (extracted V {med(r["v_T"]):+.2f}); '
+              f'M(x_T) {np.median(r["m_T"][m])/1e17:+.2f} x 1e17 N')
+        rows.append((key, 'moment_trench_median_1e17N',
+                     f'{np.median(r["m_T"][m]) / 1e17:.3f}'))
         for name, arr in (('nd_trench', r['nd_T']), ('nd_first_isostatic', r['nd_I']),
                           ('nd_ridge', r['nd_R']),
                           ('shear_load_trench_face_down', face_load),
@@ -147,8 +161,21 @@ def main():
                   f'{(d_tr > 0).mean():.3f}'),
                  (key, 'abs_v_over_abs_nd_trench_median',
                   f'{np.median(np.abs(v_t) / np.abs(nd_t)):.2f}')]
-    axes[0].set_title('(a) at the trench: horizontal load ($N_D$) and the downward '
-                      'shear load on the trench-side face ($-V$)', fontsize=10.5)
+    axes[0].set_title('(a) at the trench: horizontal load ($N_D$), the downward '
+                      'shear load on the trench-side face ($-V$), and the '
+                      'bending moment ($-M$, right axis)', fontsize=10.5)
+    a0b.set_ylabel(r'Bending moment [$10^{17}$ N]', fontsize=11)
+    # BAND SEPARATION. Left free-scaled, the moment curves sweep the whole
+    # panel and tangle with N_D and -V. Instead the force curves are given
+    # headroom so they occupy the lower ~62 % of the panel, and the right
+    # axis is set so the moment occupies the top ~30 % -- two readable
+    # bands rather than six crossing curves. Computed from the data so it
+    # survives a re-run.
+    fl, fh = axes[0].get_ylim()
+    axes[0].set_ylim(fl, fl + (fh - fl) / 0.62)
+    ml, mh = a0b.get_ylim()
+    span = (mh - ml) / 0.30
+    a0b.set_ylim(ml - 0.66 * span, ml - 0.66 * span + span)
     axes[1].set_title('(b) $N_D$ at the trench, first isostatic column and ridge',
                       fontsize=10.5)
     axes[1].set_xlabel('Model time [Myr]', fontsize=12)
@@ -156,7 +183,12 @@ def main():
         ax.axhline(0, color='k', lw=1.4)
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
         ax.set_ylabel('Force per unit distance [TN/m]', fontsize=11)
-        ax.legend(frameon=False, fontsize=8.5, ncol=2, loc='best')
+    # panel (a)'s legend must gather both axes' handles
+    h0, l0 = axes[0].get_legend_handles_labels()
+    hb, lb = a0b.get_legend_handles_labels()
+    axes[0].legend(h0 + hb, l0 + lb, frameon=False, fontsize=8.5, ncol=3,
+                   loc='lower left')
+    axes[1].legend(frameon=False, fontsize=8.5, ncol=2, loc='best')
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_trench_resultants.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)

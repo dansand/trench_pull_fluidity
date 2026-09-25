@@ -1,4 +1,5 @@
 model,quantity,value
+STD,moment_trench_median_1e17N,-1.169
 STD,nd_trench_median_TNm,-0.696
 STD,nd_trench_q1_TNm,-1.488
 STD,nd_trench_q3_TNm,0.497
@@ -19,6 +20,7 @@ STD,nd_ridge_always_tension_like,True
 STD,nd_trench_minus_ridge_median_TNm,-0.941
 STD,nd_trench_minus_ridge_driving_fraction,0.378
 STD,abs_v_over_abs_nd_trench_median,1.99
+WAL,moment_trench_median_1e17N,-1.022
 WAL,nd_trench_median_TNm,-1.834
 WAL,nd_trench_q1_TNm,-3.136
 WAL,nd_trench_q3_TNm,-1.177
