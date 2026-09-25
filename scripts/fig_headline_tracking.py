@@ -1,8 +1,8 @@
 """fig_headline_tracking — the paper's headline figure.
 
 Normalised Delta-GPE* and topography vs normalised trench-to-ridge distance,
-averaged over every snapshot with t >= 8 Myr, STD and WAL; min-max range bands
-(lightly smoothed). Per-snapshot normalisation: values rescaled trench = 0,
+averaged over every snapshot with t >= 8 Myr, STD and WAL; both min-max range
+bands shaded in one panel per model (lightly smoothed). Per-snapshot normalisation: values rescaled trench = 0,
 ridge = 1; distance rescaled by the trench-to-ridge span. Columns are +-5 km
 means (conventions §4.1); pickers from fluidity_helpers (single implementation).
 
@@ -15,8 +15,8 @@ the subducting plate for the Fluidity models STD (left) and WAL (right). At
 each snapshot both quantities are rescaled so that the trench column is 0 and
 the ridge column is 1, and distance is rescaled by the trench-to-ridge span;
 solid and dashed curves are averages over 37 snapshots (t = 8-80 Myr), and
-grey bands show the full range through time of the topography (top row) and
-of Delta-GPE* (bottom row). The corrected potential-energy resultant tracks
+the two shaded bands show the full range through time -- the lighter band the
+topography, the darker one Delta-GPE*. The corrected potential-energy resultant tracks
 the topography across the entire plate and throughout the run: the driving
 topographic pressure gradient is carried jointly by the non-isostatic trench
 deflection (the steep rise within the first ~10 percent of the span) and the
@@ -111,26 +111,31 @@ def render(cache_path, fig_path):
     d = np.load(cache_path)
     XH = d['XH']
     sm = lambda f: gaussian_filter1d(f, 3)
-    fig, axes = plt.subplots(2, 2, figsize=(9.5, 7.5), sharex=True, sharey=True)
+    # ONE ROW (Dan, 2026-09-25). The figure was 2x2: the second row
+    # repeated the same two curves and differed only in which range band
+    # was shaded, which is an expensive way to carry one extra envelope.
+    # Both bands are now filled in the same panel, distinguished by grey
+    # level -- 'option A' of the four encodings trialled. Note the two
+    # ranges nearly coincide in STD; the separation is essentially a WAL
+    # feature over 0.6-0.9 of the span, so the encoding does its work in
+    # one panel of the two.
+    fig, axes = plt.subplots(1, 2, figsize=(9.5, 4.3), sharex=True, sharey=True)
     for j, KEY in enumerate(['STD', 'WAL']):
         g, t = d[f'{KEY}_gpe_n'], d[f'{KEY}_topo_n']
         g_av, t_av = g.mean(axis=0), t.mean(axis=0)
-        ax = axes[0, j]
+        ax = axes[j]
         ax.fill_between(XH, sm(t.min(axis=0)), sm(t.max(axis=0)),
-                        color='0.82', lw=0, label='topography range (8-80 Myr)')
+                        color='0.55', alpha=0.45, lw=0,
+                        label='topography range (8-80 Myr)')
+        ax.fill_between(XH, sm(g.min(axis=0)), sm(g.max(axis=0)),
+                        color='0.15', alpha=0.28, lw=0,
+                        label=r'$\Delta\mathrm{GPE}^*$ range (8-80 Myr)')
         ax.plot(XH, t_av, 'k--', lw=1.5, label='average topography')
         ax.plot(XH, g_av, 'k-', lw=1.8, label=r'average $\Delta\mathrm{GPE}^*$')
         ax.set_title(KEY)
-        ax.legend(fontsize=8, loc='lower right')
-        ax = axes[1, j]
-        ax.fill_between(XH, sm(g.min(axis=0)), sm(g.max(axis=0)),
-                        color='0.82', lw=0, label=r'$\Delta\mathrm{GPE}^*$ range (8-80 Myr)')
-        ax.plot(XH, g_av, 'k-', lw=1.8, label=r'average $\Delta\mathrm{GPE}^*$')
-        ax.plot(XH, t_av, 'k--', lw=1.5, label='average topography')
         ax.set_xlabel(r'$(x - x_T)\,/\,(x_R - x_T)$')
         ax.legend(fontsize=8, loc='lower right')
-    for ax in axes[:, 0]:
-        ax.set_ylabel('normalised value\n(trench = 0, ridge = 1)')
+    axes[0].set_ylabel('normalised value\n(trench = 0, ridge = 1)')
     fig.suptitle(r'Normalised $\Delta\mathrm{GPE}^*$ and topography, averaged over 37 snapshots (8-80 Myr)', y=0.98)
     fig.tight_layout()
     fig.savefig(fig_path, dpi=200)
