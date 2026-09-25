@@ -161,9 +161,10 @@ def main():
                   f'{(d_tr > 0).mean():.3f}'),
                  (key, 'abs_v_over_abs_nd_trench_median',
                   f'{np.median(np.abs(v_t) / np.abs(nd_t)):.2f}')]
-    axes[0].set_title('(a) at the trench: horizontal load ($N_D$), the downward '
-                      'shear load on the trench-side face ($-V$), and the '
-                      'bending moment ($-M$, right axis)', fontsize=10.5)
+    # Panel titles name the SUBJECT only; what each curve is belongs in the
+    # legend and the caption, not spelled out across the top of the figure
+    # (Dan, 2026-09-25).
+    axes[0].set_title('(a) key stress resultants at the trench', fontsize=11)
     a0b.set_ylabel(r'Bending moment, $-M(x_T)$ [$10^{17}$ N]', fontsize=11)
     # SHARED NUMERICAL RANGE, SYMMETRIC ABOUT ZERO (Dan, 2026-09-25).
     # The two axes carry different dimensions -- TN/m and 1e17 N -- and are
@@ -180,8 +181,8 @@ def main():
     A = max(abs(fl), abs(fh))
     axes[0].set_ylim(-A, A)
     a0b.set_ylim(-A, A)
-    axes[1].set_title('(b) $N_D$ at the trench, first isostatic column and ridge',
-                      fontsize=10.5)
+    axes[1].set_title('(b) $N_D$ at key locations in the trailing plate',
+                      fontsize=11)
     axes[1].set_xlabel('Model time [Myr]', fontsize=12)
     for ax in axes:
         ax.axhline(0, color='k', lw=1.4)
