@@ -29,7 +29,7 @@ import pyvista as pv
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from scipy.ndimage import gaussian_filter1d
+from scipy.ndimage import gaussian_filter1d, uniform_filter1d
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from fluidity_helpers import (make_field_extractor, mirror_fields_in_x, pick_trench_3step,
@@ -87,9 +87,32 @@ def compute():
             # normalised profiles on the trench->ridge span
             span = (x >= xT) & (x <= xR)
             xh = (x[span] - xT) / (xR - xT)
-            gpe_n = (gpe[span] - ca(gpe, ti)) / (ca(gpe, iR) - ca(gpe, ti))
-            topo_s = gaussian_filter1d(fs_top, 5)
-            topo_n = (topo_s[span] - ca(topo_s, ti)) / (ca(topo_s, iR) - ca(topo_s, ti))
+            # MIN-MAX NORMALISATION (Dan, 2026-09-25), replacing the former
+            # trench/ridge-column anchoring. Each profile is rescaled to its
+            # OWN extrema over the trench-to-ridge span. Three reasons:
+            #   1. the old anchors were the trench and ridge COLUMNS, so the
+            #      figure inherited every ridge-pick problem -- including the
+            #      axial valley, an ~800 m trough only ~15 km wide that the
+            #      divergence-based pick lands in by construction;
+            #   2. values exceeded 1 wherever a profile overshot its ridge
+            #      anchor (6-7 % on the STD mean), which looks like an error;
+            #   3. the anchors forced every snapshot to 0 and 1 at fixed x,
+            #      so the range band was PINCHED TO ZERO WIDTH at both ends
+            #      by construction rather than by the data.
+            # Under min-max the extrema sit at different x in different
+            # snapshots, so the pinch is smeared rather than imposed.
+            # The claim the figure makes is correspondingly narrower and
+            # more defensible: the two profiles have the same SHAPE along
+            # the plate, not the same amplitude.
+            # Profiles are window-smoothed FIRST, with the same +-5 km window
+            # the column convention uses (§4.1): taking min/max of a raw
+            # profile would anchor on single noisy points, and the old code
+            # was inconsistent anyway -- windowed anchors against a raw curve.
+            nrm = lambda a: (a - a.min()) / (a.max() - a.min())
+            gpe_s = uniform_filter1d(gpe, 2 * W + 1)
+            topo_s = uniform_filter1d(gaussian_filter1d(fs_top, 5), 2 * W + 1)
+            gpe_n = nrm(gpe_s[span])
+            topo_n = nrm(topo_s[span])
             # sigma_zz lobe profiles (+-5 km column means)
             d_tp = ca(szz, iI) - ca(szz, ti)       # trench lobe vs depth
             d_rp = ca(szz, iI) - ca(szz, iR)       # ridge lobe vs depth
@@ -119,11 +142,20 @@ def render(cache_path, fig_path):
     # ranges nearly coincide in STD; the separation is essentially a WAL
     # feature over 0.6-0.9 of the span, so the encoding does its work in
     # one panel of the two.
-    fig, axes = plt.subplots(1, 2, figsize=(9.5, 4.3), sharex=True, sharey=True)
+    # A short RESIDUAL strip under each panel (Dan, 2026-09-25: this is the
+    # headline figure and it must not invite scepticism). The obvious
+    # objection to any normalised overlay is "you rescaled both to the same
+    # interval, so of course they look alike". The strip answers it
+    # directly: min-max normalisation fixes only the two extrema of each
+    # profile, so every point in between is free to disagree -- and the
+    # residual shows by how much it does not. It is information, not the
+    # repetition the old second row carried.
+    fig, axes = plt.subplots(2, 2, figsize=(9.5, 5.4), sharex=True,
+                             gridspec_kw={'height_ratios': [1.0, 0.34]})
     for j, KEY in enumerate(['STD', 'WAL']):
         g, t = d[f'{KEY}_gpe_n'], d[f'{KEY}_topo_n']
         g_av, t_av = g.mean(axis=0), t.mean(axis=0)
-        ax = axes[j]
+        ax = axes[0, j]
         ax.fill_between(XH, sm(t.min(axis=0)), sm(t.max(axis=0)),
                         color='0.55', alpha=0.45, lw=0,
                         label='topography range (8-80 Myr)')
@@ -133,10 +165,30 @@ def render(cache_path, fig_path):
         ax.plot(XH, t_av, 'k--', lw=1.5, label='average topography')
         ax.plot(XH, g_av, 'k-', lw=1.8, label=r'average $\Delta\mathrm{GPE}^*$')
         ax.set_title(KEY)
-        ax.set_xlabel(r'$(x - x_T)\,/\,(x_R - x_T)$')
         ax.legend(fontsize=8, loc='lower right')
-    axes[0].set_ylabel('normalised value\n(trench = 0, ridge = 1)')
-    fig.suptitle(r'Normalised $\Delta\mathrm{GPE}^*$ and topography, averaged over 37 snapshots (8-80 Myr)', y=0.98)
+        if j:
+            ax.tick_params(labelleft=False)
+
+        r = g - t
+        axr = axes[1, j]
+        axr.fill_between(XH, sm(r.min(axis=0)), sm(r.max(axis=0)),
+                         color='0.55', alpha=0.40, lw=0, label='full range')
+        axr.plot(XH, r.mean(axis=0), 'k-', lw=1.4, label='mean')
+        axr.axhline(0, color='k', lw=0.6)
+        axr.set_xlabel(r'$(x - x_T)\,/\,(x_R - x_T)$')
+        if j:
+            axr.tick_params(labelleft=False)
+        print(f'   {KEY}: residual (GPE* - topo), normalised units -- '
+              f'mean |r| {np.abs(r.mean(axis=0)).mean():.3f}, '
+              f'max |mean r| {np.abs(r.mean(axis=0)).max():.3f}, '
+              f'worst single snapshot {np.abs(r).max():.3f}')
+    axes[0, 0].set_ylabel('normalised value\n(min = 0, max = 1)')
+    axes[1, 0].set_ylabel(r'$\Delta$GPE$^*$ $-$ topo')
+    for a in axes[1]:
+        a.set_ylim(-0.32, 0.32)
+    axes[1, 0].legend(fontsize=7, loc='lower right', ncol=2)
+    fig.suptitle(r'Normalised $\Delta\mathrm{GPE}^*$ and topography, '
+                 '37 snapshots (8-80 Myr)', y=0.98, fontsize=11)
     fig.tight_layout()
     fig.savefig(fig_path, dpi=200)
     print('wrote', fig_path)
