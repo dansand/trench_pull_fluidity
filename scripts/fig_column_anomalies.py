@@ -204,11 +204,12 @@ def main():
     axes[0].set_ylim(200, 0)
     # lower RIGHT: the deep left side now carries the Delta P annotation,
     # and below ~150 km the right side is empty in both models.
-    # Short labels at 7.5 pt: the former wording reached back across x = 0
-    # and crossed the curves. The title already says the anomalies are
-    # relative to the first isostatic column, so the legend need only name
-    # which column each curve is.
-    axes[0].legend(fontsize=7.5, frameon=False, loc='lower right')
+    # Short labels carry the clearance, so the size does not have to: at
+    # 8.5 pt the block still ends near x = +14, clear of the curves at
+    # -8..0. The title already says the anomalies are relative to the first
+    # isostatic column, so the legend need only name which column each
+    # curve is.
+    axes[0].legend(fontsize=8.5, frameon=False, loc='lower right')
     # Title names the subject only; the bands, the dashed line and the
     # averaging windows are caption material (Dan, 2026-09-26).
     fig.suptitle('Column stress anomalies relative to the first isostatic column',
