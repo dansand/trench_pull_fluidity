@@ -1,0 +1,22 @@
+{
+  "table": "plate_thickness.csv",
+  "script": "fig_plate_thickness.py",
+  "figure": "fig_plate_thickness.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 16,
+  "sigfig": 6,
+  "meta": {
+    "estimates": "thermal 900 C, 2 h_np, yield 10 %, sigma_zz sign change (ridge column)",
+    "columns": "first three at the maximum-bending-moment column; the fourth at the ridge column",
+    "t_min_Myr": "8",
+    "note": "the sigma_zz sign change is a force-balance boundary, not a strength measure, and is not where the flow reverses"
+  }
+}
