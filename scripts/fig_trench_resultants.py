@@ -164,18 +164,22 @@ def main():
     axes[0].set_title('(a) at the trench: horizontal load ($N_D$), the downward '
                       'shear load on the trench-side face ($-V$), and the '
                       'bending moment ($-M$, right axis)', fontsize=10.5)
-    a0b.set_ylabel(r'Bending moment [$10^{17}$ N]', fontsize=11)
-    # BAND SEPARATION. Left free-scaled, the moment curves sweep the whole
-    # panel and tangle with N_D and -V. Instead the force curves are given
-    # headroom so they occupy the lower ~62 % of the panel, and the right
-    # axis is set so the moment occupies the top ~30 % -- two readable
-    # bands rather than six crossing curves. Computed from the data so it
-    # survives a re-run.
+    a0b.set_ylabel(r'Bending moment, $-M(x_T)$ [$10^{17}$ N]', fontsize=11)
+    # SHARED NUMERICAL RANGE, SYMMETRIC ABOUT ZERO (Dan, 2026-09-25).
+    # The two axes carry different dimensions -- TN/m and 1e17 N -- and are
+    # nonetheless given the SAME numbers and the same symmetric limits, so
+    # that the zero line is common and the three curves can be compared for
+    # RELATIVE VARIABILITY. That is the claim the panel makes: the shear
+    # load and the bending moment barely move while N_D sweeps from
+    # tension-like to strongly compression-like. An axis pair chosen to
+    # separate the curves into bands (tried first) hides exactly that, and
+    # free-scaling the moment exaggerates its variation to fill the panel.
+    # The coincidence of numbers is deliberate and declared, not implied
+    # equivalence: 1 TN/m and 1e17 N are not the same quantity.
     fl, fh = axes[0].get_ylim()
-    axes[0].set_ylim(fl, fl + (fh - fl) / 0.62)
-    ml, mh = a0b.get_ylim()
-    span = (mh - ml) / 0.30
-    a0b.set_ylim(ml - 0.66 * span, ml - 0.66 * span + span)
+    A = max(abs(fl), abs(fh))
+    axes[0].set_ylim(-A, A)
+    a0b.set_ylim(-A, A)
     axes[1].set_title('(b) $N_D$ at the trench, first isostatic column and ridge',
                       fontsize=10.5)
     axes[1].set_xlabel('Model time [Myr]', fontsize=12)
