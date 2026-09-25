@@ -33,6 +33,28 @@ FORCE-BALANCE boundary, measured on the isostatic domain, with no
 reference to rheology or temperature. That it lands in the same place is
 the result; it is not built to.
 
+⚠⚠ THE FOURTH ESTIMATE IS ILL-CONDITIONED AND MUST NOT BE READ AS AN
+EQUAL OF THE OTHER THREE (Dan, 2026-09-26). It is the zero crossing of a
+curve that is asymptotic at depth -- the isostatic density tail, shifted
+bodily by the deep offset Delta P -- so the crossing sits where the tail
+happens to equal |Delta P|, on a part of the profile with almost no
+gradient. Measured, the crossing moves
+
+    3.7 km per MPa of shift in STD (2.5-5.0 over the run)
+    5.4 km per MPa in WAL          (3.6-9.0)
+
+against a Delta P of only 9.6 and 4.8 MPa respectively. In WAL a change of
+one fifth of the entire deep anomaly relocates the estimate by 5 km, and
+at the 90th percentile by 9 km. That is the whole explanation for the
+fourth curve's excursions to 105 km (STD) and 120 km (WAL), and for WAL
+being the noisier of the two: its Delta P is half STD's, so the tail it
+crosses is flatter.
+
+This reproduces PAPER_PLAN W17, recorded 2026-09-16: "Apparent ridge
+equilibration depth = where the isostatic tail equals |Delta P| --
+epoch-dependent, NOT a material thickness." The figure shows what that
+costs.
+
 ⚠ It is also the only one of the four that is not evaluated near the
 trench. It comes from the ridge column, a whole plate-length away, so the
 agreement is not an artefact of a shared location either.
@@ -57,7 +79,13 @@ column changes sign. The first three are strength- or
 temperature-based and are evaluated at the column of maximum bending
 moment; the fourth is a force-balance boundary evaluated at the ridge
 column, a plate length away. Shading spans the four. (c) The spread, the
-largest estimate minus the smallest, for both models.
+largest estimate minus the smallest, for both models. The fourth estimate
+is the zero crossing of a profile that is asymptotic at depth, so it is
+poorly conditioned: the crossing moves 3.7 km (STD) and 5.4 km (WAL) for
+each MPa by which the profile is shifted, against deep offsets of 9.6 and
+4.8 MPa. Most of the spread in (c), and the departure of the fourth curve
+from the other three after about 40 Myr, follows from that sensitivity
+rather than from a change in the plate.
 """
 import os, sys
 import numpy as np
