@@ -1,0 +1,17 @@
+model,quantity,value
+STD,n_snapshots,37
+STD,t_min_Myr,8
+STD,t_max_Myr,80
+STD,residual_mean_abs,0.0178
+STD,residual_max_of_mean,0.0562
+STD,residual_worst_snapshot,0.1561
+STD,span_fraction_at_half_rise,0.025
+STD,span_fraction_reaching_plateau,0.03
+WAL,n_snapshots,37
+WAL,t_min_Myr,8
+WAL,t_max_Myr,79.9
+WAL,residual_mean_abs,0.0267
+WAL,residual_max_of_mean,0.0665
+WAL,residual_worst_snapshot,0.1571
+WAL,span_fraction_at_half_rise,0.03
+WAL,span_fraction_reaching_plateau,0.03

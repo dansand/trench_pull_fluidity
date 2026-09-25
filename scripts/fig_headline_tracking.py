@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter1d, uniform_filter1d
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tables_io import write_table
 from fluidity_helpers import (make_field_extractor, mirror_fields_in_x, pick_trench_3step,
                            find_first_isostatic_column, find_ridge_x_flow)
 
@@ -133,6 +134,8 @@ def compute():
 def render(cache_path, fig_path):
     d = np.load(cache_path)
     XH = d['XH']
+    # PAPER_PLAN W25: this figure's caption quotes numbers and had no table.
+    rows = [('model', 'quantity', 'value')]
     sm = lambda f: gaussian_filter1d(f, 3)
     # ONE ROW (Dan, 2026-09-25). The figure was 2x2: the second row
     # repeated the same two curves and differed only in which range band
@@ -182,6 +185,19 @@ def render(cache_path, fig_path):
               f'mean |r| {np.abs(r.mean(axis=0)).mean():.3f}, '
               f'max |mean r| {np.abs(r.mean(axis=0)).max():.3f}, '
               f'worst single snapshot {np.abs(r).max():.3f}')
+        # where the steep near-trench rise ends -- the quantity behind the
+        # caption's "within the first ~10 per cent of the span"
+        x50 = float(XH[np.argmax(g_av >= 0.50)])
+        xpl = float(XH[np.argmax(g_av >= 0.95 * g_av[XH >= 0.20][0])])
+        tt = d[f'{KEY}_t']
+        rows += [(KEY, 'n_snapshots', str(len(tt))),
+                 (KEY, 't_min_Myr', f'{tt.min():.1f}'),
+                 (KEY, 't_max_Myr', f'{tt.max():.1f}'),
+                 (KEY, 'residual_mean_abs', f'{np.abs(r.mean(axis=0)).mean():.4f}'),
+                 (KEY, 'residual_max_of_mean', f'{np.abs(r.mean(axis=0)).max():.4f}'),
+                 (KEY, 'residual_worst_snapshot', f'{np.abs(r).max():.4f}'),
+                 (KEY, 'span_fraction_at_half_rise', f'{x50:.4f}'),
+                 (KEY, 'span_fraction_reaching_plateau', f'{xpl:.4f}')]
     axes[0, 0].set_ylabel('normalised value\n(min = 0, max = 1)')
     axes[1, 0].set_ylabel(r'$\Delta$GPE$^*$ $-$ topo')
     for a in axes[1]:
@@ -192,6 +208,15 @@ def render(cache_path, fig_path):
     fig.tight_layout()
     fig.savefig(fig_path, dpi=200)
     print('wrote', fig_path)
+    print('wrote', write_table('headline_tracking', rows[0], rows[1:],
+                               script='fig_headline_tracking.py',
+                               figure='fig_headline_tracking.png',
+                               models=('STD', 'WAL'),
+                               meta={'normalisation': 'per profile, min-max over the '
+                                                      'trench-to-ridge span, after a '
+                                                      '+-5 km window smooth',
+                                     'residual': 'GPE*_n - topo_n, normalised units',
+                                     'note': 'closes PAPER_PLAN W25'}))
 
 
 if __name__ == '__main__':

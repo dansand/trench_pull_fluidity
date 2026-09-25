@@ -1,0 +1,21 @@
+{
+  "table": "headline_tracking.csv",
+  "script": "fig_headline_tracking.py",
+  "figure": "fig_headline_tracking.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 16,
+  "sigfig": 6,
+  "meta": {
+    "normalisation": "per profile, min-max over the trench-to-ridge span, after a +-5 km window smooth",
+    "residual": "GPE*_n - topo_n, normalised units",
+    "note": "closes PAPER_PLAN W25"
+  }
+}
