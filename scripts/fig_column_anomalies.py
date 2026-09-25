@@ -127,10 +127,13 @@ def main():
         # domains are named. A DAGGER not an asterisk -- '*' already carries
         # a specific meaning in this paper (GPE*), and reusing it as a
         # footnote marker invites a misreading.
-        ax.text(-9, 10, 'trench\npull$^{\\dagger}$', ha='right', va='center',
+        # Dagger at FULL SIZE, not superscripted: at 9.5 pt a superscript
+        # marker is ~6 pt and reads inconsistently between the two labels
+        # (Dan saw one and not the other, 2026-09-26).
+        ax.text(-9, 10, 'trench\npull$\\,\\dagger$', ha='right', va='center',
                 fontsize=9.5, color=C_TRENCH, fontweight='bold',
                 linespacing=1.3)
-        ax.text(9, 10, 'ridge\npush$^{\\dagger}$', ha='left', va='center',
+        ax.text(9, 10, 'ridge\npush$\\,\\dagger$', ha='left', va='center',
                 fontsize=9.5, color=C_RIDGE, fontweight='bold',
                 linespacing=1.3)
         # Regime labels: two lines each, set WELL CLEAR of the sign change
@@ -156,7 +159,7 @@ def main():
         # read as locating a transition.
         for xc, z_lab, z_arr, txt, head in (
                 (0.24, z_x - 22, z_x - 6, 'plate pressure\ngradient', -1),
-                (0.755, 132, 152, 'counterflow pressure\ngradient', +1)):
+                (0.755, 122, 142, 'counterflow pressure\ngradient', +1)):
             ax.text(xc, z_lab, txt, transform=ax.get_yaxis_transform(),
                     ha='center', va='center', fontsize=8.5, color='0.25',
                     linespacing=1.4)
@@ -168,24 +171,37 @@ def main():
         # The deep asthenospheric anomaly, labelled with its SIGN, rounded
         # to whole MPa, and stated with the band it is sampled over -- the
         # interval in which it asymptotes (Dan, 2026-09-26).
-        dP_mid = c['dP'][m].mean() / 1e6
-        zlo, zhi = cpc.DP_BAND_KM
+        # Sampled over 150-200 km, matching the plotted depth range, rather
+        # than the cache's 150-220 band (Dan, 2026-09-26). The anomaly has
+        # asymptoted by 150 km, so the two differ by 0.02 MPa and round to
+        # the same integer -- the figure stays consistent with every force
+        # quantity computed from cpc.DP_BAND_KM while quoting a band the
+        # reader can see.
+        zlo, zhi = 150.0, 200.0
+        band = (zkm >= zlo) & (zkm <= zhi)
+        dP_mid = c['p_R'][m].mean(axis=0)[band].mean() / 1e6
         # number inside mathtext so the sign renders as a minus, not a hyphen
         ax.annotate(f'$\\Delta P \\approx {dP_mid:.0f}$ MPa\n'
                     f'({zlo:.0f}–{zhi:.0f} km)',
-                    xy=(dP_mid, 0.5 * (zlo + zhi)), xytext=(-46, 0.5 * (zlo + zhi)),
+                    xy=(dP_mid, 175), xytext=(-46, 175),
                     ha='center', va='center', fontsize=8.5, color=C_RIDGE,
                     linespacing=1.35,
                     arrowprops=dict(arrowstyle='-', color=C_RIDGE, lw=0.9,
                                     shrinkA=2, shrinkB=2))
         ax.set_xlabel('Vertical normal stress anomaly [MPa]\n(pressure-positive)')
     axes[0].set_ylabel('Depth [km]')
-    # 250 km, not 200: the Delta P band runs to 220 km and was half off-plot,
-    # and the counterflow label needs depth clear of the sign change.
-    axes[0].set_ylim(250, 0)
-    axes[0].legend(fontsize=8, frameon=False, loc='lower left')
-    fig.suptitle('Column stress anomalies relative to the first isostatic column\n'
-                 '(bands: full-run range, 8–80 Myr; dashed: $\\Delta\\sigma_{zz}$ sign change)', fontsize=10)
+    # 200 km (Dan, 2026-09-26). The curves are flat well before it, so the
+    # asymptote is established on-plot; the Delta P band runs to 220 km and
+    # its upper part is off-plot, which is why the annotation states the
+    # band explicitly rather than relying on the axis to show it.
+    axes[0].set_ylim(200, 0)
+    # lower RIGHT: the deep left side now carries the Delta P annotation,
+    # and below ~150 km the right side is empty in both models.
+    axes[0].legend(fontsize=8, frameon=False, loc='lower right')
+    # Title names the subject only; the bands, the dashed line and the
+    # averaging windows are caption material (Dan, 2026-09-26).
+    fig.suptitle('Column stress anomalies relative to the first isostatic column',
+                 fontsize=10.5, color='0.35')
     fig.tight_layout()
     out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                        'figures', 'fig_column_anomalies.png')
