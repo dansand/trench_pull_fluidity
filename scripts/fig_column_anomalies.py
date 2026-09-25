@@ -32,8 +32,9 @@ Sign pin (asserted before rendering): the trench-lobe integral over 0..z_c
 must reproduce the committed f10 trench pulls (1.71 STD / 1.74 WAL TN/m)
 to within 3 %.
 
-DRAFT CAPTION. Vertical normal stress anomalies of the trench and ridge
-columns relative to the first isostatic column, for STD (left) and WAL
+DRAFT CAPTION. Topographic pressure anomalies of the trench and ridge
+columns relative to the first isostatic column, measured as the vertical
+normal stress, for STD (left) and WAL
 (right), in the pressure-positive register. Solid curves are means over
 the mid-run window (36-44 Myr, n = 5, and 38-44 Myr, n = 4); the grey
 bands are the full range over 8-80 Myr. Blue is the anomaly of the trench
@@ -218,8 +219,12 @@ def main():
     axes[0].legend(fontsize=8.5, frameon=False, loc='lower right')
     # Title names the subject only; the bands, the dashed line and the
     # averaging windows are caption material (Dan, 2026-09-26).
-    fig.suptitle('Column stress anomalies relative to the first isostatic column',
-                 fontsize=10.5, color='0.35')
+    # 'Topographic pressure anomaly' is SYMBOLOGY §4.4 locked vocabulary,
+    # so the title uses the manuscript's own term rather than the generic
+    # 'column stress anomalies' (Dan, 2026-09-26). The x label keeps naming
+    # the plotted quantity exactly; the title names the concept.
+    fig.suptitle('Topographic pressure anomalies relative to the first '
+                 'isostatic column', fontsize=10.5, color='0.35')
     fig.tight_layout()
     out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                        'figures', 'fig_column_anomalies.png')
