@@ -164,9 +164,15 @@ def main():
         # The lower arrow is also moved well below it, into the interval
         # where the anomaly has asymptoted, so that neither label can be
         # read as locating a transition.
+        # FIXED depths, not offsets from z_x (Dan, 2026-09-26): the sign
+        # change sits at 75.5 km in STD and 85.5 in WAL, so anchoring the
+        # plate label to it put the two panels' annotations at different
+        # heights. Fixed values put them level, and 62 km still clears the
+        # dashed line in both. The arrow now sits 12 km below its label
+        # rather than 16-20, so it reads as part of the label.
         for xc, z_lab, z_arr, txt, head in (
-                (0.24, z_x - 22, z_x - 6, 'plate pressure\ngradient', -1),
-                (0.755, 112, 132, 'counterflow pressure\ngradient', +1)):
+                (0.24, 50, 62, 'plate pressure\ngradient', -1),
+                (0.755, 112, 124, 'counterflow pressure\ngradient', +1)):
             ax.text(xc, z_lab, txt, transform=ax.get_yaxis_transform(),
                     ha='center', va='center', fontsize=8.5, color='0.25',
                     linespacing=1.4)
