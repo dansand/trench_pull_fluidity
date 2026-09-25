@@ -111,10 +111,19 @@ def main():
         ax.axhline(z_x, color='0.35', lw=0.9, ls='--')
         # name the two forces where their amplitude is largest, in the
         # corridor between the trench and ridge bands (Dan, 2026-09-18)
-        ax.text(-9, 10, 'trench\npull', ha='right', va='center', fontsize=9.5,
-                color=C_TRENCH, fontweight='bold', linespacing=1.3)
-        ax.text(9, 10, 'ridge\npush', ha='left', va='center', fontsize=9.5,
-                color=C_RIDGE, fontweight='bold', linespacing=1.3)
+        # DOMAIN names first, mechanism in brackets (Dan, 2026-09-26): the
+        # schematic's two additive domains are what the colours encode, and
+        # "trench pull"/"ridge push" are the forces they carry.
+        # The longer names reach into the curves, so they are set on a
+        # translucent white ground rather than moved -- they belong beside
+        # the lobes they name, which is where the curves are.
+        bb = dict(facecolor='white', alpha=0.72, edgecolor='none', pad=1.5)
+        ax.text(-9, 12, 'non-isostatic domain\n(trench pull)', ha='right',
+                va='center', fontsize=8.5, color=C_TRENCH, fontweight='bold',
+                linespacing=1.35, bbox=bb)
+        ax.text(9, 12, 'isostatic domain\n(ridge push)', ha='left',
+                va='center', fontsize=8.5, color=C_RIDGE, fontweight='bold',
+                linespacing=1.35, bbox=bb)
         # Regime labels: two lines each, set WELL CLEAR of the sign change
         # (one shallower, one much deeper), each with an arrow giving the
         # direction of the force it produces (Dan, 2026-09-18).
@@ -125,9 +134,20 @@ def main():
         # Plate label in the empty LEFT region above the sign change,
         # asthenosphere label in the empty RIGHT region below it; each with
         # its force-direction arrow beneath. Trench-ward is left.
+        # The two gradients are now named PLAINLY (Dan, 2026-09-26). The
+        # old wording ("plate: topographic" above, "asthenosphere: adverse"
+        # below, both hugging the dashed line) implied that the FLOW
+        # reverses at the sigma_zz sign change. It does not: the sign change
+        # sits at 80 km (STD) / 86 (WAL) while the base of the coherently
+        # translating plate -- the dynamical LAB -- is at 99 / 93 km
+        # (fig_lab_kinematics, W17). The dashed line marks where the stress
+        # anomaly changes sign, nothing more.
+        # The lower arrow is also moved well below it, into the interval
+        # where the anomaly has asymptoted, so that neither label can be
+        # read as locating a transition.
         for xc, z_lab, z_arr, txt, head in (
-                (0.24, z_x - 18, z_x - 4, 'plate: topographic\npressure gradient', -1),
-                (0.755, z_x + 26, z_x + 42, 'asthenosphere: adverse\npressure gradient', +1)):
+                (0.24, z_x - 22, z_x - 6, 'plate pressure\ngradient', -1),
+                (0.755, 132, 152, 'counterflow pressure\ngradient', +1)):
             ax.text(xc, z_lab, txt, transform=ax.get_yaxis_transform(),
                     ha='center', va='center', fontsize=8.5, color='0.25',
                     linespacing=1.4)
@@ -136,9 +156,24 @@ def main():
                         textcoords=ax.get_yaxis_transform(),
                         arrowprops=dict(arrowstyle='-|>', color='0.25', lw=2.2,
                                         mutation_scale=16))
+        # The deep asthenospheric anomaly, labelled with its SIGN, rounded
+        # to whole MPa, and stated with the band it is sampled over -- the
+        # interval in which it asymptotes (Dan, 2026-09-26).
+        dP_mid = c['dP'][m].mean() / 1e6
+        zlo, zhi = cpc.DP_BAND_KM
+        # number inside mathtext so the sign renders as a minus, not a hyphen
+        ax.annotate(f'$\\Delta P \\approx {dP_mid:.0f}$ MPa\n'
+                    f'({zlo:.0f}–{zhi:.0f} km)',
+                    xy=(dP_mid, 0.5 * (zlo + zhi)), xytext=(-46, 0.5 * (zlo + zhi)),
+                    ha='center', va='center', fontsize=8.5, color=C_RIDGE,
+                    linespacing=1.35,
+                    arrowprops=dict(arrowstyle='-', color=C_RIDGE, lw=0.9,
+                                    shrinkA=2, shrinkB=2))
         ax.set_xlabel('Vertical normal stress anomaly [MPa]\n(pressure-positive)')
     axes[0].set_ylabel('Depth [km]')
-    axes[0].set_ylim(200, 0)
+    # 250 km, not 200: the Delta P band runs to 220 km and was half off-plot,
+    # and the counterflow label needs depth clear of the sign change.
+    axes[0].set_ylim(250, 0)
     axes[0].legend(fontsize=8, frameon=False, loc='lower left')
     fig.suptitle('Column stress anomalies relative to the first isostatic column\n'
                  '(bands: full-run range, 8–80 Myr; dashed: $\\Delta\\sigma_{zz}$ sign change)', fontsize=10)
