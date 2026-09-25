@@ -32,20 +32,25 @@ Sign pin (asserted before rendering): the trench-lobe integral over 0..z_c
 must reproduce the committed f10 trench pulls (1.71 STD / 1.74 WAL TN/m)
 to within 3 %.
 
-DRAFT CAPTION. Vertical normal stress anomalies of the trench column
-(blue) and ridge column (orange) relative to the first isostatic column,
-in the domain colours of the schematic — blue the non-isostatic or trench
-pull domain, orange the isostatic or ridge push domain —
-for the Fluidity models STD (left) and WAL (right); curves are averages
-over the mid-run window (36–44 Myr) and bands show the full range through
-the run (8–80 Myr). The trench deficit is confined to the boundary layer,
-closing by z_c = 75 km (dotted); its area is the trench pull. The ridge
-column crosses zero and holds a finite deep deficit ΔP (shaded band) — the
-adverse asthenospheric pressure gradient. The dashed curve removes the
-asthenospheric part (shifts the curve by |ΔP| onto a zero deep
-asymptote): the ridge column in the absence of the tilt, whose enlarged
-area is the untilted ridge push — the difference between the areas is the
-tilting force F_tilt = |ΔP|·z_c by definition.
+DRAFT CAPTION. Vertical normal stress anomalies of the trench and ridge
+columns relative to the first isostatic column, for STD (left) and WAL
+(right), in the pressure-positive register. Solid curves are means over
+the mid-run window (36-44 Myr, n = 5, and 38-44 Myr, n = 4); the grey
+bands are the full range over 8-80 Myr. Blue is the anomaly of the trench
+column and orange that of the ridge column; the areas they enclose are
+the trench pull and the ridge push, and the domains they span are the
+non-isostatic domain between the trench and the first isostatic column
+and the isostatic domain between that column and the ridge (dagger). The
+dashed orange curve is the ridge anomaly with the deep offset Delta P
+subtracted, so that its deep asymptote is zero. The horizontal dashed
+line marks the depth at which the ridge anomaly changes sign, 80 km in
+STD and 86 km in WAL; it is a change in the sign of the stress anomaly
+and not a change in the sense of flow, which occurs deeper, at the base
+of the coherently translating plate. The two arrows give the direction
+of the force each gradient exerts on the plate. Delta P is the mean of
+the ridge anomaly over 150-220 km, the interval over which it asymptotes.
+Quantities are +-5 km column means and all snapshots at t >= 8 Myr enter
+the range bands.
 """
 import os, sys
 import numpy as np
@@ -114,16 +119,20 @@ def main():
         # DOMAIN names first, mechanism in brackets (Dan, 2026-09-26): the
         # schematic's two additive domains are what the colours encode, and
         # "trench pull"/"ridge push" are the forces they carry.
-        # The longer names reach into the curves, so they are set on a
-        # translucent white ground rather than moved -- they belong beside
-        # the lobes they name, which is where the curves are.
-        bb = dict(facecolor='white', alpha=0.72, edgecolor='none', pad=1.5)
-        ax.text(-9, 12, 'non-isostatic domain\n(trench pull)', ha='right',
-                va='center', fontsize=8.5, color=C_TRENCH, fontweight='bold',
-                linespacing=1.35, bbox=bb)
-        ax.text(9, 12, 'isostatic domain\n(ridge push)', ha='left',
-                va='center', fontsize=8.5, color=C_RIDGE, fontweight='bold',
-                linespacing=1.35, bbox=bb)
+        # SHORT names, daggered (Dan, 2026-09-26). The full domain names
+        # ('non-isostatic domain (trench pull)') were tried and reverted:
+        # at this width they cross both the curves and the range bands, and
+        # no placement fixes that without moving them away from the lobes
+        # they name. The dagger sends the reader to the caption, where the
+        # domains are named. A DAGGER not an asterisk -- '*' already carries
+        # a specific meaning in this paper (GPE*), and reusing it as a
+        # footnote marker invites a misreading.
+        ax.text(-9, 10, 'trench\npull$^{\\dagger}$', ha='right', va='center',
+                fontsize=9.5, color=C_TRENCH, fontweight='bold',
+                linespacing=1.3)
+        ax.text(9, 10, 'ridge\npush$^{\\dagger}$', ha='left', va='center',
+                fontsize=9.5, color=C_RIDGE, fontweight='bold',
+                linespacing=1.3)
         # Regime labels: two lines each, set WELL CLEAR of the sign change
         # (one shallower, one much deeper), each with an arrow giving the
         # direction of the force it produces (Dan, 2026-09-18).
