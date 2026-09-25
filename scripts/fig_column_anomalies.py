@@ -107,7 +107,7 @@ def main():
                 label='ridge column')
         ax.plot(pRd[m].mean(axis=0), zkm, '--', color=C_RIDGE, lw=1.2, alpha=0.45,
                 label='ridge, $\\Delta P$ removed')
-        ax.axvline(0, color='0.7', lw=0.7)
+        ax.axvline(0, color='0.55', lw=1.3)
         ax.set_title(f'{k}  (avg {c["t"][m].min():.0f}–{c["t"][m].max():.0f} Myr, n={m.sum()})',
                      fontsize=10)
         # regime annotations (Dan, 2026-09-18): above the sign change the
