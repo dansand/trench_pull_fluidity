@@ -62,16 +62,28 @@ the ridge; the downward shear load at the trench face is +1.60 / +1.11.
 Styling per FIGURE_STYLE.md: model by brand colour, quantity or column by
 linestyle.
 
-DRAFT CAPTION. Stress resultants through the runs for STD (navy) and WAL
-(magenta). (a) At the trench column, the normal-stress-difference
-resultant N_D (solid) and the downward shear load carried by the
-trailing plate's trench-side face, -V (dashed): the horizontal load
-transmitted along the plate against the vertical load carried by shear.
-(b) N_D at the trench (solid), the first isostatic column (dashed) and
-the ridge (dotted), showing how the resultant changes between columns
-through time. The shaded band between the trench and first isostatic
-curves is the trench pull increment, the change in N_D across the
-non-isostatic domain.
+DRAFT CAPTION. Stress resultants through the STD and WAL runs, all
+quantities integrated to z_c and evaluated on +-5 km column windows.
+(a) The three resultants at the trench: the normal-stress-difference
+resultant N_D(x_T) (solid), the downward shear load on the trailing
+plate's trench-side face -V(x_T) (dashed), and the bending moment
+-M(x_T) about the neutral plane (dash-dot, right axis). The shear load
+is plotted as -V because the face's outward normal is in the negative x
+direction, so positive values act downward; the extracted V has the
+opposite sign. The moment is plotted as -M because the extracted moment
+is negative at every step of both runs. The left and right axes carry
+different dimensions -- TN/m and 1e17 N -- but are given the same
+numerical range and the same symmetric limits about a common zero, so
+that the three curves share one baseline and their variations are drawn
+to a common scale. Median values are N_D(x_T) -0.70 and -1.83 TN/m,
+-V(x_T) +1.60 and +1.11 TN/m, and M(x_T) -1.17 and -1.02 x 1e17 N for
+STD and WAL respectively. (b) N_D at the trench (solid), the first
+isostatic column (dashed) and the ridge (dotted), with the shading
+marking the increment N_D(x_I) - N_D(x_T). Medians are +1.27 and -0.14
+TN/m at the first isostatic column, +0.19 and +0.13 TN/m at the ridge,
+and +1.94 and +1.71 TN/m for the increment; these are medians of the
+per-step difference, not differences of the column medians. Both panels
+use snapshots at t >= 8 Myr (conventions §7.5).
 """
 import os, sys
 import numpy as np
