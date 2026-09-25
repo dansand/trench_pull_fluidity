@@ -40,7 +40,11 @@ bands are the full range over 8-80 Myr. Blue is the anomaly of the trench
 column and orange that of the ridge column; the areas they enclose are
 the trench pull and the ridge push, and the domains they span are the
 non-isostatic domain between the trench and the first isostatic column
-and the isostatic domain between that column and the ridge (dagger). The
+and the isostatic domain between that column and the ridge. The dagger on
+'ridge push' marks that the name refers to the interval and not to its
+content: the balance across it carries the adverse asthenospheric
+pressure gradient as well as the isostatic cooling signal, so the force
+delivered there is smaller than static ridge push. The
 dashed orange curve is the ridge anomaly with the deep offset Delta P
 subtracted, so that its deep asymptote is zero. The horizontal dashed
 line marks the depth at which the ridge anomaly changes sign, 80 km in
@@ -98,11 +102,11 @@ def main():
         ax.fill_betweenx(zkm, pT.min(axis=0), pT.max(axis=0), color='0.85', lw=0)
         ax.fill_betweenx(zkm, pR.min(axis=0), pR.max(axis=0), color='0.92', lw=0)
         ax.plot(pT[m].mean(axis=0), zkm, '-', color=C_TRENCH, lw=1.7,
-                label='trench $-$ first isostatic')
+                label='trench column')
         ax.plot(pR[m].mean(axis=0), zkm, '-', color=C_RIDGE, lw=1.5,
-                label='ridge $-$ first isostatic')
+                label='ridge column')
         ax.plot(pRd[m].mean(axis=0), zkm, '--', color=C_RIDGE, lw=1.2, alpha=0.45,
-                label='ridge, tilt ($\\Delta P$) removed')
+                label='ridge, $\\Delta P$ removed')
         ax.axvline(0, color='0.7', lw=0.7)
         ax.set_title(f'{k}  (avg {c["t"][m].min():.0f}–{c["t"][m].max():.0f} Myr, n={m.sum()})',
                      fontsize=10)
@@ -127,10 +131,13 @@ def main():
         # domains are named. A DAGGER not an asterisk -- '*' already carries
         # a specific meaning in this paper (GPE*), and reusing it as a
         # footnote marker invites a misreading.
-        # Dagger at FULL SIZE, not superscripted: at 9.5 pt a superscript
-        # marker is ~6 pt and reads inconsistently between the two labels
-        # (Dan saw one and not the other, 2026-09-26).
-        ax.text(-9, 10, 'trench\npull$\\,\\dagger$', ha='right', va='center',
+        # The dagger goes on RIDGE PUSH ONLY (Dan, 2026-09-26). It is not a
+        # generic "see caption" marker: it flags the one label that needs a
+        # caveat. SYMBOLOGY §4.4 -- the ridge push domain names the INTERVAL,
+        # never its content, because the balance across it carries the
+        # adverse asthenospheric gradient as well as the isostatic cooling
+        # signal. 'Trench pull' carries no such ambiguity and takes no mark.
+        ax.text(-9, 10, 'trench\npull', ha='right', va='center',
                 fontsize=9.5, color=C_TRENCH, fontweight='bold',
                 linespacing=1.3)
         ax.text(9, 10, 'ridge\npush$\\,\\dagger$', ha='left', va='center',
@@ -159,7 +166,7 @@ def main():
         # read as locating a transition.
         for xc, z_lab, z_arr, txt, head in (
                 (0.24, z_x - 22, z_x - 6, 'plate pressure\ngradient', -1),
-                (0.755, 122, 142, 'counterflow pressure\ngradient', +1)):
+                (0.755, 112, 132, 'counterflow pressure\ngradient', +1)):
             ax.text(xc, z_lab, txt, transform=ax.get_yaxis_transform(),
                     ha='center', va='center', fontsize=8.5, color='0.25',
                     linespacing=1.4)
@@ -197,7 +204,11 @@ def main():
     axes[0].set_ylim(200, 0)
     # lower RIGHT: the deep left side now carries the Delta P annotation,
     # and below ~150 km the right side is empty in both models.
-    axes[0].legend(fontsize=8, frameon=False, loc='lower right')
+    # Short labels at 7.5 pt: the former wording reached back across x = 0
+    # and crossed the curves. The title already says the anomalies are
+    # relative to the first isostatic column, so the legend need only name
+    # which column each curve is.
+    axes[0].legend(fontsize=7.5, frameon=False, loc='lower right')
     # Title names the subject only; the bands, the dashed line and the
     # averaging windows are caption material (Dan, 2026-09-26).
     fig.suptitle('Column stress anomalies relative to the first isostatic column',
