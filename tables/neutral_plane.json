@@ -1,0 +1,23 @@
+{
+  "table": "neutral_plane.csv",
+  "script": "fig_neutral_plane.py",
+  "figure": "fig_neutral_plane.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 20,
+  "sigfig": 6,
+  "meta": {
+    "relation": "2 h_np - h = -N h^2 / (6 M), beam under combined axial load and bending",
+    "column": "maximum bending moment, for h_np, N and M",
+    "nd_depth_limit_km": "75",
+    "t_min_Myr": "8",
+    "slopes": "quote the split slopes; the pooled WAL value is a pooling artefact"
+  }
+}
