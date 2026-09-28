@@ -1,9 +1,9 @@
 model,quantity,value
 STD,nd_trench_TNm,-0.744
-STD,nd_first_isostatic_TNm,1.004
-STD,nd_ridge_TNm,0.46
+STD,nd_first_isostatic_TNm,1.159
+STD,nd_ridge_TNm,0.516
 STD,reference_epoch_Myr,40
 WAL,nd_trench_TNm,-1.779
-WAL,nd_first_isostatic_TNm,-0.092
-WAL,nd_ridge_TNm,0.302
+WAL,nd_first_isostatic_TNm,-0.079
+WAL,nd_ridge_TNm,0.297
 WAL,reference_epoch_Myr,40

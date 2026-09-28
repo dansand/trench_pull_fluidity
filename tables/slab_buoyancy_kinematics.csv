@@ -3,8 +3,8 @@ STD,trench_advance_snapshots,0
 STD,vz_mid_upper_median_cmyr,1.673
 STD,vz_mid_upper_min_cmyr,0.991
 STD,vz_mid_upper_max_cmyr,3.2
-STD,plate_velocity_median_cmyr,1.691
-STD,convergence_median_cmyr,3.475
+STD,plate_velocity_median_cmyr,1.693
+STD,convergence_median_cmyr,3.477
 STD,F_upper_ztop75_median_TNm,119.18
 STD,F_eff_ztop75_median_TNm,53.92
 STD,dEdt_upper_ztop75_median_kWm,28.61
@@ -30,8 +30,8 @@ WAL,trench_advance_snapshots,7
 WAL,vz_mid_upper_median_cmyr,1.992
 WAL,vz_mid_upper_min_cmyr,1.593
 WAL,vz_mid_upper_max_cmyr,4.318
-WAL,plate_velocity_median_cmyr,2.478
-WAL,convergence_median_cmyr,3.409
+WAL,plate_velocity_median_cmyr,2.482
+WAL,convergence_median_cmyr,3.413
 WAL,F_upper_ztop75_median_TNm,104.07
 WAL,F_eff_ztop75_median_TNm,45.9
 WAL,dEdt_upper_ztop75_median_kWm,28.99

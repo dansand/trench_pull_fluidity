@@ -33,7 +33,9 @@ Method notes (2026-09-15 session):
   -4.63/-4.85/-4.80 MPa over 120-190/150-220/200-250 km) -- the chosen
   band sits on the plateau.
 - RIDGE PICK (2026-09-16): the ridge column is the maximum of the surface
-  divergence dvx/dx seaward of the trench (`find_ridge_x_flow`), NOT the
+  divergence dvx/dx seaward of the trench, REFINED to the local
+  topographic crest within +/-20 km (`find_ridge_x_flow`, conventions
+  §3.4, 2026-09-27), NOT the
   shallowest surface point. The topographic pick is stored alongside as
   `xR_topo` for comparison. See the helper's docstring for why.
 - Sign pin: the trench-lobe integral over 0..z_c must reproduce the
@@ -114,7 +116,12 @@ def build():
             # ridge from the FLOW (max surface divergence) -- the
             # topographic pick is retained alongside for comparison
             iz10 = int(np.argmin(np.abs(z - 10e3)))
-            xR, iR = find_ridge_x_flow(x, vx[iz10], xT, seaward_sign=+1)
+            # flow pick REFINED to the local topographic crest within
+            # +/-20 km (conventions §3.4, 2026-09-27): the divergence
+            # maximum is the spreading axis and the spreading axis sits in
+            # the axial valley
+            xR, iR = find_ridge_x_flow(x, vx[iz10], xT, seaward_sign=+1,
+                                       fs_top=fs_top)
             xR_topo, _ = find_ridge_x(x, fs_top, xT, seaward_sign=+1)
             ca = lambda f, j: f[..., max(0, j - W):j + W + 1].mean(axis=-1)
             # HORIZONTALLY AVERAGED HORIZONTAL VELOCITY (Dan, 2026-09-21):

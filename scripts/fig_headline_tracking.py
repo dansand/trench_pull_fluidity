@@ -82,7 +82,13 @@ def compute():
             xT, _ = pick_trench_3step(x, z, p, vx, subducting_side='right')
             ti = int(np.argmin(np.abs(x - xT)))
             iI, _ = find_first_isostatic_column(x, fs_top, xT, ti, DX, seaward_sign=+1)
-            xR, iR = find_ridge_x_flow(x, vx[int(np.argmin(np.abs(z - 10e3)))], xT, seaward_sign=+1)
+            # refined to the local topographic crest (conventions §3.4,
+            # 2026-09-27). The min-max normalisation removed this figure's
+            # dependence on the ridge column's VALUE but not on its
+            # POSITION: x_R still terminates the profile and sets the span
+            # the extrema are taken over.
+            xR, iR = find_ridge_x_flow(x, vx[int(np.argmin(np.abs(z - 10e3)))],
+                                       xT, seaward_sign=+1, fs_top=fs_top)
             gpe = -np.trapz(szz, z, axis=0)
             ca = lambda f, j: f[..., max(0, j - W):j + W + 1].mean(axis=-1)
             # normalised profiles on the trench->ridge span

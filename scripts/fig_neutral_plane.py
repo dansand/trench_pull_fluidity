@@ -72,7 +72,11 @@ thermal estimate grows by 3.5 and 3.7; the corrected estimate recovers the
 thermal trend. (c) The measured offset of the neutral-plane estimate from
 the thermal thickness against the offset predicted by beam theory for a
 plate under combined axial load and bending, one point per snapshot, with
-the one-to-one line.
+the one-to-one line. The axes are symmetric about zero and the $x = 0$
+line is drawn: the predicted offset is negative -- a compressional axial
+load, lifting the neutral plane -- on 62 per cent of STD snapshots and on
+every WAL snapshot, and the large-magnitude offsets are negative in both
+runs. Fitted slopes are 1.14 (STD) and 1.21 (WAL).
 """
 import os, sys
 import numpy as np
@@ -185,14 +189,25 @@ def main():
     hi = max(max(a.get_ylim()) for a in axes)
     for a in axes:
         a.set_ylim(lo, hi)
-    lim = np.array(axs.get_xlim())
+    # SYMMETRIC about zero on both axes (Dan, 2026-09-26), with the x = 0
+    # line drawn, so the reader can see where the cloud sits: the axial
+    # term is negative -- lifting the neutral plane -- on 62 % of STD
+    # snapshots and on ALL of WAL's, and the large-magnitude points are
+    # negative in both runs. A symmetric box also keeps the one-to-one
+    # line at 45 degrees.
+    r = max(np.abs(axs.get_xlim()).max(), np.abs(axs.get_ylim()).max())
+    lim = np.array([-r, r])
+    axs.axvline(0, color='0.25', lw=1.4)
     axs.plot(lim, lim, '-', color='0.4', lw=1.2, label='one-to-one')
     axs.set_xlim(*lim)
-    axs.set_xlabel(r'Beam prediction, $-N h^{2}/(6M)$ [km]', fontsize=11)
+    axs.set_ylim(*lim)
+    axs.set_xlabel('Beam-theory prediction of the neutral-plane offset '
+                   r'under combined axial load and bending, $-N h^{2}/(6M)$ [km]',
+                   fontsize=11)
     axs.set_ylabel('Measured offset,\n' r'$2\,h_{np} - h$ [km]', fontsize=10.5)
     axs.grid(alpha=0.25, color=C_RULE, lw=0.6)
     axs.legend(frameon=False, fontsize=9.5, loc='upper left')
-    fig.suptitle('Why the neutral-plane thickness barely grows',
+    fig.suptitle('The neutral plane: plate thermal thickening against axial force',
                  fontsize=10.5, color='0.35')
     out = os.path.join(ROOT, 'figures', 'fig_neutral_plane.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)

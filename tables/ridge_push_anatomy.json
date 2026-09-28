@@ -1,0 +1,22 @@
+{
+  "table": "ridge_push_anatomy.csv",
+  "script": "fig_ridge_push_anatomy.py",
+  "figure": "fig_ridge_push_anatomy.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 42,
+  "sigfig": 6,
+  "meta": {
+    "curves": "mid-run mean (36-44 Myr); shading is the full run, t >= 8 Myr",
+    "areas": "A measured to z_c; T = |dP| z_c; S tilt-removed from z_c to 200 km; A+T+S is the static limit",
+    "zc": "z_c = 75 km is NOMINAL, standing in for the sigma_zz maximum across both runs (see fig_ridge_cumulative)",
+    "density_route": "a check curve, not a fourth value; it carries no elevation mass"
+  }
+}

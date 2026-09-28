@@ -138,8 +138,11 @@ def main():
     if not hasattr(np, 'trapezoid'):
         np.trapezoid = np.trapz
     d = cpc.load()
-    fig, axes = plt.subplots(2, 2, figsize=(12.2, 8.6), sharex='col',
-                             gridspec_kw={'height_ratios': [1.75, 1.0]})
+    # The suppression row is a SUBSIDIARY strip (Dan, 2026-09-26): it carries
+    # one curve per panel and was taking a third of the figure. Height ratio
+    # cut from 1.75:1.0 to 2.6:0.7.
+    fig, axes = plt.subplots(2, 2, figsize=(12.2, 7.4), sharex='col',
+                             gridspec_kw={'height_ratios': [2.6, 0.7]})
     rows = [('model', 'quantity', 'value')]
 
     for col, key in enumerate(('STD', 'WAL')):

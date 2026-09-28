@@ -6,9 +6,9 @@ STD,nd_trench_q3_TNm,0.497
 STD,nd_first_isostatic_median_TNm,1.269
 STD,nd_first_isostatic_q1_TNm,0.642
 STD,nd_first_isostatic_q3_TNm,2.161
-STD,nd_ridge_median_TNm,0.193
-STD,nd_ridge_q1_TNm,0.167
-STD,nd_ridge_q3_TNm,0.314
+STD,nd_ridge_median_TNm,0.37
+STD,nd_ridge_q1_TNm,0.286
+STD,nd_ridge_q3_TNm,0.481
 STD,shear_load_trench_face_down_median_TNm,1.6
 STD,shear_load_trench_face_down_q1_TNm,1.312
 STD,shear_load_trench_face_down_q3_TNm,1.654
@@ -17,8 +17,8 @@ STD,d_nd_trench_to_first_isostatic_q1_TNm,1.699
 STD,d_nd_trench_to_first_isostatic_q3_TNm,2.16
 STD,nd_trench_tension_like_fraction,0.378
 STD,nd_ridge_always_tension_like,True
-STD,nd_trench_minus_ridge_median_TNm,-0.941
-STD,nd_trench_minus_ridge_driving_fraction,0.378
+STD,nd_trench_minus_ridge_median_TNm,-1.132
+STD,nd_trench_minus_ridge_driving_fraction,0.297
 STD,abs_v_over_abs_nd_trench_median,1.99
 WAL,moment_trench_median_1e17N,-1.022
 WAL,nd_trench_median_TNm,-1.834
@@ -27,9 +27,9 @@ WAL,nd_trench_q3_TNm,-1.177
 WAL,nd_first_isostatic_median_TNm,-0.142
 WAL,nd_first_isostatic_q1_TNm,-0.839
 WAL,nd_first_isostatic_q3_TNm,0.361
-WAL,nd_ridge_median_TNm,0.13
-WAL,nd_ridge_q1_TNm,0.104
-WAL,nd_ridge_q3_TNm,0.182
+WAL,nd_ridge_median_TNm,0.216
+WAL,nd_ridge_q1_TNm,0.145
+WAL,nd_ridge_q3_TNm,0.274
 WAL,shear_load_trench_face_down_median_TNm,1.105
 WAL,shear_load_trench_face_down_q1_TNm,1.025
 WAL,shear_load_trench_face_down_q3_TNm,1.251
@@ -38,6 +38,6 @@ WAL,d_nd_trench_to_first_isostatic_q1_TNm,1.596
 WAL,d_nd_trench_to_first_isostatic_q3_TNm,1.874
 WAL,nd_trench_tension_like_fraction,0
 WAL,nd_ridge_always_tension_like,True
-WAL,nd_trench_minus_ridge_median_TNm,-2.021
+WAL,nd_trench_minus_ridge_median_TNm,-2.121
 WAL,nd_trench_minus_ridge_driving_fraction,0
 WAL,abs_v_over_abs_nd_trench_median,0.67

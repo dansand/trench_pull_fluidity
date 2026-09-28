@@ -244,8 +244,30 @@ def surface_fs(vtk_data, x, mirror_x=True, tol_m=1.0):
 
 
 def find_ridge_x_flow(x, vx_row, x_trench, seaward_sign=+1,
-                      smooth_km=15.0, min_offset_km=300.0):
-    """Ridge column from the FLOW, not the topography.
+                      smooth_km=15.0, min_offset_km=300.0,
+                      fs_top=None, crest_half_km=20.0, crest_smooth_km=3.0):
+    """Ridge column from the FLOW, refined to the local topographic crest.
+
+    TWO STEPS (ANALYSIS_CONVENTIONS §3.4, ruled by Dan 2026-09-26,
+    specified 2026-09-27), because each fixes what the other gets wrong:
+
+      locate  the spreading axis as the maximum surface divergence
+              dvx/dx seaward of the trench -- robust, defined at every
+              snapshot, and it does not wander (see below).
+      refine  to the highest point of the smoothed free surface within
+              +/- `crest_half_km`. The divergence maximum IS the
+              spreading axis, and the spreading axis sits in the AXIAL
+              VALLEY: measured on six snapshots per run, the local crest
+              is 50-350 m higher and lies a median 5-20 km away,
+              systematically INBOARD (negative offset on 9 of 12).
+
+    +/- 20 km measured, not assumed: the gain from 20 to 30 km is under
+    40 m in every snapshot tested, while +/- 50 km escapes to a
+    neighbouring high in 1 of 6 STD and 3 of 6 WAL snapshots -- the
+    failure mode the flow pick exists to avoid.
+
+    The refinement is SKIPPED if `fs_top` is None, which preserves the
+    pre-2026-09-27 behaviour for any caller that has not been updated.
 
     The ridge is the spreading centre: the maximum of the surface
     divergence dvx/dx seaward of the trench. Adopted 2026-09-16 after the
@@ -270,6 +292,9 @@ def find_ridge_x_flow(x, vx_row, x_trench, seaward_sign=+1,
     x_trench : trench position [m]
     min_offset_km : ignore the near-trench zone, where the flexural
                velocity field has its own structure
+    fs_top   : free surface along x [m]. If given, the pick is refined to
+               the local topographic crest; if None, it is not.
+    crest_half_km : half-width of the crest search about the flow pick
 
     Returns (x_ridge, index).
     """
@@ -283,7 +308,14 @@ def find_ridge_x_flow(x, vx_row, x_trench, seaward_sign=+1,
         div = -div
     idx = np.where(sea)[0]
     j = idx[int(np.argmax(div[idx]))]
-    return float(x[j]), int(j)
+    if fs_top is None:
+        return float(x[j]), int(j)
+    # refine to the local topographic crest (conventions §3.4)
+    s_fs = gaussian_filter1d(np.nan_to_num(fs_top),
+                             max(1.0, crest_smooth_km * 1e3 / dx))
+    w = np.where(np.abs(x - x[j]) <= crest_half_km * 1e3)[0]
+    k = int(w[int(np.argmax(s_fs[w]))])
+    return float(x[k]), k
 
 
 def find_ridge_x(x, fs_top, x_trench, seaward_sign=+1,

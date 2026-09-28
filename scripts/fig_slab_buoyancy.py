@@ -263,7 +263,13 @@ def main():
         # pull, and the figure never said so. Quoted, because the paper's
         # argument is that it is NOT the force delivered to the plate.
         a0.set_ylabel('Buoyancy force —\n"slab pull" [TN/m]', fontsize=10)
-        a0.set_title(key, fontsize=11.5)
+        # PANEL LETTERS (Dan, 2026-09-28): the figure had none, so the text
+        # could not direct the reader to a specific panel. Column-major:
+        # (a,b,c) STD, (d,e,f) WAL.
+        L = 'abc' if col == 0 else 'def'
+        a0.set_title(f'({L[0]}) {key}', fontsize=11.5, loc='left')
+        a1.set_title(f'({L[1]}) {key}', fontsize=11.5, loc='left')
+        a2.set_title(f'({L[2]}) {key}', fontsize=11.5, loc='left')
         a0.legend(frameon=False, fontsize=8.5, loc='upper left')
 
         # The z_top band is drawn here too, and LABELLED AS SUCH. It is only

@@ -1,0 +1,28 @@
+{
+  "table": "ridge_cumulative.csv",
+  "script": "fig_ridge_cumulative.py",
+  "figure": "fig_ridge_cumulative.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 30,
+  "sigfig": 6,
+  "meta": {
+    "quantity": "cumulative int_0^z [szz(x_I) - szz(x_R)] dz",
+    "panel_c": "shortfall vs each snapshot own maximum, per candidate fixed depth, 40-140 km",
+    "midrun_window_Myr": [
+      36.0,
+      44.0
+    ],
+    "t_min_Myr": "8",
+    "zc_km": "75",
+    "zc": "fixed nominal integration depth",
+    "dnd_note": "the N_D term has no extremum; between 75 and 150 km its cumulative moves 0.09 (STD) / 0.03 (WAL) TN/m, 7 % / 2 % of the GPE-like term"
+  }
+}

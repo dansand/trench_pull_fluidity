@@ -84,6 +84,15 @@ variant in this figure; the trench VALUES are communicated separately by
 fig_trench_resultants. Because ΔN_D and ΔGPE* nearly coincide (F_B is
 small), each panel carries a force-direction glyph.
 
+THE GLYPH SHOWS SENSE, NOT MAGNITUDE. All arrows are drawn the same
+length. Which terms actually vary, measured over the 37 retained
+snapshots (t >= 8 Myr): Delta GPE* positive at 100 % of steps in both runs
+(+1.88 to +4.83 STD, +2.31 to +4.99 WAL); F_B positive at 100 % (+1.74 to
++3.49, +0.89 to +1.89); Delta N_D positive at 70 % in STD, reversing on 11
+of 37 steps (-1.19 to +2.86), and at 100 % in WAL (+0.47 to +3.88). So one
+term in one run carries the whole caveat, and the caption says so rather
+than the glyph gesturing at it.
+
 THE GLYPH IS SNAPSHOT-SPECIFIC (Dan, 2026-09-21). It was a sign key —
 "a positive value of this term would mean a force this way". It is now a
 statement about the model state at the plotted step: each arrow is drawn
@@ -201,7 +210,19 @@ def draw_direction_glyph(ax, terms, x0=0.365, y_top=1.0):
     header and the GPE* label were running across the x_I line.
     """
     L = 0.09
-    ax.text(x0, y_top, 'trailing-plate force balance\n(current time step)',
+    # MINIMAL GLYPH HEADER (Dan, 2026-09-28, option 5). The old header
+    # named the figure ("trailing-plate force balance"), not the arrows,
+    # so the glyph read as a legend; and "(current time step)" gestured at
+    # variability without saying what varies. The header now describes the
+    # arrows and nothing else. What varies is quantified in the caption:
+    # Delta GPE* and F_B hold their direction at 100 % of snapshots in both
+    # runs; Delta N_D reverses on 30 % of STD snapshots (11 of 37) and on
+    # none in WAL.
+    # header dropped ~0.1 in below the axes top (Dan, 2026-09-28); the rows
+    # below it are placed relative to the same y_top, so they follow
+    y_hdr = y_top - 0.10 / (ax.get_position().height
+                            * ax.get_figure().get_figheight())
+    ax.text(x0, y_hdr, 'direction at this step',
             transform=ax.transAxes, fontsize=9, style='italic',
             color='0.25', ha='center', va='top', linespacing=1.3)
     # Header clearance and row spacing are set in INCHES and converted to
@@ -210,7 +231,7 @@ def draw_direction_glyph(ax, terms, x0=0.365, y_top=1.0):
     # size, so a single hard-coded fraction that clears the header in the
     # tall panel runs straight through it in the short one.
     h_in = ax.get_position().height * ax.get_figure().get_figheight()
-    y0 = y_top - 0.34 / h_in                 # first row, below the header
+    y0 = y_hdr - 0.24 / h_in                 # first row, below the header
     ys = [y0 - (0.17 / h_in) * i for i in range(len(terms))]
     ax.plot([x0, x0], [min(ys) - 0.02, max(ys) + 0.02], color='0.5', lw=0.8,
             transform=ax.transAxes)
