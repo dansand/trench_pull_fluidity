@@ -1,0 +1,27 @@
+{
+  "table": "model_evolution.csv",
+  "script": "fig_model_evolution.py",
+  "figure": "fig_model_evolution.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 26,
+  "sigfig": 6,
+  "meta": {
+    "times_Myr": [
+      8.003719520570485,
+      31.99792437792008,
+      55.97041943792659,
+      67.97928092456813
+    ],
+    "frame": "sampled native, displayed mirrored (trench left, seaward right)",
+    "slab_contour_K": "1415.84",
+    "role": "Models-section orientation figure"
+  }
+}

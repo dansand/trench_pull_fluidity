@@ -1,0 +1,30 @@
+{
+  "table": "convergence.csv",
+  "script": "fig_convergence.py",
+  "figure": "fig_convergence.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 18,
+  "sigfig": 6,
+  "meta": {
+    "quantity": "trench-side Delta GPE*, cumulative with depth",
+    "normalisation": "each curve by its own value at z_c",
+    "zc_km": "80",
+    "t_min_Myr": "8",
+    "h_m": "25 MPa carried fibre stress, flex column T",
+    "h_m_in_panels_ab": "mid-run median; panels c,d use the per-snapshot h_m",
+    "midrun_window_Myr": [
+      36.0,
+      44.0
+    ],
+    "elastic_model": "parabolic equivalent density over 0..h_m; cumulative 2z-2z^3+z^4 in z/h_m; carries a_eff = h_m/2 BY CONSTRUCTION, so it tests the SHAPE and not the arm",
+    "ridge_side": "EXCLUDED 2026-10-11 -- its depth structure is in fig_ridge_cumulative and fig_ridge_push_anatomy"
+  }
+}

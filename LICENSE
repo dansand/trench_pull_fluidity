@@ -1,0 +1,29 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 Dan Sandiford
+
+This work -- the analysis code, figures, tables and derived data in this
+repository -- is licensed under the Creative Commons Attribution 4.0
+International License. You are free to share and adapt the material for
+any purpose, including commercially, provided you give appropriate
+credit, link to the licence, and indicate if changes were made.
+
+Full licence text: https://creativecommons.org/licenses/by/4.0/legalcode
+Summary:          https://creativecommons.org/licenses/by/4.0/
+
+WHY THIS LICENCE. It matches the licence of the model output the work is
+built on (Cerpa et al. 2022, doi:10.5281/zenodo.6817177, CC BY 4.0), so
+the whole chain from model output to published figure carries the same
+attribution requirement.
+
+NOTE ON SOFTWARE. Creative Commons does not recommend CC licences for
+source code, because they address neither patent rights nor the
+source/object distinction that software licences handle. The choice here
+is deliberate: this repository is a post-processing analysis published
+alongside a paper, not a software product, and consistency with the data
+licence was preferred. If you wish to reuse the code in a context where a
+conventional software licence matters, contact the author.
+
+THE BUNDLED MODEL OUTPUT IN data/ IS NOT COVERED BY THIS NOTICE. It is
+redistributed from Cerpa et al. (2022) under their own CC BY 4.0 licence;
+see data/ATTRIBUTION.md. Cite them, not this repository, for the data.

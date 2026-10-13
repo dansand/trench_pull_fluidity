@@ -1,0 +1,24 @@
+{
+  "table": "thickness_definitions.csv",
+  "script": "fig_thickness_definitions.py",
+  "figure": "fig_thickness_definitions.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 16,
+  "sigfig": 6,
+  "meta": {
+    "midrun_window_Myr": [
+      36.0,
+      44.0
+    ],
+    "isotherm_C": "900",
+    "z_star": "depth at which the ridge-minus-x_I anomaly changes sign"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "table": "force_length_scale.csv",
+  "script": "fig_force_length_scale.py",
+  "figure": "fig_force_length_scale.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 30,
+  "sigfig": 6,
+  "meta": {
+    "rho_g": "32340",
+    "surface_window_km": 20
+  }
+}

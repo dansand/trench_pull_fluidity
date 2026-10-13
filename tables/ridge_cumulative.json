@@ -1,0 +1,28 @@
+{
+  "table": "ridge_cumulative.csv",
+  "script": "fig_ridge_cumulative.py",
+  "figure": "fig_ridge_cumulative.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 20,
+  "sigfig": 6,
+  "meta": {
+    "quantity": "cumulative int_0^z [-Delta sigma_zz] dz, ridge minus first isostatic column",
+    "cost": "signed % change relative to the value at z_c",
+    "zstar": "depth at which the anomaly changes sign, i.e. where the cumulative is stationary",
+    "dnd_omitted": "Delta N_D is not shown: it has asymptoted by 76-94 km and moves 1-2 % between 100 and 175 km, so it cannot constrain z_c",
+    "midrun_window_Myr": [
+      36.0,
+      44.0
+    ],
+    "t_min_Myr": "8",
+    "zc_km": "80"
+  }
+}

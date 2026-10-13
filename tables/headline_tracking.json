@@ -1,0 +1,23 @@
+{
+  "table": "headline_tracking.csv",
+  "script": "fig_headline_tracking.py",
+  "figure": "fig_headline_tracking.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 30,
+  "sigfig": 6,
+  "meta": {
+    "normalisation": "per profile, min-max over the trench-to-ridge span, after a +-5 km window smooth",
+    "x_axis": "seaward distance s/s_R; rows (a,b) linear, (c,d) square-root",
+    "x_I": "median over the retained snapshots; the spread is dominated by the RIDGE migrating (s_R 2099-3695 km), not by x_I moving (s_I 70-107 km)",
+    "residual": "GPE*_n - topo_n; the residual PANEL was retired 2026-10-12, these rows replace it",
+    "t_min_Myr": "8"
+  }
+}

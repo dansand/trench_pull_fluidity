@@ -1,0 +1,21 @@
+{
+  "table": "ridge_density_check.csv",
+  "script": "fig_ridge_density_check.py",
+  "figure": "fig_ridge_density_check.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 8,
+  "sigfig": 6,
+  "meta": {
+    "test": "ridge anomaly shifted by |dP| against g*int(rho_R - rho_I)dz with its deep constant removed",
+    "zc_km": "80",
+    "window": "mid-run average"
+  }
+}

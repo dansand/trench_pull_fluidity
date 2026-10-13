@@ -1,0 +1,25 @@
+{
+  "table": "stress_state.csv",
+  "script": "fig_stress_state.py",
+  "figure": "fig_stress_state.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 50,
+  "sigfig": 6,
+  "meta": {
+    "reference_Myr": "40",
+    "zc_km": "80",
+    "window_half_width_km": "5",
+    "dip": "800 C isotherm fitted over +/-10 km at x_T",
+    "planes": "vertical; slab-normal to the same depth",
+    "scaling": "shift quoted against run-scale |N_D| and the trench pull, never against the instantaneous resultant (Dan 2026-10-09)",
+    "source": "dip method ported from further_analysis/fluidity_slab_normal_FD.ipynb"
+  }
+}

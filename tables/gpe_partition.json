@@ -1,0 +1,22 @@
+{
+  "table": "gpe_partition.csv",
+  "script": "fig_gpe_partition.py",
+  "figure": "fig_gpe_partition.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 44,
+  "sigfig": 6,
+  "meta": {
+    "zc_km": "80",
+    "additivity": "trench pull + ridge push = Delta GPE*; isostatic part - tilt = ridge push; both asserted at render",
+    "tilt": "|Delta P| * z_c on the analysis grid",
+    "no_residual_panel": "deliberate; see DYNAMICS_FINDINGS \u00a75.10"
+  }
+}

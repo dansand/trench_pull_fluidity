@@ -1,0 +1,17 @@
+model,quantity,value
+STD,h_np_km,30
+STD,two_h_np_km,60
+STD,yield_cap_km,68.5
+STD,isotherm_900C_km,66.5
+STD,proxy_band_low_km,60
+STD,proxy_band_high_km,68.5
+STD,zc_nominal_km,80
+STD,z_star_km,74.6
+WAL,h_np_km,27
+WAL,two_h_np_km,54
+WAL,yield_cap_km,64.5
+WAL,isotherm_900C_km,63.5
+WAL,proxy_band_low_km,54
+WAL,proxy_band_high_km,64.5
+WAL,zc_nominal_km,80
+WAL,z_star_km,85.5

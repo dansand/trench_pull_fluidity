@@ -1,0 +1,23 @@
+{
+  "table": "tilt_velocity.csv",
+  "script": "fig_tilt_velocity.py",
+  "figure": "fig_tilt_velocity.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 48,
+  "sigfig": 6,
+  "meta": {
+    "zc_km": "80",
+    "plate_speed": "|v_x| above 20 km, trench-to-ridge mean",
+    "convergence": "plate speed + trench rollback -d(x_T)/dt",
+    "F_tilt": "|Delta P| * z_c (conventions \u00a76b.3)",
+    "note": "increment correlations are the discriminating statistic; level correlations share any secular trend"
+  }
+}

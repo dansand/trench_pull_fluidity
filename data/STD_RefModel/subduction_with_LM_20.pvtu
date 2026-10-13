@@ -1,0 +1,34 @@
+<VTKFile type="PUnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+    <PUnstructuredGrid GhostLevel="1">
+        <PPointData Scalars="NormalSP::Pressure" Vectors="NormalSP::Velocity" Tensors="NormalSP::Viscosity">
+            <PDataArray type="Float64" Name="NormalSP::Pressure" />
+            <PDataArray type="Float64" Name="NormalSP::Density" />
+            <PDataArray type="Float64" Name="NormalSP::Temperature" />
+            <PDataArray type="Float64" Name="NormalSP::SecondInvariant_StrainRate" />
+            <PDataArray type="Float64" Name="NormalSP::MaterialVolumeFraction" />
+            <PDataArray type="Float64" Name="NormalSP::FreeSurface" />
+            <PDataArray type="Float64" Name="NormalSP::DeformationMechanism" />
+            <PDataArray type="Float64" Name="NormalSP::Time" />
+            <PDataArray type="Float64" Name="NormalOP::MaterialVolumeFraction" />
+            <PDataArray type="Float64" Name="NormalSP::Velocity" NumberOfComponents="3" />
+            <PDataArray type="Float64" Name="NormalSP::Viscosity" NumberOfComponents="9" />
+            <PDataArray type="Float64" Name="NormalSP::Stress" NumberOfComponents="9" />
+        </PPointData>
+        <PCellData Scalars="vtkGhostLevels">
+            <PDataArray type="UInt8" Name="vtkGhostLevels" />
+        </PCellData>
+        <PPoints>
+            <PDataArray type="Float64" Name="Points" NumberOfComponents="3" />
+        </PPoints>
+        <Piece Source="subduction_with_LM_20/subduction_with_LM_20_0.vtu" />
+        <Piece Source="subduction_with_LM_20/subduction_with_LM_20_1.vtu" />
+        <Piece Source="subduction_with_LM_20/subduction_with_LM_20_2.vtu" />
+        <Piece Source="subduction_with_LM_20/subduction_with_LM_20_3.vtu" />
+        <Piece Source="subduction_with_LM_20/subduction_with_LM_20_4.vtu" />
+        <Piece Source="subduction_with_LM_20/subduction_with_LM_20_5.vtu" />
+        <Piece Source="subduction_with_LM_20/subduction_with_LM_20_6.vtu" />
+        <Piece Source="subduction_with_LM_20/subduction_with_LM_20_7.vtu" />
+        <Piece Source="subduction_with_LM_20/subduction_with_LM_20_8.vtu" />
+        <Piece Source="subduction_with_LM_20/subduction_with_LM_20_9.vtu" />
+    </PUnstructuredGrid>
+</VTKFile>

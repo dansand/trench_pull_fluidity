@@ -1,0 +1,22 @@
+{
+  "table": "trench_resultants.csv",
+  "script": "fig_trench_resultants.py",
+  "figure": "fig_trench_resultants.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 42,
+  "sigfig": 6,
+  "meta": {
+    "zc_km": "80",
+    "t_min_Myr": "8",
+    "V_sense": "extracted V = int tau_zx dz in the model's own frame, which carries the sense the companion register defines: positive at the trench, dV/ds = -rho g w",
+    "shear_load_sense": "shear_load_trench_face_down = +V, the traction resultant on the trailing plate's trench-side face (outward normal +x: the plate lies seaward at x < x_T), positive DOWNWARD"
+  }
+}

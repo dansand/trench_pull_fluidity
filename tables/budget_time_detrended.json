@@ -1,0 +1,25 @@
+{
+  "table": "budget_time_detrended.csv",
+  "script": "fig_budget_time_detrended.py",
+  "figure": "fig_budget_time_detrended.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 110,
+  "sigfig": 6,
+  "meta": {
+    "domain": "trench to ridge columns",
+    "zc_km": "80",
+    "t_min_Myr": "8",
+    "sign": "Delta GPE* plotted POSITIVE (driving); Delta N_D and F_B keep their own signs and resist when positive. The axis has no single physical sense, which is why the figure carries no driving/resisting labels.",
+    "closure": "Delta GPE* - Delta N_D - F_B = 0; its trend row changed sign on 2026-10-08 with the display register, magnitude unchanged",
+    "detrend": "fitted linear model per series, removed",
+    "axes": "shared per row; residual row symmetric about 0"
+  }
+}

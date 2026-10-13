@@ -1,0 +1,69 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite both the paper it accompanies and the
+  Cerpa et al. (2022) model archive it analyses.
+title: >-
+  trench_pull_fluidity: force-balance analysis of the Cerpa et al. Fluidity
+  subduction models
+abstract: >-
+  Post-processing code that measures the vertically integrated horizontal force
+  balance of two free-subduction models directly from the vertical normal
+  stress, partitioning the plate-wide driving force into trench pull, ridge push
+  and the tilting force. Contains no model code; the model output it analyses is
+  published separately by Cerpa et al. (2022).
+type: software
+authors:
+  - family-names: Sandiford
+    given-names: Dan
+    affiliation: University of Melbourne
+    email: dsand@unimelb.edu.au
+    orcid: "https://orcid.org/0000-0002-2207-6837"
+license: CC-BY-4.0
+keywords:
+  - geodynamics
+  - subduction
+  - slab pull
+  - ridge push
+  - gravitational potential energy
+  - force balance
+references:
+  - type: data
+    title: >-
+      Data for "The effect of a weak asthenospheric layer on surface kinematics,
+      subduction dynamics and slab morphology in the lower mantle"
+    authors:
+      - family-names: Cerpa
+        given-names: Nestor G.
+      - family-names: Sigloch
+        given-names: Karin
+      - family-names: Garel
+        given-names: Fanny
+      - family-names: Heuret
+        given-names: Arnauld
+      - family-names: Davies
+        given-names: D. Rhodri
+      - family-names: Mihalynuk
+        given-names: Mitchell
+    year: 2022
+    doi: 10.5281/zenodo.6817177
+    license: CC-BY-4.0
+  - type: article
+    title: >-
+      The effect of a weak asthenospheric layer on surface kinematics,
+      subduction dynamics and slab morphology in the lower mantle
+    authors:
+      - family-names: Cerpa
+        given-names: Nestor G.
+      - family-names: Sigloch
+        given-names: Karin
+      - family-names: Garel
+        given-names: Fanny
+      - family-names: Heuret
+        given-names: Arnauld
+      - family-names: Davies
+        given-names: D. Rhodri
+      - family-names: Mihalynuk
+        given-names: Mitchell
+    journal: "Journal of Geophysical Research: Solid Earth"
+    year: 2022
+    doi: 10.1029/2022JB024494

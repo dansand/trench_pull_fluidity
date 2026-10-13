@@ -1,0 +1,36 @@
+{
+  "title": "trench_pull_fluidity: force-balance analysis of the Cerpa et al. Fluidity subduction models",
+  "description": "<p>Post-processing code accompanying <em>How topographic pressure gradients drive subducting plates</em>. It measures the vertically integrated horizontal force balance of two free-subduction models directly from the vertical normal stress, and partitions the plate-wide driving force into trench pull, ridge push and the tilting force.</p><p>Every figure in the paper and its supplement is produced by one named script, each writing a CSV of the numbers quoted in its caption. The reference snapshot of both runs and the reduced time-series caches are bundled, so no figure requires a download to reproduce.</p><p>This repository contains no model code and no new simulations. The model output analysed here is published separately by Cerpa et al. (2022), doi:10.5281/zenodo.6817177, under CC-BY-4.0; two of its snapshots are redistributed here under that licence.</p>",
+  "upload_type": "software",
+  "license": "CC-BY-4.0",
+  "creators": [
+    {
+      "name": "Sandiford, Dan",
+      "affiliation": "University of Melbourne",
+      "orcid": "0000-0002-2207-6837"
+    }
+  ],
+  "keywords": [
+    "geodynamics",
+    "subduction",
+    "slab pull",
+    "ridge push",
+    "gravitational potential energy",
+    "force balance",
+    "Fluidity"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.5281/zenodo.6817177",
+      "relation": "isDerivedFrom",
+      "resource_type": "dataset",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "10.1029/2022JB024494",
+      "relation": "references",
+      "resource_type": "publication-article",
+      "scheme": "doi"
+    }
+  ]
+}

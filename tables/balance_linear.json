@@ -1,0 +1,22 @@
+{
+  "table": "balance_linear.csv",
+  "script": "fig_balance_linear.py",
+  "figure": "fig_balance_linear.png",
+  "models": [
+    "STD",
+    "WAL"
+  ],
+  "fields": [
+    "model",
+    "quantity",
+    "value"
+  ],
+  "n_rows": 20,
+  "sigfig": 6,
+  "meta": {
+    "role": "linear-axis counterpart of the main balance figure; a check on spatial interpretation, not a new analysis",
+    "computation": "balance_chain.compute, identical to the main figure",
+    "plate_wide": "every fraction is referenced to the value at the RIDGE column, not to the 3000 km display limit",
+    "zc_km": "80"
+  }
+}
