@@ -210,11 +210,13 @@ def main():
     # the lithosphere, which would terminate at the cache edge and read as
     # a plate that stops in open mantle. The limb is isolated by taking the
     # 1416 K contour below 150 km only.
-    # PLACED AT THE LEGEND'S HEIGHT, on the other side (Dan, 2026-10-14).
-    # The bbox carries the domain's own 8000:2900 aspect, so the outline is
-    # the box rather than a box-shaped frame; at 8 Myr the field to the
-    # right of the slab is empty mantle, which is the room this uses.
-    ins = axes[0, 1].inset_axes([0.575, 0.555, 0.40, 0.25])
+    # LOWER RIGHT OF (b), AND LARGER (Dan, 2026-10-14). It first sat at the
+    # legend's height to mirror it, which cramped it against the slab and
+    # the velocity arrow. The lower half of (b) is lower mantle with nothing
+    # in it at 8 Myr -- the same empty field the legend uses in (a) -- so
+    # the inset can be half again as wide there. The bbox carries the
+    # domain's own 8000:2900 aspect, so the outline is the box itself.
+    ins = axes[0, 1].inset_axes([0.515, 0.10, 0.465, 0.29])
     ins.set_facecolor('white')
     Tw = d['WAL_temp'][0]
     Tw = Tw if Tw.shape[0] == len(zk) else Tw.T
