@@ -176,15 +176,15 @@ def main():
         a0, a1 = axes[0, col], axes[1, col]
         a0.axhline(0, color='k', lw=1.2)
         a0.plot(t, DENS, '--', color=C_RIDGE, lw=1.6,
-                label='isostatic part, before tilt')
+                label=r'tilt-corrected ridge push, $A+T$')
         a0.plot(t, RP, '-', color=C_RIDGE, lw=2.2,
-                label='ridge push (isostatic domain)')
+                label=r'ridge push, $A$')
         a0.plot(t, TP, '-', color=C_TRENCH, lw=2.2,
-                label='trench pull (non-isostatic domain)')
+                label='trench pull')
         a0.plot(t, TOT, '-', color=C_TOTAL, lw=2.6,
-                label=r'$\Delta\mathrm{GPE}^{*}$ (= blue + orange)')
+                label=r'$\Delta\mathrm{GPE}^{*}$ = trench pull + ridge push')
         a0.plot(t, -TILT, '-', color=C_TILT, lw=2.0,
-                label='tilt (removed from the isostatic part)')
+                label=r'plate-tilt reduction, $-T$')
         a0.set_title(key, fontsize=11.5)
         a0.grid(alpha=0.25, color=C_RULE, lw=0.6)
 
@@ -248,7 +248,8 @@ def main():
         for ax in axes[row, :]:
             ax.set_ylim(lo, hi)
     axes[0, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=11)
-    axes[1, 0].set_ylabel('tilt / isostatic part', fontsize=10)
+    # the plotted ratio is TILT / DENS, i.e. T / (A + T)
+    axes[1, 0].set_ylabel(r'$T\,/\,(A+T)$', fontsize=11)
     h, l = axes[0, 0].get_legend_handles_labels()
     axes[0, 0].legend(h[::-1], l[::-1], frameon=False, fontsize=8.5,
                       loc='upper left', ncol=2)

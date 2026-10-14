@@ -335,7 +335,8 @@ def main():
                  (key, 'surface_supplied_over_demanded', f'{unt[0]/dens[0]:.3f}')]
 
     axes[0, 0].set_ylim(Z_DEEP_KM, 0)
-    fig.suptitle('Pressure anomaly and force integral in the isostatic domain',
+    # 'isostatic domain' is a domain word; the domain term is the ridge side
+    fig.suptitle('Pressure anomaly and force integral on the ridge side',
                  fontsize=11.5, color='0.35')
     out = os.path.join(ROOT, 'figures', 'fig_ridge_push_anatomy.png')
     depth_ticks(fig)   # 20 km depth ticks (FIGURE_STYLE)
