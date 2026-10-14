@@ -182,13 +182,13 @@ def main():
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
         ax.legend(frameon=False, fontsize=9, loc=loc)
     a_zstar.axhline(cpc.ZC_KM, color='0.30', lw=1.4)
-    a_zstar.set_ylabel(r'crossing depth $z_{\ast}$ [km]', fontsize=11)
+    a_zstar.set_ylabel(r'crossing depth $z^{*}$ [km]', fontsize=11)
     a_zstar.set_title(r'(c) the crossing deepens; $z_c$ is fixed',
                       fontsize=10.5, loc='left')
     a_tcost.axhline(0, color='0.55', lw=1.3)
     for v in (-10,):
         a_tcost.axhline(v, color='0.45', lw=1.0, ls='--')
-    a_tcost.set_ylabel(r"cost of $z_c$ vs that step's $z_{\ast}$  [%]",
+    a_tcost.set_ylabel(r"cost of $z_c$ vs that step's $z^{*}$  [%]",
                        fontsize=11)
     a_tcost.set_title('(d) what the fixed depth costs, step by step',
                       fontsize=10.5, loc='left')

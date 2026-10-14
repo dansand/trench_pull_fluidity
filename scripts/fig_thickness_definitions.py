@@ -137,7 +137,7 @@ def main():
         a1.axhline(cpc.ZC_KM, color='0.35', lw=1.1, ls=(0, (6, 3)),
                    label=rf'$z_c$  {cpc.ZC_KM:.0f} km (nominal)')
         a1.axhline(zstar, color=C_RIDGE, lw=1.1, ls=(0, (1, 2)),
-                   label=rf'$z_{{\ast}}$  {zstar:.0f} km')
+                   label=rf'$z^{{*}}$  {zstar:.0f} km')
         a1.set_xlabel(r'$-\Delta\sigma_{zz}$  (column $-\ x_I$)  [MPa]', fontsize=10)
         a1.legend(frameon=False, fontsize=8, loc='lower left',
                   handlelength=2.4, handletextpad=0.7, labelspacing=0.5,

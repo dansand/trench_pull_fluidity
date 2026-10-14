@@ -240,7 +240,7 @@ def main():
         acu.text(0.09, cpc.ZC_KM + 9,
                  f'at $z_c$   {at_zc:.2f} TN/m\n'
                  f'at the maximum   {at_max:.2f}\n'
-                 rf'({100*abs(at_max-at_zc)/at_max:.1f} %; $z_{{\ast}}$ = {zkm[kmax]:.0f} km)',
+                 rf'({100*abs(at_max-at_zc)/at_max:.1f} %; $z^{{*}}$ = {zkm[kmax]:.0f} km)',
                  transform=blended_transform_factory(acu.transAxes, acu.transData),
                  fontsize=9.0, ha='left', va='top')
 
