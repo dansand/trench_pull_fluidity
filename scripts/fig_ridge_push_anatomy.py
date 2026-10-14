@@ -177,23 +177,35 @@ def main():
         deep = (zkm >= cpc.ZC_KM) & (zkm <= Z_DEEP_KM)   # kept for the table
         a0.fill_betweenx(zkm[shal], 0, meas[shal], color=C_RIDGE,
                          alpha=0.38, lw=0, zorder=1,
-                         label=f'(1)  reported ridge push   {A:.2f} TN/m')
+                         label=f'(1)  ridge push   $A$ = {A:.2f} TN/m')
         a0.fill_betweenx(zkm[shal], meas[shal], unt[shal], color=C_RIDGE,
                          alpha=0.16, lw=0, zorder=1,
-                         label=f'(2)  plate-tilt reduction   {T:.2f}')
-        # (3) is the area under the SHIFTED (tilt-removed) sigma_zz curve,
-        # integrated to the asymptote -- the static ridge push (Dan,
-        # 2026-09-27, reverting an intermediate version that used the
-        # density curve instead). Drawn FIRST so (1) and (2) sit on top.
-        # The three are alternatives, not components: they are not summed.
+                         label=f'(2)  plate-tilt reduction   $T$ = {T:.2f}')
+        # (3) is the area under the SHIFTED (tilt-corrected) sigma_zz curve,
+        # integrated to the asymptote. Drawn FIRST so (1) and (2) sit on top.
+        # ⚠ THE THREE ARE COMPONENTS, NOT ALTERNATIVES. This comment used to
+        # say the opposite -- "they are not summed" -- which was wrong:
+        # A + T is the area under the corrected curve to z_c, and
+        # A + T + S is that area to the asymptote, which is exactly Pstat.
+        # Terminology fixed to the manuscript's, 2026-10-14 (Dan):
+        #   A        ridge push, the ridge-side term at z_c
+        #   T        plate-tilt reduction
+        #   A + T    tilt-corrected ridge push, same z_c
+        #   S        deep-tail correction
+        #   A+T+S    static ridge-push counterfactual, to the asymptote
         w200 = zkm <= Z_DEEP_KM
         Pstat = I(unt, 0, Z_DEEP_KM)
         a0.fill_betweenx(zkm[w200], 0, unt[w200], color='0.45', alpha=0.18,
                          lw=0, zorder=0,
-                         label=f'(3)  static ridge push   {Pstat:.2f}')
+                         label=f'(3)  deep-tail correction   $S$ = {Pstat-A-T:.2f}')
+        a0.text(0.97, 0.52,
+                f'$A+T$ = {A+T:.2f}   tilt-corrected ridge push\n'
+                f'$A+T+S$ = {Pstat:.2f}   static counterfactual',
+                transform=a0.transAxes, ha='right', va='top', fontsize=8.2,
+                linespacing=1.6, color='0.25')
         a0.plot(meas, zkm, '-', color=C_RIDGE, lw=2.0, label='measured')
         a0.plot(unt, zkm, '--', color=C_RIDGE, lw=1.6,
-                label=f'tilt removed ($|\\Delta P|$ = {abs(dP):.1f} MPa)')
+                label=f'tilt-corrected ($|\\Delta P|$ = {abs(dP):.1f} MPa)')
         a0.plot(dens, zkm, '-', color=C_DENS, lw=1.1, alpha=0.9,
                 label='density structure (check)')
         # the plotted quantity is PRESSURE-POSITIVE, so it is Delta(-sigma_zz),
@@ -218,7 +230,7 @@ def main():
         )[:len(zkm)] / 1e6
         Cm, Cu, Cd = cum(meas), cum(unt), cum(dens)
         acu.plot(Cm, zkm, '-', color=C_RIDGE, lw=2.0, label='measured')
-        acu.plot(Cu, zkm, '--', color=C_RIDGE, lw=1.6, label='tilt removed')
+        acu.plot(Cu, zkm, '--', color=C_RIDGE, lw=1.6, label='tilt-corrected')
         acu.plot(Cd, zkm, '-', color=C_DENS, lw=1.1, label='density structure')
         kmax = int(np.argmax(Cm[zkm <= Z_DEEP_KM]))
         acu.plot(Cm[kmax], zkm[kmax], 'o', ms=6.5, color=C_RIDGE,
