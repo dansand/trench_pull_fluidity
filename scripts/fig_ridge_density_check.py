@@ -60,7 +60,7 @@ def main():
         ax.set_title(f'({"be"[row]})  {k}', fontsize=10.5, loc='left')
         ax = axes[row, 2]
         ax.plot(ps, zkm, 'k-', lw=1.6, label='measured anomaly')
-        ax.plot(ps - dP, zkm, 'k--', lw=1.3, label='shifted by $|\\Delta P|$ (untilted)')
+        ax.plot(ps - dP, zkm, 'k--', lw=1.3, label='tilting contribution removed')
         ax.plot(lith_c, zkm, color='0.45', lw=1.6, ls='-.',
                 label='density prediction\n$g\\int(\\rho_R-\\rho_I)dz$ $-$ deep const.')
         ax.set_title(f'({"cf"[row]})  {k}', fontsize=10.5, loc='left')
@@ -94,7 +94,11 @@ def main():
     axes[0, 0].set_ylim(250, 0)
     axes[0, 0].set_ylabel('Depth [km]')
     axes[1, 0].set_ylabel('Depth [km]')
-    fig.suptitle('Untilted ridge anomaly and density structure', fontsize=11)
+    # NOT "untilted" (Dan, 2026-10-14). At a glance it reads as "untitled",
+    # and the companion figure fig_ridge_push_anatomy already says "tilt
+    # removed" for the same operation -- one phrase, both figures.
+    fig.suptitle('Ridge anomaly with the tilting contribution removed, '
+                 'against density structure', fontsize=11)
     fig.tight_layout()
     out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                        'figures', 'fig_ridge_density_check.png')
