@@ -117,13 +117,33 @@ def main():
         col = C_MODEL[key]
 
         # ---- per snapshot: the crossing and the cost of 75 km there -----
+        # z* IS THE RIDGE-SIDE CROSSING, but the cost of the fixed depth is
+        # measured on the WHOLE TRENCH-TO-RIDGE force (Dan, 2026-10-14).
+        # Two reasons, and the mismatch is deliberate. The crossing exists
+        # BECAUSE the ridge-side term reverses sign below the plate; the
+        # trench side has no turnover of its own, it simply closes, so a
+        # crossing defined on the sum mixes a quantity that has one with a
+        # quantity that does not. But what the balance reports, and what a
+        # reader cares about, is the plate-wide Delta GPE*, so that is what
+        # the error should be quoted against.
+        # Measured: ridge-side-only gives a median cost of 3.0 / 3.1 % with
+        # excursions to 31 % (STD, 12-14 Myr) and 20 % (WAL, 8 Myr), driven
+        # by a small early denominator -- the ridge-side force is 0.70 TN/m
+        # there against 1.2 later. On the plate-wide force the same choice
+        # costs a median 0.1 / 0.8 % and never more than 3.2 / 5.0 %.
+        # ⚠ THE SIGN GOES BOTH WAYS, which is why this is not called a
+        # shortfall. Early, z* sits near 42 km while the trench side is
+        # still accumulating, so stopping there would give LESS force than
+        # z_c does: the value is positive at 38 % of STD steps and 8 % of
+        # WAL steps.
         zs, pen_pct = [], []
         for i in np.where(m)[0]:
-            cu = cum(c['p_R'][i], z)[keep]
+            cu = cum(c['p_R'][i], z)[keep]          # ridge side: sets z*
+            cw = -cum(c['p_T'][i], z)[keep] + cu    # plate-wide: sets the cost
             k = int(np.argmax(cu))
             zs.append(zk[k])
             izc = int(np.argmin(np.abs(zk - cpc.ZC_KM)))
-            pen_pct.append(100.0 * (cu[izc] - cu[k]) / cu[k])
+            pen_pct.append(100.0 * (cw[izc] - cw[k]) / cw[k])
         zs, pen_pct = np.array(zs), np.array(pen_pct)
 
         # ---- mid-run shape and its cost curve ---------------------------
@@ -186,11 +206,15 @@ def main():
     a_zstar.set_title('(c) Crossing depth through time',
                       fontsize=10.5, loc='left')
     a_tcost.axhline(0, color='0.55', lw=1.3)
-    for v in (-10,):
+    # THE -10 % GUIDE IS GONE. It was drawn when the cost was measured on
+    # the ridge side alone and reached 31 %; on the plate-wide force
+    # nothing comes within a factor of two of it, so it only pushed the
+    # data into the top third of the panel.
+    for v in (-5,):
         a_tcost.axhline(v, color='0.45', lw=1.0, ls='--')
-    a_tcost.set_ylabel(r'Shortfall relative to $z^{*}(t)$  [%]',
+    a_tcost.set_ylabel(r'Change relative to $z^{*}(t)$  [%]',
                        fontsize=11)
-    a_tcost.set_title('(d) Shortfall of the fixed depth through time',
+    a_tcost.set_title('(d) Cost of the fixed depth, plate-wide',
                       fontsize=10.5, loc='left')
 
     out = os.path.join(ROOT, 'figures', 'fig_ridge_cumulative.png')
