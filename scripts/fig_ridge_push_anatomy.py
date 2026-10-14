@@ -177,10 +177,10 @@ def main():
         deep = (zkm >= cpc.ZC_KM) & (zkm <= Z_DEEP_KM)   # kept for the table
         a0.fill_betweenx(zkm[shal], 0, meas[shal], color=C_RIDGE,
                          alpha=0.38, lw=0, zorder=1,
-                         label=f'(1)  ridge push   $A$ = {A:.2f} TN/m')
+                         label='(1)  ridge push, $A$')
         a0.fill_betweenx(zkm[shal], meas[shal], unt[shal], color=C_RIDGE,
                          alpha=0.16, lw=0, zorder=1,
-                         label=f'(2)  plate-tilt reduction   $T$ = {T:.2f}')
+                         label='(2)  plate-tilt reduction, $T$')
         # (3) is the area under the SHIFTED (tilt-corrected) sigma_zz curve,
         # integrated to the asymptote. Drawn FIRST so (1) and (2) sit on top.
         # ⚠ THE THREE ARE COMPONENTS, NOT ALTERNATIVES. This comment used to
@@ -197,15 +197,13 @@ def main():
         Pstat = I(unt, 0, Z_DEEP_KM)
         a0.fill_betweenx(zkm[w200], 0, unt[w200], color='0.45', alpha=0.18,
                          lw=0, zorder=0,
-                         label=f'(3)  deep-tail correction   $S$ = {Pstat-A-T:.2f}')
-        a0.text(0.97, 0.52,
-                f'$A+T$ = {A+T:.2f}   tilt-corrected ridge push\n'
-                f'$A+T+S$ = {Pstat:.2f}   static counterfactual',
-                transform=a0.transAxes, ha='right', va='top', fontsize=8.2,
-                linespacing=1.6, color='0.25')
+                         label='(3)  deep-tail correction, $S$')
+        # THE SUMS A+T AND A+T+S ARE NOT PRINTED HERE. They were, as a
+        # two-line block; they are caption and table material and the panel
+        # only has to let the reader see which region is which.
         a0.plot(meas, zkm, '-', color=C_RIDGE, lw=2.0, label='measured')
         a0.plot(unt, zkm, '--', color=C_RIDGE, lw=1.6,
-                label=f'tilt-corrected ($|\\Delta P|$ = {abs(dP):.1f} MPa)')
+                label='tilt-corrected')
         a0.plot(dens, zkm, '-', color=C_DENS, lw=1.1, alpha=0.9,
                 label='density structure (check)')
         # the plotted quantity is PRESSURE-POSITIVE, so it is Delta(-sigma_zz),
@@ -249,12 +247,11 @@ def main():
                  markeredgewidth=1.4, zorder=6)
         # LEFT of the axis and just below z_c, where the panel is empty --
         # the annotation is about the depth it sits next to (Dan, 2026-09-27)
-        acu.text(0.09, cpc.ZC_KM + 9,
-                 f'at $z_c$   {at_zc:.2f} TN/m\n'
-                 f'at the maximum   {at_max:.2f}\n'
-                 rf'({100*abs(at_max-at_zc)/at_max:.1f} %; $z^{{*}}$ = {zkm[kmax]:.0f} km)',
-                 transform=blended_transform_factory(acu.transAxes, acu.transData),
-                 fontsize=9.0, ha='left', va='top')
+        # THE THREE-LINE VALUE BLOCK IS GONE (Dan, 2026-10-14): the value
+        # at z_c, the value at the maximum and the gap between them are
+        # three numbers the caption states and the table carries. The
+        # square and circle markers already show the reader where the two
+        # depths fall, which is what the panel is for.
 
         # ---- the velocity, normalised by each snapshot's own plate speed --
         zk2 = kin['z'] / 1e3
@@ -278,7 +275,9 @@ def main():
             ax.set_title(f'({letters[r][j]}) {key}', fontsize=11.5, loc='left')
         # on the FIRST column (Dan, 2026-09-27), right-hand side just below
         # z_c, where every curve has dropped below ~10 MPa
-        a0.text(0.97, cpc.ZC_KM + 9, f'$z_c$ = {cpc.ZC_KM:.0f} km (fixed nominal)',
+        # "(fixed nominal)" retired (Dan, 2026-10-14): z_c is declared and
+        # justified, not nominal, and the two words did one word's job.
+        a0.text(0.97, cpc.ZC_KM + 9, f'$z_c$ = {cpc.ZC_KM:.0f} km',
                 fontsize=9.0, color='0.25',
                 transform=blended_transform_factory(a0.transAxes, a0.transData),
                 ha='right', va='top')
