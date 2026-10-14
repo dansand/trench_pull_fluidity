@@ -52,10 +52,12 @@ temperature.
 
 DRAFT CAPTION. (a) Mechanical thickness h_m at the trench column through
 the STD (navy) and WAL (magenta) runs, with the 900 C isotherm dotted.
-(b) Effective arm against h_m/2, one point per snapshot. Shading spans
-0.5 h_m +- 10 per cent; its upper edge coincides with the 0.55 h_m
-scaling fitted by the companion study. Median a_eff/h_m is 0.487 (STD)
-and 0.504 (WAL), and 72 of the 74 snapshots fall inside the band.
+(b) Effective arm of trench pull. The measured arm is
+a_eff = |Delta GPE*| / Delta P_T, where Delta P_T is the surface pressure
+deficit at the trench; the predicted arm is half the mechanical thickness
+(Sandiford, 2026). Shading spans 0.5 h_m +- 10 per cent, its upper edge
+coinciding with that study's fitted 0.55 h_m. Median a_eff/h_m is 0.487
+(STD) and 0.504 (WAL), and 72 of the 74 snapshots fall inside the band.
 
 WHY THE BAND AND NOT A REGRESSION. See BAND_LO/BAND_HI below: the slope of
 a_eff on h_m/2 is not stable against the integration limit (0.90 at z_c,
@@ -558,7 +560,19 @@ def main():
     # DEPRECATES for this quantity -- L is RESERVED for domain length --
     # and which the manuscript stopped using on 2026-10-08. Fixed 2026-10-11.
     ax_sc.set_ylabel(r'$a_{\mathrm{eff}}$  [km]', fontsize=11)
-    ax_sc.set_title('(b)  Effective arm', fontsize=11, loc='left')
+    ax_sc.set_title('(b)  Effective arm of trench pull', fontsize=11,
+                    loc='left')
+    # WHAT IS MEASURED AND WHAT IS PREDICTED, said once on the panel
+    # (Dan, 2026-10-14). Both axes are lengths, so without this the reader
+    # has no way to tell that one is a measurement and the other a
+    # prediction being tested -- and the 0.5 looks arbitrary rather than
+    # inherited. Two lines, in the corner the hit-rate block vacated.
+    ax_sc.text(0.035, 0.965,
+               'measured      '
+               r'$a_{\mathrm{eff}} = |\Delta\mathrm{GPE}^{*}| / \Delta P_T$'
+               '\npredicted     '
+               r'$h_m/2$   (Sandiford 2026)',
+               transform=ax_sc.transAxes, va='top', fontsize=9.5, zorder=5)
     ax_sc.grid(alpha=0.25, color=C_RULE, lw=0.6, zorder=1)
     # LOWER RIGHT: the hit-rate text now owns the upper left, and the
     # scatter's own trend leaves that corner empty
