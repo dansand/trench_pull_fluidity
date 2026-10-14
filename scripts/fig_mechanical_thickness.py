@@ -51,17 +51,11 @@ cap, with the thermal curve showing that the cap essentially tracks
 temperature.
 
 DRAFT CAPTION. (a) Mechanical thickness h_m at the trench column through
-the STD (navy) and WAL (magenta) runs, defined as the depth below which the
-magnitude of the carried fibre stress remains below 25 MPa. The dotted
-curves are the 900 C isotherm, calibrated to the strength criterion at
-mid-run and shown as a thermal reference. (b) The effective trench-pull arm
-against h_m/2, one point per snapshot. The shaded band is
-a_eff = 0.5 h_m +- 10 per cent; its upper edge, 0.55 h_m, is the
-elasto-plastic scaling fitted by the companion study, and its lower edge is
-the mirror of that value about 0.5 rather than a second published bound.
-Median a_eff/h_m is 0.487 (STD) and 0.504 (WAL), and 72 of the 74 snapshots
-of the two runs fall inside the band. Both panels use the t >= 8 Myr
-analysis window.
+the STD (navy) and WAL (magenta) runs, with the 900 C isotherm dotted.
+(b) Effective arm against h_m/2, one point per snapshot. Shading spans
+0.5 h_m +- 10 per cent; its upper edge coincides with the 0.55 h_m
+scaling fitted by the companion study. Median a_eff/h_m is 0.487 (STD)
+and 0.504 (WAL), and 72 of the 74 snapshots fall inside the band.
 
 WHY THE BAND AND NOT A REGRESSION. See BAND_LO/BAND_HI below: the slope of
 a_eff on h_m/2 is not stable against the integration limit (0.90 at z_c,
@@ -383,8 +377,12 @@ def main():
     # agreement THROUGH TIME is not.
     # The legend NAMES the two curves; it does not restate the criterion --
     # that is the caption's job (Dan, 2026-10-11).
-    styles = [('yield_cap', '-', 'mechanical thickness $h_m$'),
-              ('thermal', (0, (1, 2)), '900 $^\circ$C isotherm')]
+    # THE LEGEND DISTINGUISHES THE CURVES, it does not re-describe them.
+    # These read 'mechanical thickness $h_m$' and '900 $^\circ$C isotherm'
+    # beneath a y-axis already labelled 'Mechanical thickness $h_m$ [km]'
+    # and a title already reading 'Mechanical thickness'.
+    styles = [('yield_cap', '-', '$h_m$'),
+              ('thermal', (0, (1, 2)), '900 $^\circ$C')]
     rows = [('model', 'quantity', 'value')]
     band_hits = {}
     for key in ('STD', 'WAL'):
@@ -507,9 +505,12 @@ def main():
 
     ax_t.set_ylabel('Mechanical thickness $h_m$ [km]', fontsize=11)
     ax_t.set_xlabel('Model time [Myr]', fontsize=11)
-    ax_t.set_title(f'(a) mechanical thickness at the {_COLNAME}, and the '
-                   '900 $^\\circ$C isotherm for reference\n(navy STD, magenta WAL)',
-                   fontsize=10.5, loc='left')
+    # TITLES ARE NOUN PHRASES. These read '(a) mechanical thickness at the
+    # trench column, and the 900 C isotherm for reference (navy STD, magenta
+    # WAL)' and '(b) the effective arm against h_m/2' -- each one narrating
+    # its own panel. The column, the window and the colour key belong in the
+    # caption; the axes already say what is plotted (Dan, 2026-10-14).
+    ax_t.set_title('(a)  Mechanical thickness', fontsize=11, loc='left')
     ax_t.grid(alpha=0.25, color=C_RULE, lw=0.6)
     ax_t.set_ylim(45, 90)
     for _, ls, lab in styles:
@@ -520,32 +521,23 @@ def main():
     # split version so the comparison is unchanged.
     lim = np.array([float(x) for x in
                     os.environ.get('SCALE_LIM', '25,45').split(',')])
-    # THE BAND IS THE CLAIM, the lines only label its edges. Drawn under
-    # everything (zorder 0); the abscissa is h_m/2, so a ratio of f h_m
-    # plots as the line y = 2 f x.
+    # ONE BAND, ONE LINE (Dan, 2026-10-14). This drew 0.45, 0.50 and 0.55
+    # h_m as three separate legend entries, which is three readings of one
+    # statement. The claim is a_eff = 0.5 h_m to within 10 per cent, so the
+    # band IS the claim and the centre line locates it. The upper edge still
+    # coincides with the companion's fitted 0.55 h_m; that belongs in the
+    # caption, not in a third legend entry.
+    # The abscissa is h_m/2, so a ratio of f h_m plots as y = 2 f x.
     ax_sc.fill_between(lim, 2 * BAND_LO * lim, 2 * BAND_HI * lim,
-                       color='0.86', lw=0, zorder=0)
-    ax_sc.plot(lim, lim, 'k-', lw=1.2, zorder=3,
-               label=r'$0.50\,h_m$  (1:1)')
-    # 0.55 h_m: the companion study's scaling, evaluated here with the
-    # mechanical thickness. It writes 0.55 h against its own thickness
-    # definition; the label follows THIS panel's axis so the line and the
-    # abscissa cannot be read in different units. Say so in the caption.
-    ax_sc.plot(lim, 2 * BAND_HI * lim, 'k:', lw=0.9, zorder=3,
-               label=rf'${BAND_HI:.2f}\,h_m$')
-    ax_sc.plot(lim, 2 * BAND_LO * lim, 'k--', lw=0.9, dashes=(5, 3), zorder=3,
-               label=rf'${BAND_LO:.2f}\,h_m$')
-    # the hit rate, stated on the panel: the band is wide enough that it
-    # cannot carry the claim alone, so the medians ride with it
+                       color='0.86', lw=0, zorder=0,
+                       label=r'$0.5\,h_m \pm 10\,\%$')
+    ax_sc.plot(lim, lim, 'k-', lw=1.2, zorder=3, label=r'$0.5\,h_m$')
+    # THE HIT RATE IS NOT PRINTED ON THE PANEL. It was, as a three-line
+    # block in the upper left -- medians and counts for both runs. Those are
+    # caption numbers and they are in the table; a panel that states its own
+    # result twice over is doing the caption's job.
     n_in = sum(v[0] for v in band_hits.values())
     n_all = sum(v[1] for v in band_hits.values())
-    ax_sc.text(0.035, 0.965,
-               '\n'.join([rf'{k}   $a_\mathrm{{eff}}/h_m$ = {v[2]:.3f}'
-                          rf'   within $\pm$10 %: {v[0]}/{v[1]}'
-                          for k, v in band_hits.items()]
-                         + [f'both runs: {n_in}/{n_all} '
-                            f'({100 * n_in / n_all:.0f} %)']),
-               transform=ax_sc.transAxes, va='top', fontsize=9, zorder=5)
     print(f'   band {BAND_LO:.2f}-{BAND_HI:.2f} h_m: {n_in}/{n_all} '
           f'({100 * n_in / n_all:.0f} %) of snapshots, both runs')
     ax_sc.set_xlim(*lim); ax_sc.set_ylim(*lim)
@@ -565,10 +557,8 @@ def main():
     # manuscript's own symbol). This axis read '$L$', which SYMBOLOGY §2
     # DEPRECATES for this quantity -- L is RESERVED for domain length --
     # and which the manuscript stopped using on 2026-10-08. Fixed 2026-10-11.
-    ax_sc.set_ylabel(r'$a_{\mathrm{eff}}$  [km]   (effective arm)',
-                     fontsize=10.5)
-    ax_sc.set_title(r'(b) the effective arm against $h_m/2$', 
-                    fontsize=10.5, loc='left')
+    ax_sc.set_ylabel(r'$a_{\mathrm{eff}}$  [km]', fontsize=11)
+    ax_sc.set_title('(b)  Effective arm', fontsize=11, loc='left')
     ax_sc.grid(alpha=0.25, color=C_RULE, lw=0.6, zorder=1)
     # LOWER RIGHT: the hit-rate text now owns the upper left, and the
     # scatter's own trend leaves that corner empty
