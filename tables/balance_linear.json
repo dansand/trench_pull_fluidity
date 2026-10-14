@@ -17,6 +17,8 @@
     "role": "linear-axis counterpart of the main balance figure; a check on spatial interpretation, not a new analysis",
     "computation": "balance_chain.compute, identical to the main figure",
     "plate_wide": "every fraction is referenced to the value at the RIDGE column, not to the 3000 km display limit",
+    "rows": "main-text rows 1, 3 and 4 (free surface; decomposed balance; N_D). The fundamental form is dropped as a restatement of the decomposed one (Dan, 2026-10-14)",
+    "not_plotted": "the reach and x_I-fraction numbers are measured and tabulated but have no panel -- they are cited by the manuscript, not displayed here",
     "zc_km": "80"
   }
 }

@@ -17,13 +17,20 @@ order-of-magnitude difference between the two domains, and a reader who
 sees only the square-root version may carry away the wrong sense of where
 each term accumulates.
 
-WHAT THE LINEAR VERSION SHOWS, measured and tabulated rather than asserted:
-the distance from the trench over which each term reaches half and then
-90 per cent of its plate-wide value. The trench pull is complete within
-O(100) km; the basal traction accumulates over the O(1000) km ridge side.
-The endpoint values are of course identical -- the plotting transformation
-changes nothing about the balance, which is the third thing this figure is
-here to demonstrate.
+THE ROWS ARE THE MAIN FIGURE'S ROWS, less one. Main-text rows are: the
+free surface; the fundamental form; the decomposed three-term form; and
+N_D itself. This figure carries the first, third and fourth. The
+fundamental form is dropped because it restates the decomposed one
+(Dan, 2026-10-14) and the SI does not need both.
+
+⚠ IT SHOWS NOTHING THE MAIN FIGURE DOES NOT. That is the whole point: the
+axis is the only difference, so a reader can confirm the square-root
+transformation hid nothing. A panel here that has no counterpart in the
+main figure defeats the comparison. One was added and removed -- a
+normalised "fraction of the plate-wide value" row with reach markers,
+which was a new analysis wearing an SI figure's clothes. Its NUMBERS are
+kept (the manuscript cites gpe_fraction_by_x_I and FB_fraction_by_x_I),
+they simply do not need a panel.
 """
 import os, sys
 import numpy as np
@@ -84,34 +91,23 @@ def main():
                     ls='--' if lab == 'closure' else '-',
                     alpha=0.6 if c == 'b' else 1.0, label=lab)
 
-        # where each term accumulates -- the point of the figure
+        # ROW 3 = THE MAIN FIGURE'S ROW 4: N_D itself, not a Delta form.
+        # The reach/fraction numbers below are still measured and tabulated
+        # -- the manuscript cites them -- but they are no longer plotted.
         a2 = axes[2, col]
-        for y, c, lab in ((g(r['d_gpe']), 'b', r'$\Delta\mathrm{GPE}^{*}$'),
-                          (g(r['FB']), 'red', '$F_B$')):
-            end = float(np.interp(sR, s, y))     # the plate-wide value
-            yv = y[vis] / end
-            a2.plot(s[vis], yv, color=c, lw=2.2, label=lab)
-            nm = 'gpe' if c == 'b' else 'FB'
-            d50 = reach(s[vis], y[vis], 0.5, end)
-            a2.plot(d50, 0.5, 'o', color=c, ms=5, mec='white', mew=0.7)
-            rows.append((key, f'{nm}_reach50_km', f'{d50:.0f}'))
-            rows.append((key, f'{nm}_plate_wide_TNm', f'{end*1e-12:.3f}'))
-            # THE FRACTION DELIVERED BY x_I, not the 90 % point. For F_B the
-            # two say the same thing, but for Delta GPE* the 90 % marker
-            # lands near the ridge and misleads: the curve reaches ~0.7 within
-            # 200 km and then creeps, because the total is trench pull PLUS
-            # ridge push and only the first is a near-field quantity. The
-            # split at x_I is the one the paper actually uses.
-            fI = float(np.interp(sI, s[vis], yv))
-            a2.plot(sI, fI, 's', color=c, ms=6, mec='white', mew=0.8, zorder=5)
-            rows.append((key, f'{nm}_fraction_by_x_I', f'{fI:.3f}'))
-        a2.axhline(1, color='k', lw=0.6)
-        a2.text(0.98, 0.06, 'circles: half the trench-to-ridge value\n'
-                            'squares: the fraction delivered by $x_I$',
-                transform=a2.transAxes, ha='right', va='bottom',
-                fontsize=8.5, color='0.3')
-        a2.set_ylim(-0.1, 1.25)
+        a2.plot(s[vis], g(r['Fd'])[vis] * 1e-12, color='k', lw=1.8,
+                label='$N_D(x)$')
+        a2.axhline(0, color='k', lw=0.5)
+        a2.plot(0, r['Fd_T'] * 1e-12, 'o', color='k', ms=5, zorder=6)
         a2.set_xlabel('Seaward distance from the trench [km]', fontsize=10)
+        for y, c in ((g(r['d_gpe']), 'b'), (g(r['FB']), 'red')):
+            end = float(np.interp(sR, s, y))
+            nm = 'gpe' if c == 'b' else 'FB'
+            rows.append((key, f'{nm}_reach50_km',
+                         f'{reach(s[vis], y[vis], 0.5, end):.0f}'))
+            rows.append((key, f'{nm}_plate_wide_TNm', f'{end*1e-12:.3f}'))
+            rows.append((key, f'{nm}_fraction_by_x_I',
+                         f'{float(np.interp(sI, s[vis], y[vis] / end)):.3f}'))
 
         for ax in axes[:, col]:
             ax.set_xlim(0, XMAX_KM)
@@ -134,9 +130,8 @@ def main():
 
     axes[0, 0].set_ylabel('$w$ [m]\n(positive down)', fontsize=9.5)
     axes[1, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
-    axes[2, 0].set_ylabel('fraction of the\nplate-wide value', fontsize=9.5)
+    axes[2, 0].set_ylabel('$N_D$  [TN/m]', fontsize=10)
     axes[1, 0].legend(frameon=False, fontsize=9, ncol=2, loc='upper left')
-    axes[2, 0].legend(frameon=False, fontsize=9, loc='lower right')
     fig.suptitle('The balance on a linear distance axis',
                  fontsize=10.5, color='0.35')
     fig.tight_layout()
@@ -151,6 +146,12 @@ def main():
               'computation': 'balance_chain.compute, identical to the main figure',
               'plate_wide': 'every fraction is referenced to the value at the '
                             'RIDGE column, not to the 3000 km display limit',
+              'rows': 'main-text rows 1, 3 and 4 (free surface; decomposed '
+                      'balance; N_D). The fundamental form is dropped as a '
+                      'restatement of the decomposed one (Dan, 2026-10-14)',
+              'not_plotted': 'the reach and x_I-fraction numbers are measured '
+                             'and tabulated but have no panel -- they are '
+                             'cited by the manuscript, not displayed here',
               'zc_km': bc.ZC / 1e3}))
 
 
