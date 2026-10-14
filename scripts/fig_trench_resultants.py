@@ -212,7 +212,7 @@ def main():
     # Panel titles name the SUBJECT only; what each curve is belongs in the
     # legend and the caption, not spelled out across the top of the figure
     # (Dan, 2026-09-25).
-    axes[0].set_title('(a) key stress resultants at the trench', fontsize=11)
+    axes[0].set_title('(a) Stress resultants at the trench', fontsize=11)
     a0b.set_ylabel(r'Bending moment, $-M(x_T)$ [$10^{17}$ N]', fontsize=11)
     # SHARED NUMERICAL RANGE, SYMMETRIC ABOUT ZERO (Dan, 2026-09-25).
     # The two axes carry different dimensions -- TN/m and 1e17 N -- and are
@@ -229,7 +229,7 @@ def main():
     A = max(abs(fl), abs(fh))
     axes[0].set_ylim(-A, A)
     a0b.set_ylim(-A, A)
-    axes[1].set_title('(b) $N_D$ at key locations in the trailing plate',
+    axes[1].set_title('(b) $N_D$ at the three bounding columns',
                       fontsize=11)
     axes[1].set_xlabel('Model time [Myr]', fontsize=12)
     for ax in axes:

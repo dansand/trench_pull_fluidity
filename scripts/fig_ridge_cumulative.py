@@ -165,7 +165,7 @@ def main():
     a_shape.axvline(0, color='0.55', lw=1.3)
     a_shape.set_xlabel(r'Cumulative $-\Delta\sigma_{zz}$  ($x_R - x_I$)  [TN/m]',
                        fontsize=10.5)
-    a_shape.set_title('(a) the shape, mid-run   (dot: the crossing)',
+    a_shape.set_title('(a) Cumulative ridge-side force, mid-run',
                       fontsize=10.5, loc='left')
     a_shape.legend(frameon=False, fontsize=9, loc='lower right')
 
@@ -173,8 +173,8 @@ def main():
     for v in (-10, 10):
         a_cost.axvline(v, color='0.45', lw=1.0, ls='--')
     a_cost.set_xlim(-45, 15)
-    a_cost.set_xlabel('change from the value at $z_c$  [%]', fontsize=10.5)
-    a_cost.set_title('(b) the cost of a different depth, mid-run',
+    a_cost.set_xlabel('Change from the value at $z_c$  [%]', fontsize=10.5)
+    a_cost.set_title('(b) Sensitivity to the integration depth',
                      fontsize=10.5, loc='left')
 
     for ax, loc in ((a_zstar, 'upper left'), (a_tcost, 'lower right')):
@@ -182,15 +182,15 @@ def main():
         ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
         ax.legend(frameon=False, fontsize=9, loc=loc)
     a_zstar.axhline(cpc.ZC_KM, color='0.30', lw=1.4)
-    a_zstar.set_ylabel(r'crossing depth $z^{*}$ [km]', fontsize=11)
-    a_zstar.set_title(r'(c) the crossing deepens; $z_c$ is fixed',
+    a_zstar.set_ylabel(r'Crossing depth $z^{*}$  [km]', fontsize=11)
+    a_zstar.set_title('(c) Crossing depth through time',
                       fontsize=10.5, loc='left')
     a_tcost.axhline(0, color='0.55', lw=1.3)
     for v in (-10,):
         a_tcost.axhline(v, color='0.45', lw=1.0, ls='--')
-    a_tcost.set_ylabel(r"cost of $z_c$ vs that step's $z^{*}$  [%]",
+    a_tcost.set_ylabel(r'Shortfall relative to $z^{*}(t)$  [%]',
                        fontsize=11)
-    a_tcost.set_title('(d) what the fixed depth costs, step by step',
+    a_tcost.set_title('(d) Shortfall of the fixed depth through time',
                       fontsize=10.5, loc='left')
 
     out = os.path.join(ROOT, 'figures', 'fig_ridge_cumulative.png')

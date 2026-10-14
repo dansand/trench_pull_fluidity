@@ -54,16 +54,16 @@ def main():
         lith_c = sm(c['lith_R'][m].mean(axis=0)) / 1e6
         ax = axes[row, 0]
         ax.plot(Td, zkm, 'k-', lw=1.5)
-        ax.set_title(f'{k}: $T_R - T_I$ [K]', fontsize=10)
+        ax.set_title(f'({"ad"[row]})  {k}', fontsize=10.5, loc='left')
         ax = axes[row, 1]
         ax.plot(rd, zkm, 'k-', lw=1.5)
-        ax.set_title(f'{k}: $\\rho_R - \\rho_I$ [kg m$^{{-3}}$]', fontsize=10)
+        ax.set_title(f'({"be"[row]})  {k}', fontsize=10.5, loc='left')
         ax = axes[row, 2]
         ax.plot(ps, zkm, 'k-', lw=1.6, label='measured anomaly')
         ax.plot(ps - dP, zkm, 'k--', lw=1.3, label='shifted by $|\\Delta P|$ (untilted)')
         ax.plot(lith_c, zkm, color='0.45', lw=1.6, ls='-.',
                 label='density prediction\n$g\\int(\\rho_R-\\rho_I)dz$ $-$ deep const.')
-        ax.set_title(f'{k}: column anomaly [MPa]', fontsize=10)
+        ax.set_title(f'({"cf"[row]})  {k}', fontsize=10.5, loc='left')
         if row == 0:
             ax.legend(fontsize=7.5, frameon=False, loc='lower right')
         sel = (zkm > 5) & (zkm < 220)
@@ -83,6 +83,14 @@ def main():
         for a in axes[row]:
             a.axvline(0, color='0.7', lw=0.7)
             a.axhline(cpc.ZC_KM, color='0.5', lw=0.6, ls=':')
+    # THE QUANTITY AND ITS UNITS BELONG ON THE AXIS, not in the title. The
+    # titles read '{model}: $T_R - T_I$ [K]' and so on -- a formula and a
+    # unit bracket doing the x-label's job, in the one figure of the set
+    # that also had no panel letters.
+    for a, lab in zip(axes[1], (r'$T_R - T_I$  [K]',
+                                r'$\rho_R - \rho_I$  [kg m$^{-3}$]',
+                                r'Column anomaly  [MPa]')):
+        a.set_xlabel(lab, fontsize=10.5)
     axes[0, 0].set_ylim(250, 0)
     axes[0, 0].set_ylabel('Depth [km]')
     axes[1, 0].set_ylabel('Depth [km]')
