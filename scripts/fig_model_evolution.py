@@ -58,7 +58,16 @@ LOG_ETA = (18.0, 24.0)
 T_MANTLE_K = 1573.15
 T_SLAB_K = 0.90 * T_MANTLE_K     # ~1416 K, the sharp slab edge
 Z660 = 660.0
-ZLIM = (1500.0, 0.0)
+# DEPTH LIMIT SET BY THE DATA (Dan, 2026-10-14). This was 1500 km while the
+# deepest 1416 K contour in any of the eight panels is 1278 km (WAL, 68 Myr;
+# STD reaches 1072). About 15 per cent of every panel was empty mantle.
+# The panels are 1:1, so the axes cannot be stretched vertically to open up
+# the lithosphere without the dip and fold distortion that the equal aspect
+# exists to avoid; what trimming the range buys instead is the SAME 1:1
+# scale at a larger magnification for the same figure height.
+# Deepest contours, measured: STD 682/848/1002/1072, WAL 702/948/1168/1278 km
+# at 8/32/56/68 Myr.
+ZLIM = (1320.0, 0.0)
 # 1:1 ASPECT (Dan, 2026-10-09). The window is narrowed to 2300 km so that
 # equal aspect still leaves the panels readable: at the old 3795 km width
 # the figure was 2.08x vertically exaggerated, which distorts slab dip and
