@@ -12,11 +12,11 @@ published output. The companion data archive is
 
 ![The trailing-plate force balance through both runs](figures/anim_balance.gif)
 
-*The force balance at every retained snapshot of both runs (STD left, WAL right,
-8–80 Myr). Rows: the free surface; the fundamental form
-$\Delta\bar\sigma_{xx} + F_B = 0$; the decomposed form
-$\Delta N_D - \Delta\mathrm{GPE}^* + F_B = 0$ with its closure; and $N_D$ itself,
-which begins tension-like at the trench in STD and ends strongly compression-like.*
+> The force balance at every retained snapshot of both runs (STD left, WAL right,
+> 8–80 Myr). Rows: the free surface; the fundamental form
+> $\Delta\bar\sigma_{xx} + F_B = 0$; the decomposed form
+> $\Delta N_D - \Delta\mathrm{GPE}^* + F_B = 0$ with its closure; and $N_D$ itself,
+> which begins tension-like at the trench in STD and ends strongly compression-like.
 
 ---
 
@@ -53,7 +53,7 @@ snapshots, reading the caches. It needs no model data at all.
 
 ## The mathematics
 
-Everything in this repo is one **horizontal force balance**, post-processed from the model's stress fields. The balance is decomposed so that one term is the between-column difference of the vertically integrated vertical normal stress, $\Delta\bar\sigma_{zz} = -\Delta\mathrm{GPE}^*$ — and that term **is the pressure-gradient force**. This is the point of the exercise: topography links through to pressure gradients, and $\Delta\bar\sigma_{zz}$ is a consistent representation of the pressure-gradient force so long as the *true* vertical normal stress is used — which is exactly what a numerical model supplies, and exactly what solves static equilibrium. At depth the pressure gradients equilibrate: beneath **isostatic** topography by density differences, beneath **non-isostatic** topography (the trench) by vertical shear-stress gradients — which is where shear stresses couple in, and the only role the vertical integration plays. The notebooks are then a post-processing exercise in how much of the topography is translated into $\Delta\bar\sigma_{zz}$ — across the entire plate, because topography rises from the trench all the way to the ridge and provides a driving force the whole way along.
+Everything in this repo is one **horizontal force balance**, post-processed from the model's stress fields. The balance is decomposed so that one term is the between-column difference of the vertically integrated vertical normal stress, $\Delta\bar\sigma_{zz} = -\Delta\mathrm{GPE}^*$ — and that term **is the pressure-gradient force**. This is the point of the exercise: topography links through to pressure gradients, and $\Delta\bar\sigma_{zz}$ is a consistent representation of the pressure-gradient force so long as the **true** vertical normal stress is used — which is exactly what a numerical model supplies, and exactly what solves static equilibrium. At depth the pressure gradients equilibrate: beneath **isostatic** topography by density differences, beneath **non-isostatic** topography (the trench) by vertical shear-stress gradients — which is where shear stresses couple in, and the only role the vertical integration plays. The notebooks are then a post-processing exercise in how much of the topography is translated into $\Delta\bar\sigma_{zz}$ — across the entire plate, because topography rises from the trench all the way to the ridge and provides a driving force the whole way along.
 
 **Horizontal balance — driving the trailing plate.** Integrating $\partial_x \sigma_{xx} + \partial_z \sigma_{zx} = 0$ from surface to $z_c$ and from the trench column $x_T$ outward to a column at $x$ gives the trailing-plate balance
 
