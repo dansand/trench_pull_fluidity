@@ -214,6 +214,11 @@ def main():
         a_tcost.axhline(v, color='0.45', lw=1.0, ls='--')
     a_tcost.set_ylabel(r'Change relative to $z^{*}(t)$  [%]',
                        fontsize=11)
+    # A FIXED, GENEROUS Y RANGE. Autoscaled, a 5 % wiggle fills the panel
+    # and the quietest metric in the figure reads as the most dramatic.
+    # -15 % leaves the curves in the upper third, where their size is the
+    # point (Dan, 2026-10-14).
+    a_tcost.set_ylim(-15.0, 3.0)
     a_tcost.set_title('(d) Cost of the fixed depth, plate-wide',
                       fontsize=10.5, loc='left')
 
