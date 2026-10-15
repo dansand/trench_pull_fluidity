@@ -255,11 +255,11 @@ def render(cache_path, fig_path):
             # narrow side at 12 pt. Both labels are stacked -- they are a
             # matched pair and sizing only one looks like an error.
             if mode == 'sqrt' and j == 1:
-                ax.text(xi / 2, 0.995, 'trench\nside', fontsize=14,
-                        color=C_T, ha='center', va='top', linespacing=1.15,
+                ax.text(xi / 2, 1.005, 'trench\nside', fontsize=14,
+                        color=C_T, ha='center', va='bottom', linespacing=1.15,
                         fontweight='bold')
-                ax.text((xi + 1) / 2, 0.995, 'ridge\nside', fontsize=14,
-                        color=C_R, ha='center', va='top', linespacing=1.15,
+                ax.text((xi + 1) / 2, 1.005, 'ridge\nside', fontsize=14,
+                        color=C_R, ha='center', va='bottom', linespacing=1.15,
                         fontweight='bold')
             if mode == 'sqrt':
                 ax.set_xticks(np.sqrt(TICKS_SQ))
