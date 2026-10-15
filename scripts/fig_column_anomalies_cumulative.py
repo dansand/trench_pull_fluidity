@@ -202,15 +202,17 @@ def main():
                 # this one put a blue handle in the legend against a phrase
                 # that covers both. A neutral grey proxy is added below.
                 a0.plot(lith[w], zkm[w], '--', color=cc, lw=1.5, alpha=0.85)
-                # the arrow CONTINUES the curve downward -- the claim is
-                # that it keeps going, so it must not point back up at the
-                # end of the line it is annotating
-                a0.annotate('', xy=(lith[w][-1], 150.0),
-                            xytext=(lith[w][-1], 127.0),
-                            arrowprops=dict(arrowstyle='-|>', color=cc,
-                                            lw=1.2, ls=':'))
-                a0.text(lith[w][-1], 156.0, 'never closes', color=cc,
-                        fontsize=10.5, ha='center', va='top')
+                # NO ARROWHEAD (Dan, 2026-10-15). The dots alone say the
+                # curve keeps going; an arrow made it look like a callout
+                # pointing at something.
+                a0.plot([lith[w][-1]] * 2, [127.0, 148.0], ':', color=cc,
+                        lw=1.6)
+                # TWO LINES: centred on the curve, the single line ran off
+                # the left spine (the curve sits at ~-61 MPa on a -80..80
+                # axis, and half the string is wider than the 19 MPa left).
+                a0.text(lith[w][-1], 152.0, "doesn't\nequilibrate", color=cc,
+                        fontsize=10.5, ha='center', va='top',
+                        linespacing=1.25)
             else:
                 a0.plot(lith, zkm, '--', color=cc, lw=1.5, alpha=0.85)
         # grey proxy: the dashed style belongs to both columns, so the
