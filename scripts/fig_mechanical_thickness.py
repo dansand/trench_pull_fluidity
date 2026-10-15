@@ -71,6 +71,9 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.legend_handler import HandlerTuple
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 from scipy.ndimage import gaussian_filter1d
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -536,10 +539,14 @@ def main():
     # coincides with the companion's fitted 0.55 h_m; that belongs in the
     # caption, not in a third legend entry.
     # The abscissa is h_m/2, so a ratio of f h_m plots as y = 2 f x.
-    ax_sc.fill_between(lim, 2 * BAND_LO * lim, 2 * BAND_HI * lim,
-                       color='0.86', lw=0, zorder=0,
-                       label=r'$0.5\,h_m \pm 10\,\%$')
-    ax_sc.plot(lim, lim, 'k-', lw=1.2, zorder=3, label=r'$0.5\,h_m$')
+    # ONE KEY, NOT TWO (Dan, 2026-10-15). The band and the centre line are
+    # one statement, so they share one legend entry, drawn as a composite
+    # swatch -- the grey band with the black line through it. A bare line
+    # labelled '+/- 10 %' would leave the band to be inferred; an overlaid
+    # handle leaves nothing to infer and costs a row.
+    _band = ax_sc.fill_between(lim, 2 * BAND_LO * lim, 2 * BAND_HI * lim,
+                               color='0.86', lw=0, zorder=0)
+    _mid, = ax_sc.plot(lim, lim, 'k-', lw=1.2, zorder=3)
     # THE HIT RATE IS NOT PRINTED ON THE PANEL. It was, as a three-line
     # block in the upper left -- medians and counts for both runs. Those are
     # caption numbers and they are in the table; a panel that states its own
@@ -589,7 +596,19 @@ def main():
     ax_sc.grid(alpha=0.25, color=C_RULE, lw=0.6, zorder=1)
     # LOWER RIGHT: the hit-rate text now owns the upper left, and the
     # scatter's own trend leaves that corner empty
-    ax_sc.legend(frameon=False, fontsize=13, loc='lower right')
+    # PROXY ARTISTS, not the drawn ones: a fill_between handle does not
+    # fill the key box, so HandlerTuple set the band and the line SIDE BY
+    # SIDE -- two swatches again, which is what merging them was meant to
+    # avoid. A full-width Patch under a Line2D gives the band with the line
+    # through it.
+    _key = (Patch(color='0.86'), Line2D([], [], color='k', lw=1.2))
+    _h, _l = ax_sc.get_legend_handles_labels()
+    ax_sc.legend(_h + [_key], _l + [r'$0.5\,h_m \pm 10\,\%$'],
+                 # ndivide=1, NOT None: None divides the key box between
+                 # the handles (band beside line), 1 draws both over the
+                 # full width (line through band).
+                 handler_map={tuple: HandlerTuple(ndivide=1)},
+                 frameon=False, fontsize=13, loc='lower right')
     # align the two axes and square the lower one, in inches
     fig.canvas.draw()
     pt = ax_t.get_position()
