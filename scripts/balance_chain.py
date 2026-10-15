@@ -215,7 +215,7 @@ def compute_from(v, t_myr, key, pin_committed=None, verbose=True):
     zc_ = z[:NZ_C]
     col = lambda a: integrate_to_zc(a[:NZ_C, :].T, zc_, ZC, axis=1)
     V = col(txz)
-    iI = find_first_isostatic_column(x, V, xT, ti, DX, seaward_sign=-1)
+    iI = find_first_isostatic_column(x, V, xT, seaward_sign=-1)
     # THE CANONICAL RIDGE PICKER (conventions §3.4): the maximum surface
     # divergence, refined to the local topographic crest within +/-20 km.
     # This called find_ridge_x, the retired GLOBAL topographic pick, so the

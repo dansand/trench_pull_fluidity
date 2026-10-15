@@ -137,8 +137,8 @@ def build():
             _m = zg <= ZC_KM * 1e3
             V_pick = integrate_to_zc(gf('txz')[_m].T, zg[_m],
                                      ZC_KM * 1e3, axis=1)
-            iI = find_first_isostatic_column(xg, V_pick, xT, ti,
-                                             DX_PICK, seaward_sign=-1)
+            iI = find_first_isostatic_column(xg, V_pick, xT,
+                                             seaward_sign=-1)
             xI = float(xg[iI])
             del g
 

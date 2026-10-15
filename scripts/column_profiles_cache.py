@@ -294,7 +294,7 @@ def build():
             # cooling-plus-tilt bias the old topographic reference did.
             V_pick = integrate_to_zc(txz[z <= ZC_KM * 1e3].T,
                                      z[z <= ZC_KM * 1e3], ZC_KM * 1e3, axis=1)
-            iI = find_first_isostatic_column(x, V_pick, xT, ti, DX,
+            iI = find_first_isostatic_column(x, V_pick, xT,
                                              seaward_sign=-1)
             # ridge from the FLOW (max surface divergence) -- the
             # topographic pick is retained alongside for comparison

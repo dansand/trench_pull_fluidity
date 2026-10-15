@@ -95,7 +95,7 @@ def compute():
             # blind to compensated topography and so carries none of the
             # cooling-plus-tilt bias the old topographic reference did.
             V_pick = cpc.integrate_to_zc(txz[z <= ZC].T, z[z <= ZC], ZC, axis=1)
-            iI = find_first_isostatic_column(x, V_pick, xT, ti, DX,
+            iI = find_first_isostatic_column(x, V_pick, xT,
                                              seaward_sign=-1)
             # refined to the local topographic crest (conventions §3.4,
             # 2026-09-27). The min-max normalisation removed this figure's

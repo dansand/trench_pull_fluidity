@@ -251,80 +251,34 @@ def pick_trench_3step(x, z, p, vx,
     return trench_x, info
 
 
-def find_first_isostatic_column(x, V, x_trench, tindx, DX,
-                                buffer_km=30, window_km=600,
-                                smooth_km=0.0, seaward_sign=+1):
-    """First column seaward of the trench at which dV/dx = 0.
+def find_first_isostatic_column(x, V, x_trench, seaward_sign=+1):
+    """The column seaward of the trench at which V is least.
 
-    V is the vertical shear resultant int tau_zx dz to z_c, on the x grid
-    (one integrator, `column_profiles_cache.integrate_to_zc`; this routine
-    never forms it).
+    V is the vertical shear resultant int tau_zx dz to z_c, on the x grid;
+    the caller forms it (one integrator,
+    `column_profiles_cache.integrate_to_zc`).
 
-    ⚠ THE SEARCH BOUNDS ARE INERT GUARDS, NOT TUNED CHOICES (measured
-    2026-10-16). `buffer_km=30` is inherited from the retired topographic
-    picker, where it skipped the trench axis zone; here it does nothing.
-    dV/ds = -rho_m g w and w > 0 everywhere on the trench side -- that is
-    what DEFINES the trench side -- so V falls monotonically from x_T to
-    x_I and rises past it, and the minimum cannot lie inside any buffer
-    short of x_I. Measured over all 74 retained snapshots of both runs,
-    searching [30, 600] km and searching [0, 2500] km return the IDENTICAL
-    column every time, max difference 0.0 km; x_I itself never falls below
-    63 km. The bounds are kept only so the search cannot stray onto the
-    over-riding plate. **The pick therefore has no free parameters**: no
-    window, no buffer, no smoothing. Say that rather than quoting the
-    numbers, which invite a 'why 30?' with no good answer.
+    Integrated vertical equilibrium gives dV/ds = -rho_m g w, so dV/dx = 0
+    marks the column carrying no non-isostatic load -- the first isostatic
+    column. Compensated topography produces no shear gradient, so the
+    criterion is blind to the plate's cooling subsidence and to the
+    basin-scale tilt, and needs no reference elevation.
 
-    ⚠ TAKEN AS THE MINIMUM OF V, NOT AS A ZERO OF ITS DERIVATIVE. Seaward
-    of the trench w > 0 so V falls; past x_I the outer rise has w < 0 so V
-    climbs again -- the isostatic column is a local MINIMUM of V, and
-    finding an extremum is far better conditioned than finding a zero of a
-    numerical derivative. Measured at the reference epoch: the raw,
-    UNSMOOTHED field puts the minimum at 91.0 km (STD) / 94.0 km (WAL),
-    within 3 km of every smoothed answer, while the derivative of the same
-    raw field has 29 and 30 sign changes in the window. Smoothing is
-    therefore OFF by default and the pick carries no tuning knob; for the
-    record, a 10 km kernel moves it +3.0 / +1.0 km, 20 km +7 / +6 km and
-    40 km +21 / +19 km.
-
-    ⚠ WHY THIS IS THE CONDITION, AND WHY THE TOPOGRAPHY IS NOT
-    (Dan, 2026-10-15; conventions §3.2). Vertical equilibrium integrated
-    over the column gives dV/ds = -rho_m g w, so dV/dx = 0 says the column
-    carries no non-isostatic load -- which is what "first isostatic
-    column" means. COMPENSATED TOPOGRAPHY PRODUCES NO SHEAR GRADIENT, so
-    this criterion is blind to the plate's cooling subsidence and to the
-    basin-scale tilt, by construction.
-
-    The retired picker was not. It compared the topography at x against
-    the topography 500 km seaward and stopped where they were equal --
-    but those 500 km of plate carry real elevation change from cooling
-    AND from the tilt. Measured here: the regional topographic gradient
-    in flexure-free windows is +94 m / 100 km (STD) and +141 (WAL),
-    consistent over four windows between 600 and 2000 km, so the level
-    500 km out sits 38 m (STD) / 57 m (WAL) ABOVE where an undeflected
-    plate would sit at x_I. The pick therefore waited for the topography
-    to climb above its own isostatic level and landed 3-6 km too far
-    seaward, worth 2-3 % of the measured trench pull.
-
-    That the two picks agreed to ~2 km was never evidence the reference
-    was unbiased: the routine stops where the two elevations are equal,
-    so their equality at the pick is a tautology.
+    ⚠ TAKEN AS THE MINIMUM OF V, NOT AS A ZERO OF ITS DERIVATIVE. V falls
+    from the trench, turns at x_I and climbs again over the outer rise, and
+    an extremum is far better conditioned than a zero of a numerical
+    derivative: on the raw field the minimum is stable, while the
+    derivative of that same field changes sign ~30 times across the plate.
 
     Returns the index of the first isostatic column.
     """
-    buffer_grid = int(buffer_km * 1000.0 / DX)
-    window_grid = int(window_km * 1000.0 / DX)
-    i_start = max(0, min(len(x) - 1, tindx + seaward_sign * buffer_grid))
-    i_end   = max(0, min(len(x) - 1, tindx + seaward_sign * window_grid))
-    lo, hi = (i_start, i_end) if i_start < i_end else (i_end, i_start)
-    if hi - lo < 10:
-        raise RuntimeError('find_first_isostatic_column: search window is '
-                           f'{hi - lo} columns wide — check buffer_km, '
-                           'window_km and seaward_sign')
-    seg = np.nan_to_num(V[lo:hi + 1])
-    if smooth_km:
-        from scipy.ndimage import gaussian_filter1d
-        seg = gaussian_filter1d(seg, smooth_km * 1000.0 / DX, mode='nearest')
-    return lo + int(np.argmin(seg))
+    sea = (x - x_trench) * seaward_sign > 0
+    if sea.sum() < 10:
+        raise RuntimeError('find_first_isostatic_column: only '
+                           f'{sea.sum()} columns seaward of the trench — '
+                           'check seaward_sign')
+    idx = np.where(sea)[0]
+    return int(idx[np.argmin(np.nan_to_num(V)[sea])])
 
 
 def find_first_isostatic_column_topo(x, fs_top, x_trench, tindx, DX,
