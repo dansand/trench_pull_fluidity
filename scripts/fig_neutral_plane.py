@@ -101,32 +101,52 @@ ZC = cpc.ZC_KM * 1e3            # conventions §5.1
 
 
 def parts(d, key):
-    """Thicknesses, the axial term, and the beam offset, per snapshot."""
+    """Thicknesses, the axial term, and the beam offset, per snapshot.
+
+    EVERYTHING AT THE MAXIMUM-MOMENT COLUMN (Dan, 2026-10-15). The beam
+    relation relates three quantities -- thickness, in-plane resultant and
+    moment -- and they must describe ONE section. They did not: `thicknesses`
+    defaults to FLEX_COL='T', so h_m and 2h_np came from the trench while
+    N_D and M came from the max-moment column ~20 km seaward. The docstring
+    here asserted they were the same column; that went stale when the
+    default moved to the trench on 2026-10-11, and an external review of
+    the SI caught it.
+
+    The max-moment column is the right one for this analysis: it is where
+    the plate is most strongly bent, so the neutral plane is best defined,
+    and it is where outer-rise seismicity would sample the stress state.
+
+    ⚠ AND THE MOMENT IS RE-FORMED ABOUT h_m/2. A moment is only defined
+    relative to a pivot. The beam result
+        2 h_np - h = -N_D h^2 / (6 M)
+    follows from sigma = A + B(z - h/2) with N_D = A h and M the FIRST
+    MOMENT ABOUT MID-DEPTH. The cached `M_max` is taken about a fixed pivot
+    at the TRENCH neutral plane (column_profiles_cache ~line 338), so it is
+    the wrong moment for this formula. Worse, shifting the pivot by p
+    changes the moment by -p N_D, i.e. by an amount PROPORTIONAL TO THE
+    VERY QUANTITY the analysis is trying to detect -- so part of the former
+    agreement was the error correlating with the signal. Measured: with the
+    pivot corrected the panel-(c) slope falls from 0.98/1.12 to 0.89/0.85.
+    `M_max` keeps its own meaning elsewhere and is not touched.
+    """
     if not hasattr(np, 'trapezoid'):
         np.trapezoid = np.trapz
     c = cpc.derive(d, key)
     z, t = c['z'], c['t']
-    r = thicknesses(d, key)
-    zc = z <= ZC
-    # N_D and M at the MAXIMUM-MOMENT column -- the same column at which
-    # h_np is evaluated, which is what makes the comparison legitimate.
-    # the cell rule, 0 -> z_c (cpc.integrate_to_zc)
-    nd = cpc.integrate_to_zc(d[f'{key}_sxx_M'] - d[f'{key}_szz_M'], z,
-                             ZC, axis=1)
-    mom = d[f'{key}_M_max']
-    # h_m, NOT THE 900 C ISOTHERM (Dan, 2026-10-15). Beam theory's h is the
-    # thickness of the section that CARRIES the fibre stress: M = B h^3/12
-    # is an integral of sigma_xx - sigma_zz, so h must be the mechanically
-    # strong layer. Three reasons the isotherm was the wrong choice:
-    #   - h_m (25 MPa) is the paper's own adopted definition;
-    #   - the 900 C base is CALIBRATED to that cap at mid-run (conventions
-    #     5.2), so it is a PROXY for h_m, not an independent thickness --
-    #     it imports calibration error without buying independence;
-    #   - with h_m every quantity in the relation comes from the same
-    #     stress field at the same column, which is what the theory assumes.
-    # Measured: the corrected trend then recovers h_m to +0.01 km/10 Myr in
-    # STD (was -0.19 against the $h_m$ curve) and -0.34 in WAL (was -0.40).
+    r = thicknesses(d, key, col='M')          # ONE column, explicitly
+    # h_m, NOT THE 900 C ISOTHERM (Dan, 2026-10-15): beam theory's h is the
+    # thickness of the section that CARRIES the fibre stress, and h_m is the
+    # paper's own adopted definition. The 900 C base is CALIBRATED to the
+    # 25 MPa cap at mid-run (conventions 5.2), so it is a proxy for h_m and
+    # imports calibration error without buying independence.
     h, np2 = r['yield_cap'], r['np2']
+    fib = d[f'{key}_sxx_M'] - d[f'{key}_szz_M']   # profile at that column
+    # N_D on the paper's convention, 0 -> z_c by the cell rule
+    nd = cpc.integrate_to_zc(fib, z, ZC, axis=1)
+    # M about h_m/2, per snapshot, over the same 0 -> z_c section
+    mom = np.array([cpc.integrate_to_zc(
+        (fib[i] * (z - 0.5 * h[i]))[None, :], z, ZC, axis=1)[0]
+        for i in range(len(t))])
     pred = -nd * h ** 2 / (6.0 * mom)          # beam offset, 2h_np - h
     return dict(t=t, m=t >= T_MIN_MYR, h=h, np2=np2, nd=nd, mom=mom,
                 pred=pred, res=np2 - h, corr=np2 - pred)
@@ -206,9 +226,9 @@ def main():
             (key, 'h_np_max_km', f'{_hnp.max():.1f}'),
             (key, 'h_np2_span_km', f'{_np2.max() - _np2.min():.1f}'),
             (key, 'h_np2_sd_km', f'{_np2.std():.2f}'),
-            (key, 'offset_2hnp_minus_thermal_median_km', f'{np.median(_res):.1f}'),
-            (key, 'offset_2hnp_minus_thermal_min_km', f'{_res.min():.1f}'),
-            (key, 'offset_2hnp_minus_thermal_max_km', f'{_res.max():.1f}'),
+            (key, 'offset_2hnp_minus_h_m_median_km', f'{np.median(_res):.1f}'),
+            (key, 'offset_2hnp_minus_h_m_min_km', f'{_res.min():.1f}'),
+            (key, 'offset_2hnp_minus_h_m_max_km', f'{_res.max():.1f}'),
             (key, 'offset_span_km', f'{_res.max() - _res.min():.1f}'),
             # THE PICK IS GRID-LIMITED: h_np is taken at a cell edge on the
             # 1 km profile grid, so it resolves only half-kilometres. The
@@ -216,6 +236,10 @@ def main():
             # takes, which bounds how finely 2 h_np can be read at all.
             (key, 'h_np_distinct_depths', f'{len(np.unique(_hnp))}'),
             (key, 'h_np_grid_km', '0.5'),
+            # PROVENANCE, so a reader never has to infer it: one column,
+            # one pivot (Dan, 2026-10-15)
+            (key, 'flex_column', 'M'),
+            (key, 'moment_pivot', 'h_m/2'),
             (key, 'offset_negative_fraction', f'{np.mean(_res < 0):.3f}'),
             (key, 'nd_at_max_moment_compressional_fraction',
              f'{np.mean(_nd < 0):.3f}'),
@@ -228,7 +252,7 @@ def main():
             (key, 'beam_h_np_at_nd_zero_km', f'{_hmed / 2e3:.1f}'),
             (key, 'beam_h_np_at_nd_plus2TNm_km',
              f'{(_hmed / 2e3) + _dhdn * (+2.0):.1f}'),
-            (key, 'trend_thermal_km_per_10Myr', f'{sl(p["h"]):.2f}'),
+            (key, 'trend_h_m_km_per_10Myr', f'{sl(p["h"]):.2f}'),
                  (key, 'trend_2hnp_raw_km_per_10Myr', f'{sl(p["np2"]):.2f}'),
                  (key, 'trend_2hnp_corrected_km_per_10Myr', f'{sl(p["corr"]):.2f}'),
                  # FROM `pred`, NOT `pf` (Dan, 2026-10-15). This was taken

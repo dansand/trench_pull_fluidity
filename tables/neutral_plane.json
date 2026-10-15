@@ -11,7 +11,7 @@
     "quantity",
     "value"
   ],
-  "n_rows": 54,
+  "n_rows": 58,
   "sigfig": 6,
   "meta": {
     "relation": "2 h_np - h = -N h^2 / (6 M), beam under combined axial load and bending",
