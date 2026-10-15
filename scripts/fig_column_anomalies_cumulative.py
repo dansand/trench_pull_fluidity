@@ -202,15 +202,14 @@ def main():
                 # this one put a blue handle in the legend against a phrase
                 # that covers both. A neutral grey proxy is added below.
                 a0.plot(lith[w], zkm[w], '--', color=cc, lw=1.5, alpha=0.85)
-                # NO ARROWHEAD (Dan, 2026-10-15). The dots alone say the
-                # curve keeps going; an arrow made it look like a callout
-                # pointing at something.
-                a0.plot([lith[w][-1]] * 2, [127.0, 148.0], ':', color=cc,
-                        lw=1.6)
-                # TWO LINES: centred on the curve, the single line ran off
+                # THE CURVE JUST STOPS, AND A LABEL SAYS WHY (Dan,
+                # 2026-10-15). No dotted continuation and no arrowhead: a
+                # truncated line plus words is the whole statement, and the
+                # dots only ever gestured at it.
+                # TWO LINES: centred on the curve, a single line ran off
                 # the left spine (the curve sits at ~-61 MPa on a -80..80
                 # axis, and half the string is wider than the 19 MPa left).
-                a0.text(lith[w][-1], 152.0, "doesn't\nequilibrate", color=cc,
+                a0.text(lith[w][-1], 134.0, "doesn't\nequilibrate", color=cc,
                         fontsize=10.5, ha='center', va='top',
                         linespacing=1.25)
             else:
