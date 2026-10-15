@@ -48,7 +48,16 @@ from fluidity_helpers import (pick_trench_3step, find_first_isostatic_column,
                                surface_fs, archive_root)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = archive_root()          # $TRENCH_PULL_DATA or the default; one resolver
+# RESOLVED, NOT VALIDATED, AT IMPORT (2026-10-15). This called
+# archive_root() with its default required=True, so merely importing this
+# module demanded the full 1.4 GB archive -- and every figure script
+# imports it for ZC_KM, T_MIN_MYR and the integrator. A clone with no
+# archive could therefore render nothing, while the error it raised said
+# "You do NOT need the archive to reproduce any figure in the paper".
+# The README promises standalone reproduction; this broke it. The check
+# now happens in build(), the only thing that reads the archive.
+# Found by external review.
+DATA = archive_root(required=False)
 OUT = os.path.join(ROOT, 'notebooks', 'outputs', 'trench_plane.npz')
 
 Y = 2_900_000.0
@@ -80,6 +89,7 @@ def _dip(temp_C, x, z, xT, window_km=DIP_WINDOW_KM, t_iso_C=ISO_DIP_C):
 
 
 def build():
+    archive_root()   # the validation deferred from import time
     out = {}
     for KEY in ('STD', 'WAL'):
         rows, patches = [], {'ns': [], 'tzx': [], 'temp': []}

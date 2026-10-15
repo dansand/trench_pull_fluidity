@@ -80,7 +80,16 @@ from fluidity_helpers import make_field_extractor, archive_root
 # builders. Its path arithmetic assumed one extra directory level and
 # broke the moment the public export flattened scripts/.
 ROOT = os.path.dirname(_HERE)                    # repo root
-DATA = archive_root()          # $TRENCH_PULL_DATA or the default; one resolver
+# RESOLVED, NOT VALIDATED, AT IMPORT (2026-10-15). This called
+# archive_root() with its default required=True, so merely importing this
+# module demanded the full 1.4 GB archive -- and every figure script
+# imports it for ZC_KM, T_MIN_MYR and the integrator. A clone with no
+# archive could therefore render nothing, while the error it raised said
+# "You do NOT need the archive to reproduce any figure in the paper".
+# The README promises standalone reproduction; this broke it. The check
+# now happens in build(), the only thing that reads the archive.
+# Found by external review.
+DATA = archive_root(required=False)
 OUT = os.path.join(ROOT, 'notebooks', 'outputs', 'slab_geometry.npz')
 Y = 2_900_000.0
 DX = 5000.0                 # slab geometry does not need the 1 km grid
@@ -148,6 +157,7 @@ _UM = (_ZP >= 100e3) & (_ZP < 660e3)               # progress-print band only
 
 
 def build():
+    archive_root()   # the validation deferred from import time
     out = {}
     for key in ('STD', 'WAL'):
         rows, prof = [], []

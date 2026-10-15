@@ -12,9 +12,9 @@ ridge-push values -- none of which was the one the paper actually reports.
 Both faults are fixed here: the force is shown as AREA, the way it is read
 off a stress profile, and there are THREE quantities, chosen so they ADD:
 
-    A   the ridge push as reported: the measured anomaly integrated to
-        z_c = 80 km
-    T   the tilt: the area between the measured and tilt-removed curves
+    A   ridge push: the measured anomaly integrated to z_c = 80 km
+    T   the plate-tilt reduction: the area between the measured and
+        tilt-corrected curves
         over the same depth, identically |Delta P| z_c
     S   the deep tail: what the tilt-removed curve still contributes
         between z_c and 200 km
@@ -24,9 +24,17 @@ off a stress profile, and there are THREE quantities, chosen so they ADD:
 
 Mid-run (36-44 Myr) values, TN/m:
 
-              A       T       S     A+T+S    density route to 200 km
-      STD    1.21    0.62    0.20    2.04           2.39
-      WAL    1.36    0.38    0.18    1.92           2.24
+              A       T       S     A+T    A+T+S
+      STD    1.40    0.67    0.17    2.07    2.24
+      WAL    1.49    0.40    0.14    1.89    2.03
+
+TERMINOLOGY (Dan's handoff, 2026-10-14). A is RIDGE PUSH, the ridge-side
+term at z_c. T is the PLATE-TILT REDUCTION; entered as a signed
+contribution in a driving-positive budget it is -T. A+T is the
+TILT-CORRECTED RIDGE PUSH at the same z_c. S is the DEEP-TAIL CORRECTION.
+A+T+S is the STATIC RIDGE-PUSH COUNTERFACTUAL, which does not enter the
+model's balance. Do not write "reported", "measured", "thermal" or
+"dynamic" ridge push, or an unqualified "static ridge push".
 
 The argument, left panels:
 
@@ -36,9 +44,9 @@ The argument, left panels:
     curves IS the tilt, and that the dashed curve coincides with the
     independent density-route prediction is what licenses calling the
     remainder the density structure rather than a residual.
- 3. A static treatment would claim A + T + S, about 1.7x and 1.4x the
-    reported value. Area S is what a static reading adds by integrating
-    past the plate.
+ 3. The static counterfactual is A + T + S, about 1.6x and 1.4x ridge
+    push. Area S is what a static reading adds by integrating past the
+    plate.
 
 and, right panels:
 
@@ -47,8 +55,9 @@ and, right panels:
     through material progressively decoupling from the plate it is
     supposed to be driving.
 
-⚠ z_c = 80 km IS NOMINAL, NOT DECLARED-BY-DEFINITION (Dan's wording,
-2026-09-27). It is a single round depth standing in for the sigma_zz
+⚠ z_c = 80 km IS A COMPROMISE, NOT A DEFINITION (Dan's point, 2026-09-27;
+the word "nominal" for it is retired, 2026-10-14). It is a single round
+depth standing in for the sigma_zz
 maximum across both runs and the whole time span -- per snapshot that
 maximum ranges over 42-126 km and deepens secularly with the boundary
 layer. The SI figure fig_ridge_cumulative carries the justification and
@@ -92,11 +101,11 @@ anomaly of the ridge column
 relative to the first isostatic column, as measured (solid) and with the
 deep asthenospheric anomaly |Delta P| removed (dashed); the thin curve is
 the independent prediction from the density structure alone. The shaded
-areas are three alternative force estimates, NOT a time range: (1) the
-ridge push as reported, the measured curve integrated to the fixed nominal
-integration depth z_c = 80 km; (2) the plate-tilt reduction, the area
-between the measured and de-tilted curves over the same depth, identically
-|Delta P| z_c; and (3) the static ridge push, the de-tilted curve
+areas are COMPONENTS, not a time range and not alternatives: (1) ridge
+push A, the measured curve integrated to the declared z_c = 80 km; (2) the
+plate-tilt reduction T, the area between the measured and tilt-corrected
+curves over the same depth, identically |Delta P| z_c; and (3) the
+deep-tail correction S, the tilt-corrected curve
 integrated to 200 km. Centre: the corresponding cumulative integrals, with
 the measured value marked at z_c and at its own maximum. Right: the
 horizontal
@@ -166,7 +175,7 @@ def main():
         j200 = int(round(Z_DEEP_KM / h_km)) - 1
         Icell = lambda a, j0, j1: float(a[j0:j1 + 1].sum() * h_km * 1e3 / 1e6)
 
-        A = Icell(meas, 0, jc)                     # the reported ridge push
+        A = Icell(meas, 0, jc)                     # ridge push
         T = Icell(unt, 0, jc) - A                  # = |dP| * z_c, identically
         S = Icell(unt, jc + 1, j200)               # the deep tail
         I = lambda a, lo, hi: Icell(
@@ -211,33 +220,39 @@ def main():
         # its cumulative integral is Delta GPE* (paper agent, 2026-09-27)
         a0.set_xlabel(r'$\Delta(-\sigma_{zz})$ [MPa]', fontsize=11.5)
         a0.set_ylabel('Depth [km]', fontsize=12)
-        # NO "1 + 2 + 3 = static" annotation (Dan, 2026-09-27): the three
-        # areas are alternatives a reader might integrate, not components to
-        # be summed, and labelling them A/T/S implied an accounting identity
-        # that the argument does not need.
+        # THE THREE ARE COMPONENTS AND THEY DO SUM. This said the opposite
+        # -- "alternatives a reader might integrate, not components to be
+        # summed" -- which was wrong: A+T is the area under the corrected
+        # curve to z_c and A+T+S is that area to the asymptote, which is
+        # exactly the Pstat the code computes. The sums are stated in the
+        # caption rather than on the panel (Dan, 2026-10-14/15).
 
         # ---- the cumulative integrals, retained in the main text (Dan,
         # 2026-09-27) because the area panel alone does not show WHERE the
         # force stops accumulating. The band between the tilt-removed and
         # density curves is the area the lithostatic approximation claims
         # and the model does not carry.
-        # cell rule on cell edges -- same convention as the areas above
-        # edges, trimmed to len(zkm) so it pairs with the panel's depths
-        cum = lambda a: np.concatenate(
-            [[0.0], np.cumsum(a) * float(np.diff(zkm)[0]) * 1e3]
-        )[:len(zkm)] / 1e6
+        # CELL EDGES WITH THEIR OWN DEPTH AXIS. This built edge values and
+        # trimmed them to len(zkm) so they could be plotted against the
+        # panel's cell CENTRES -- half a cell out, so the point marked at
+        # z_c actually read the integral to 79 km and was not formed from
+        # the same 80 cells as area A. Found by external review 2026-10-15,
+        # the same defect as in fig_ridge_cumulative.
+        h_m = float(np.diff(zkm)[0]) * 1e3
+        zedge = np.concatenate([[0.0], zkm + float(np.diff(zkm)[0]) / 2])
+        cum = lambda a: np.concatenate([[0.0], np.cumsum(a) * h_m]) / 1e6
         Cm, Cu, Cd = cum(meas), cum(unt), cum(dens)
-        acu.plot(Cm, zkm, '-', color=C_RIDGE, lw=2.0, label='measured')
-        acu.plot(Cu, zkm, '--', color=C_RIDGE, lw=1.6, label='tilt-corrected')
-        acu.plot(Cd, zkm, '-', color=C_DENS, lw=1.1, label='density structure')
-        kmax = int(np.argmax(Cm[zkm <= Z_DEEP_KM]))
-        acu.plot(Cm[kmax], zkm[kmax], 'o', ms=6.5, color=C_RIDGE,
+        acu.plot(Cm, zedge, '-', color=C_RIDGE, lw=2.0, label='measured')
+        acu.plot(Cu, zedge, '--', color=C_RIDGE, lw=1.6, label='tilt-corrected')
+        acu.plot(Cd, zedge, '-', color=C_DENS, lw=1.1, label='density structure')
+        kmax = int(np.argmax(Cm[zedge <= Z_DEEP_KM]))
+        acu.plot(Cm[kmax], zedge[kmax], 'o', ms=6.5, color=C_RIDGE,
                  markeredgecolor='white', markeredgewidth=1.0, zorder=5)
         acu.set_xlabel('cumulative force [TN/m]', fontsize=11.5)
         gap = float(Cd[np.argmin(np.abs(zkm - Z_DEEP_KM))]
                     - Cu[np.argmin(np.abs(zkm - Z_DEEP_KM))])
         i20 = np.argmin(np.abs(zkm - 20.0))
-        izc = np.argmin(np.abs(zkm - cpc.ZC_KM))
+        izc = int(np.argmin(np.abs(zedge - cpc.ZC_KM)))   # the 80 km EDGE
         above = float((Cd - Cu)[izc]) / gap
         # HOW MUCH THE NOMINAL DEPTH COSTS (Dan, 2026-09-27): the measured
         # cumulative read at z_c against its own maximum. Both points are
@@ -303,30 +318,30 @@ def main():
         dens200 = I(dens, 0, Z_DEEP_KM)
         v125 = float(np.interp(125.0, zk2, vm))
         print(f'{key}: A {A:.2f} | T {T:.2f} | S {S:.2f} | A+T+S {A+T+S:.2f} TN/m'
-              f'  (static / reported {(A+T+S)/A:.2f});  density route {dens200:.2f}'
+              f'  (counterfactual / A {(A+T+S)/A:.2f});  density route {dens200:.2f}'
               f' (rms vs tilt-removed {rms:.1f} MPa)')
         print(f'      v/v_plate at 125 km = {v125:.2f};  |dP| = {abs(dP):.1f} MPa')
         print(f'      at z_c {at_zc:.2f} vs at the maximum {at_max:.2f} TN/m '
-              f'({100*abs(at_max-at_zc)/at_max:.1f} %, z* = {zkm[kmax]:.0f} km); '
+              f'({100*abs(at_max-at_zc)/at_max:.1f} %, z* = {zedge[kmax]:.0f} km); '
               f'static push {Pstat:.2f}')
         print(f'      lithostatic gap {gap:.2f} TN/m, {100*above:.0f} % above z_c; '
               f'surface: density demands {dens[0]:.1f} MPa, stress supplies {unt[0]:.1f} '
               f'({100*unt[0]/dens[0]:.0f} %)')
-        rows += [(key, 'A_reported_ridge_push_TNm', f'{A:.3f}'),
+        rows += [(key, 'A_ridge_push_TNm', f'{A:.3f}'),
                  (key, 'T_tilt_TNm', f'{T:.3f}'),
                  (key, 'S_deep_tail_TNm', f'{S:.3f}'),
                  (key, 'static_limit_A_T_S_TNm', f'{A+T+S:.3f}'),
-                 (key, 'static_over_reported', f'{(A+T+S)/A:.3f}'),
+                 (key, 'static_counterfactual_over_A', f'{(A+T+S)/A:.3f}'),
                  (key, 'density_route_to_200km_TNm', f'{dens200:.3f}'),
                  (key, 'density_vs_untilted_rms_MPa', f'{rms:.2f}'),
                  (key, 'deep_dP_MPa', f'{dP:.2f}'),
                  (key, 'v_over_vplate_at_125km', f'{v125:.3f}'),
-                 (key, 'zc_nominal_km', f'{cpc.ZC_KM:.0f}'),
+                 (key, 'zc_km', f'{cpc.ZC_KM:.0f}'),
                  (key, 'static_push_inside_density_curve_TNm', f'{Pstat:.3f}'),
                  (key, 'cumulative_at_zc_TNm', f'{at_zc:.3f}'),
                  (key, 'cumulative_at_maximum_TNm', f'{at_max:.3f}'),
                  (key, 'zc_vs_maximum_pct', f'{100*abs(at_max-at_zc)/at_max:.2f}'),
-                 (key, 'zstar_midrun_km', f'{zkm[kmax]:.1f}'),
+                 (key, 'zstar_midrun_km', f'{zedge[kmax]:.1f}'),
                  (key, 'lithostatic_gap_at_200km_TNm', f'{gap:.3f}'),
                  (key, 'lithostatic_gap_fraction_above_zc', f'{above:.3f}'),
                  (key, 'lithostatic_gap_0_20km_TNm', f'{float((Cd-Cu)[i20]):.3f}'),
@@ -345,12 +360,15 @@ def main():
     tab = write_table('ridge_push_anatomy', rows[0], rows[1:],
                       script='fig_ridge_push_anatomy.py',
                       figure='fig_ridge_push_anatomy.png', models=('STD', 'WAL'),
-                      meta={'curves': 'mid-run mean (36-44 Myr); shading is the full '
+                      meta={'curves': 'mid-run mean (36-44 Myr); the force areas are '
+                                      'components A, T and S, not a range -- only '
+                                      'the velocity panel\'s band is the full '
                                       'run, t >= 8 Myr',
                             'areas': 'A measured to z_c; T = |dP| z_c; S tilt-removed '
                                      'from z_c to 200 km; A+T+S is the static limit',
-                            'zc': 'z_c is NOMINAL, standing in for the sigma_zz '
-                                  'maximum across both runs (see fig_ridge_cumulative)',
+                            'zc': 'z_c is a single declared depth standing in for '
+                                  'a sigma_zz maximum that moves 42-126 km through '
+                                  'the runs; justified in fig_ridge_cumulative',
                             'density_route': 'a check curve, not a fourth value; it '
                                              'carries no elevation mass'})
     print('written:', tab)

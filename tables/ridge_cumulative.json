@@ -15,7 +15,8 @@
   "sigfig": 6,
   "meta": {
     "quantity": "cumulative int_0^z [-Delta sigma_zz] dz, ridge minus first isostatic column",
-    "cost": "signed % change relative to the value at z_c",
+    "cost_panel_b": "signed % change relative to the value at z_c, ridge side, mid-run",
+    "cost_of_zc_rows": "per-step signed % change of the PLATE-WIDE force between z_c and z*(t); z* is the RIDGE-SIDE crossing and the denominator is the plate-wide value at z*",
     "zstar": "depth at which the anomaly changes sign, i.e. where the cumulative is stationary",
     "dnd_omitted": "Delta N_D is not shown: it has asymptoted by 76-94 km and moves 1-2 % between 100 and 175 km, so it cannot constrain z_c",
     "midrun_window_Myr": [

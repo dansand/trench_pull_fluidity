@@ -104,25 +104,25 @@ This table is generated from the manuscript's own figure list by
 |---|---|---|---|
 | Fig 1 | `figures/fig_headline_tracking.png` | `scripts/fig_headline_tracking.py` | `tables/headline_tracking.csv` |
 | Fig 2 | `figures/fig_model_evolution.png` | `scripts/fig_model_evolution.py` | `tables/model_evolution.csv` |
-| Fig 3 | `ridge_trench_overview_v2.pdf` | — | — |
-| Fig 4 | `figures/fig_balance_snapshot_absolute.png` | `scripts/fig_balance_snapshot_absolute.py` | `tables/balance_snapshot_absolute.csv` |
-| Fig 5 | `figures/fig_budget_time_detrended.png` | `scripts/fig_budget_time_detrended.py` | `tables/budget_time_detrended.csv` |
-| Fig 6 | `figures/fig_column_anomalies_cumulative.png` | `scripts/fig_column_anomalies_cumulative.py` | `tables/column_anomalies_cumulative.csv` |
-| Fig 7 | `figures/fig_ridge_push_anatomy.png` | `scripts/fig_ridge_push_anatomy.py` | `tables/ridge_push_anatomy.csv` |
-| Fig 8 | `figures/fig_gpe_partition.png` | `scripts/fig_gpe_partition.py` | `tables/gpe_partition.csv` |
-| Fig 9 | `figures/fig_mechanical_thickness.png` | `scripts/fig_mechanical_thickness.py` | `tables/mechanical_thickness.csv` |
-| Fig 10 | `figures/fig_force_length_scale.png` | `scripts/fig_force_length_scale.py` | `tables/force_length_scale.csv` |
-| Fig S1 | `figures/fig_stress_state.png` | `scripts/fig_stress_state.py` | `tables/stress_state.csv` |
-| Fig S2 | `figures/fig_trench_resultants.png` | `scripts/fig_trench_resultants.py` | `tables/trench_resultants.csv` |
-| Fig S3 | `figures/fig_slab_buoyancy.png` | `scripts/fig_slab_buoyancy.py` | `tables/slab_buoyancy.csv` |
-| Fig S4 | `figures/fig_neutral_plane.png` | `scripts/fig_neutral_plane.py` | `tables/neutral_plane.csv` |
-| Fig S5 | `figures/fig_trench_stress_profiles.png` | `scripts/fig_trench_stress_profiles.py` | `tables/bending_stress_regime.csv` |
-| Fig S6 | `figures/fig_convergence.png` | `scripts/fig_convergence.py` | `tables/convergence.csv` |
-| Fig S7 | `figures/fig_balance_linear.png` | `scripts/fig_balance_linear.py` | `tables/balance_linear.csv` |
+| Fig 3 | `figures/fig_balance_snapshot_absolute.png` | `scripts/fig_balance_snapshot_absolute.py` | `tables/balance_snapshot_absolute.csv` |
+| Fig 4 | `figures/fig_budget_time_detrended.png` | `scripts/fig_budget_time_detrended.py` | `tables/budget_time_detrended.csv` |
+| Fig 5 | `figures/fig_column_anomalies_cumulative.png` | `scripts/fig_column_anomalies_cumulative.py` | `tables/column_anomalies_cumulative.csv` |
+| Fig 6 | `figures/fig_mechanical_thickness.png` | `scripts/fig_mechanical_thickness.py` | `tables/mechanical_thickness.csv` |
+| Fig 7 | `figures/fig_force_length_scale.png` | `scripts/fig_force_length_scale.py` | `tables/force_length_scale.csv` |
+| Fig S1 | `ridge_trench_overview_v2.pdf` | — | — |
+| Fig S2 | `figures/fig_stress_state.png` | `scripts/fig_stress_state.py` | `tables/stress_state.csv` |
+| Fig S3 | `figures/fig_trench_resultants.png` | `scripts/fig_trench_resultants.py` | `tables/trench_resultants.csv` |
+| Fig S4 | `figures/fig_slab_buoyancy.png` | `scripts/fig_slab_buoyancy.py` | `tables/slab_buoyancy.csv` |
+| Fig S5 | `figures/fig_neutral_plane.png` | `scripts/fig_neutral_plane.py` | `tables/neutral_plane.csv` |
+| Fig S6 | `figures/fig_trench_stress_profiles.png` | `scripts/fig_trench_stress_profiles.py` | `tables/bending_stress_regime.csv` |
+| Fig S7 | `figures/fig_convergence.png` | `scripts/fig_convergence.py` | `tables/convergence.csv` |
 | Fig S8 | `figures/fig_ridge_cumulative.png` | `scripts/fig_ridge_cumulative.py` | `tables/ridge_cumulative.csv` |
-| Fig S9 | `figures/fig_ridge_density_check.png` | `scripts/fig_ridge_density_check.py` | `tables/ridge_density_check.csv` |
-| Fig S10 | `figures/fig_thickness_definitions.png` | `scripts/fig_thickness_definitions.py` | `tables/thickness_definitions.csv` |
-| Fig S11 | `figures/fig_tilt_velocity.png` | `scripts/fig_tilt_velocity.py` | `tables/tilt_velocity.csv` |
+| Fig S9 | `figures/fig_thickness_definitions.png` | `scripts/fig_thickness_definitions.py` | `tables/thickness_definitions.csv` |
+| Fig S10 | `figures/fig_balance_linear.png` | `scripts/fig_balance_linear.py` | `tables/balance_linear.csv` |
+| Fig S11 | `figures/fig_gpe_partition.png` | `scripts/fig_gpe_partition.py` | `tables/gpe_partition.csv` |
+| Fig S12 | `figures/fig_ridge_push_anatomy.png` | `scripts/fig_ridge_push_anatomy.py` | `tables/ridge_push_anatomy.csv` |
+| Fig S13 | `figures/fig_ridge_density_check.png` | `scripts/fig_ridge_density_check.py` | `tables/ridge_density_check.csv` |
+| Fig S14 | `figures/fig_tilt_velocity.png` | `scripts/fig_tilt_velocity.py` | `tables/tilt_velocity.csv` |
 
 Figure 3 is a schematic, not produced here.
 

@@ -21,7 +21,15 @@ import argparse, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-MS = '/Users/DSAND/projects/gpe_geodynamica/2026_manuscript'
+# THE MANUSCRIPT PATH IS NOT HARDCODED (2026-10-15). It pointed at
+# gpe_geodynamica/2026_manuscript, which does not exist -- the tree is
+# jgr_solid_earth -- so --check raised FileNotFoundError instead of
+# answering whether the table was current. In a public repo it also
+# pointed at a path no cloner has. $TRENCH_PULL_MS overrides; without it
+# the check is skipped with a message rather than crashing.
+MS = os.environ.get(
+    'TRENCH_PULL_MS',
+    '/Users/DSAND/projects/gpe_geodynamica/jgr_solid_earth')
 
 
 def table():

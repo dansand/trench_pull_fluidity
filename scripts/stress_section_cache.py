@@ -17,7 +17,16 @@ warnings.filterwarnings('ignore'); logging.disable(logging.ERROR)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from fluidity_helpers import archive_root
-DATA = archive_root()          # $TRENCH_PULL_DATA or the default; one resolver
+# RESOLVED, NOT VALIDATED, AT IMPORT (2026-10-15). This called
+# archive_root() with its default required=True, so merely importing this
+# module demanded the full 1.4 GB archive -- and every figure script
+# imports it for ZC_KM, T_MIN_MYR and the integrator. A clone with no
+# archive could therefore render nothing, while the error it raised said
+# "You do NOT need the archive to reproduce any figure in the paper".
+# The README promises standalone reproduction; this broke it. The check
+# now happens in build(), the only thing that reads the archive.
+# Found by external review.
+DATA = archive_root(required=False)
 COLS = os.path.join(ROOT, 'notebooks', 'outputs', 'column_profiles_deep.npz')
 OUT = os.path.join(ROOT, 'notebooks', 'outputs', 'stress_section.npz')
 Y = 2_900_000.0
@@ -28,6 +37,7 @@ SPY = 31_557_600.0
 
 
 def build():
+    archive_root()   # the validation deferred from import time
     cache = np.load(COLS)
     z = np.arange(0, ZMAX, DX) + DX / 2
     out = {'z': z}

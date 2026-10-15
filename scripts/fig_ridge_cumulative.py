@@ -33,13 +33,26 @@ because past the crossing the integral subtracts the counterflow. So the
 defensible stopping point is the crossing.
 
                               STD        WAL
-      mid-run crossing       75.5 km    85.5 km
-      run-median crossing    76.5       87.5 km
-      deepens                +9.0       +10.1 km / 10 Myr
-      crossing range         42-104     48-126 km
-      cost of z_c, median    -2.9 %     -3.0 %
-      worst                  -33.8      -18.2 %
-      worst after 20 Myr     -9.5       -9.7 %
+      mid-run crossing       75.0 km    85.0 km
+      deepens                +9.1       +10.1 km / 10 Myr
+      crossing range         42-105     47-125 km
+      cost of z_c, median    -0.3 %     -0.9 %
+      worst                  -3.6       -4.8 %
+      worst after 20 Myr     -2.7       -4.8 %
+
+WHAT THE COST PANEL MEASURES (changed 2026-10-14, numbers corrected
+2026-10-15). z* is the crossing of the RIDGE-SIDE cumulative -- the
+crossing exists because that term reverses sign below the plate, while
+the trench side has no turnover and simply closes. The COST, however, is
+evaluated on the WHOLE trench-to-ridge force, because that is what the
+balance reports and what a reader is anxious about. So the numerator and
+the denominator are the plate-wide force at z_c and at z*(t), while z*
+itself comes from the ridge side. The mismatch is deliberate and must be
+stated wherever these numbers are quoted.
+
+⚠ THE SIGN GOES BOTH WAYS, so this is a change, not a shortfall. Early,
+z* sits near 42 km while the trench side is still accumulating, so
+stopping there gives LESS force than z_c does.
 
 WHY z_c IS 80 km AND NOT 75 (ruled 2026-10-09, conventions §5.1). The old
 answer was that 75 km coincided with STD's mid-run crossing. That is a
@@ -51,13 +64,12 @@ runs. 80 km is the joint minimum, on the run-wide rms and on the mid-run
 window alike. STD's own optimum is 74 km and WAL's is 87, so 85 is WAL's
 number and costs STD enough to land back where 75 sat.
 
-⚠ READ THE PERCENTAGES IN THIS FIGURE WITH THAT IN MIND. The cost panel is
-relative to each snapshot's own peak, and that peak falls to 0.66 TN/m
-early in STD -- so the worst-case percentages above are large mostly
-because the denominator is small. In TN/m the worst case is -0.23 (80)
-against -0.18 (75) and -0.28 (85): a spread of 0.05 TN/m, under 3 % of the
-trench pull, which discriminates nothing. The relative measure is what
-made 75 look safest; the absolute one is what chose 80.
+⚠ WHY THE PANEL NO LONGER USES THE RIDGE-SIDE DENOMINATOR. It did, and
+that peak falls to 0.70 TN/m early in STD, so the cost read -31 % at
+12-14 Myr where the absolute error is 0.22 TN/m. The error was real but
+the percentage was inflated by a small denominator -- conventions §5.1
+warns against exactly that measure for this quantity. On the plate-wide
+force the same choice costs under 5 % at every state in both runs.
 
 TWO THINGS A READER WOULD OTHERWISE GET WRONG. The crossing's spread is
 SECULAR, not scatter (r^2 0.95 and 0.90) -- panel (c) shows it; the old
@@ -89,15 +101,45 @@ Z_MAX_KM = 200.0
 
 
 def cum(profile, z):
-    """Cumulative integral from the surface, TN/m, on the cache grid."""
-    # cell rule, cumulative on CELL EDGES, so the curve read at the z_c
-    # edge is the reported scalar (see cpc.cumulative_to_zc)
-    # edges 0..N*h; trimmed to len(z) so it pairs with the depth array the
-    # panels already use. Edge k = the integral from the SURFACE to k*h, so
-    # the value read at the z_c edge is the reported scalar.
-    return np.concatenate([[0.0], np.cumsum(profile)
-                           * float(np.diff(z)[0])])[:len(z)] / 1e12
+    """Cumulative integral from the surface: (edge depths [km], TN/m).
 
+    ⚠ RETURNS ITS OWN DEPTH AXIS, and that is the point. This used to
+    return values alone, built on cell EDGES and then trimmed to len(z) so
+    it could be paired with the cell-CENTRE array the panels already had.
+    The two are offset by half a cell, so `argmin(|z_centres - 80|)` chose
+    index 79 -- centre 79.5 km -- holding the integral to the 79 km edge.
+    A constant 1 MPa profile then integrated to 0.079 TN/m over a nominal
+    0-80 km instead of 0.080: one cell short, which is exactly the defect
+    the repo-wide quadrature invariant exists to prevent, reintroduced by
+    pairing an edge array with centre coordinates. Found by external
+    review, 2026-10-15.
+    """
+    ze, cu = cpc.cumulative_edges(profile, z)      # len N+1, both of them
+    return ze / 1e3, cu / 1e12
+
+
+
+def _cum_self_test():
+    """The quadrature invariant, asserted at import.
+
+    A constant 1 MPa profile must integrate to exactly ZC_KM x 1 MPa at
+    the z_c EDGE. The defect this guards against is not an arithmetic
+    error but a pairing error -- edge values indexed by centre
+    coordinates -- which is silent, costs one cell, and had already been
+    reintroduced here once after the repo-wide quadrature fix.
+    """
+    z = (np.arange(250) + 0.5) * 1000.0
+    ze, cu = cum(np.ones_like(z) * 1e6, z)
+    j = int(np.argmin(np.abs(ze - cpc.ZC_KM)))
+    want = cpc.ZC_KM * 1e3 * 1e6 / 1e12
+    assert abs(ze[j] - cpc.ZC_KM) < 1e-9, (
+        f'the index chosen as z_c sits at {ze[j]} km, not {cpc.ZC_KM}')
+    assert abs(cu[j] - want) < 1e-12, (
+        f'1 MPa over 0-{cpc.ZC_KM:.0f} km integrated to {cu[j]:.4f} TN/m, '
+        f'not {want:.4f} -- edge/centre pairing has slipped again')
+
+
+_cum_self_test()
 
 
 def main():
@@ -138,37 +180,43 @@ def main():
         # WAL steps.
         zs, pen_pct = [], []
         for i in np.where(m)[0]:
-            cu = cum(c['p_R'][i], z)[keep]          # ridge side: sets z*
-            cw = -cum(c['p_T'][i], z)[keep] + cu    # plate-wide: sets the cost
+            ze, cu = cum(c['p_R'][i], z)            # ridge side: sets z*
+            _, ct = cum(c['p_T'][i], z)
+            w = ze <= Z_MAX_KM
+            ze, cu, cw = ze[w], cu[w], (-ct[w] + cu[w])   # plate-wide: the cost
             k = int(np.argmax(cu))
-            zs.append(zk[k])
-            izc = int(np.argmin(np.abs(zk - cpc.ZC_KM)))
+            zs.append(ze[k])
+            izc = int(np.argmin(np.abs(ze - cpc.ZC_KM)))  # the 80 km EDGE
             pen_pct.append(100.0 * (cw[izc] - cw[k]) / cw[k])
         zs, pen_pct = np.array(zs), np.array(pen_pct)
 
         # ---- mid-run shape and its cost curve ---------------------------
-        avg = np.mean([cum(c['p_R'][i], z)[keep] for i in np.where(mid)[0]], axis=0)
+        # panels (a) and (b) on the SAME edge axis as the statistics above
+        zedge = cum(c['p_R'][0], z)[0]
+        we = zedge <= Z_MAX_KM
+        zedge = zedge[we]
+        avg = np.mean([cum(c['p_R'][i], z)[1][we] for i in np.where(mid)[0]], axis=0)
         ka = int(np.argmax(avg))
-        izc = int(np.argmin(np.abs(zk - cpc.ZC_KM)))
+        izc = int(np.argmin(np.abs(zedge - cpc.ZC_KM)))
         cost = 100.0 * (avg - avg[izc]) / abs(avg[izc])
 
-        a_shape.plot(avg, zk, '-', color=col, lw=2.2, label=key)
-        a_shape.plot(avg[ka], zk[ka], 'o', ms=8, color=col,
+        a_shape.plot(avg, zedge, '-', color=col, lw=2.2, label=key)
+        a_shape.plot(avg[ka], zedge[ka], 'o', ms=8, color=col,
                      markeredgecolor='white', markeredgewidth=1.2, zorder=5)
-        a_cost.plot(cost, zk, '-', color=col, lw=2.2, label=key)
+        a_cost.plot(cost, zedge, '-', color=col, lw=2.2, label=key)
         a_zstar.plot(t[m], zs, '-o', color=col, lw=1.6, ms=3.5, label=key)
         a_tcost.plot(t[m], pen_pct, '-o', color=col, lw=1.6, ms=3.5, label=key)
 
         sl = np.polyfit(t[m], zs, 1)[0] * 10
-        print(f'{key}: mid-run crossing {zk[ka]:.1f} km; '
+        print(f'{key}: mid-run crossing {zedge[ka]:.1f} km; '
               f'z* deepens {sl:+.1f} km/10 Myr ({zs.min():.0f}-{zs.max():.0f}); '
               f'cost of z_c median {np.median(pen_pct):+.1f} %, '
               f'worst {pen_pct.min():+.1f} %, '
               f'after 20 Myr worst {pen_pct[t[m] >= 20].min():+.1f} %')
         for zq in (100.0, 125.0, 150.0):
             rows.append((key, f'cost_at_{zq:.0f}km_pct',
-                         f'{np.interp(zq, zk, cost):.2f}'))
-        rows += [(key, 'midrun_crossing_km', f'{zk[ka]:.1f}'),
+                         f'{np.interp(zq, zedge, cost):.2f}'))
+        rows += [(key, 'midrun_crossing_km', f'{zedge[ka]:.1f}'),
                  (key, 'zstar_trend_km_per_10Myr', f'{sl:.2f}'),
                  (key, 'zstar_min_km', f'{zs.min():.1f}'),
                  (key, 'zstar_max_km', f'{zs.max():.1f}'),
@@ -231,7 +279,13 @@ def main():
                       figure='fig_ridge_cumulative.png', models=('STD', 'WAL'),
                       meta={'quantity': 'cumulative int_0^z [-Delta sigma_zz] dz, '
                                         'ridge minus first isostatic column',
-                            'cost': 'signed % change relative to the value at z_c',
+                            'cost_panel_b': 'signed % change relative to the '
+                                            'value at z_c, ridge side, mid-run',
+                            'cost_of_zc_rows': 'per-step signed % change of the '
+                                               'PLATE-WIDE force between z_c and '
+                                               'z*(t); z* is the RIDGE-SIDE '
+                                               'crossing and the denominator is '
+                                               'the plate-wide value at z*',
                             'zstar': 'depth at which the anomaly changes sign, i.e. '
                                      'where the cumulative is stationary',
                             'dnd_omitted': 'Delta N_D is not shown: it has asymptoted '
