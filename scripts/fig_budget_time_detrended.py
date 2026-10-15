@@ -120,6 +120,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.offsetbox import TextArea, HPacker, AnchoredOffsetbox
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import column_profiles_cache as cpc
@@ -150,9 +151,13 @@ def main():
         t = q['t'][m]
         gpe, nd, fb = (q['d_gpe'][m] / 1e12, q['d_nd'][m] / 1e12,
                        q['f_b'][m] / 1e12)
-        # CLOSURE IN THE DISPLAYED REGISTER: Delta GPE* - Delta N_D - F_B.
-        # terms() returns d_nd - d_gpe + f_b, which is its negative.
-        clo = -q['closure'][m] / 1e12
+        # CLOSURE AS FIGURE 3 PLOTS IT: Delta N_D - Delta GPE* + F_B.
+        # This was negated here, so Figures 3 and 4 drew opposite signs of
+        # one quantity and Figure 3's legend expression could not be used on
+        # Figure 4's curve. The magnitude is ~0.03-0.08 TN/m, so nothing in
+        # the panel moves visibly; what changes is that the two figures now
+        # agree (Dan, 2026-10-15).
+        clo = q['closure'][m] / 1e12
         sl = lambda y: np.polyfit(t, y, 1)[0] * 10          # per 10 Myr
 
         # ---------------- top: levels, as in fig_budget_time -------------
@@ -171,6 +176,8 @@ def main():
                 label=r'$\Delta\mathrm{GPE}^{*}$')
         a0.plot(t, nd, color='k', lw=1.6, label=r'$\Delta N_D$')
         a0.plot(t, fb, color='red', lw=2, label='$F_B$')
+        # SHORT in the legend: the written balance below the axis already
+        # gives the expression, and in green, so the two are linked by colour
         a0.plot(t, clo, color='g', ls='--', lw=2.5, label='closure')
         a0.plot(t, fit(t, gpe), color='b', lw=1.0, alpha=0.9)
         a0.plot(t, fit(t, nd), color='k', lw=1.0, alpha=0.9)
@@ -194,6 +201,30 @@ def main():
         # cannot point a reader at one panel, which is what the results
         # prose has to do. Top row (a, b) levels, bottom row (c, d)
         # residuals; letter in the title so it sits clear of the curves.
+        # THE BALANCE, WRITTEN OUT, IN THE CURVES' OWN COLOURS (test in
+        # panel (a) only, Dan 2026-10-15). The three terms are plotted as
+        # levels and the reader is left to infer that they close; the band
+        # below y = 0 is empty, so the identity can simply be stated there.
+        # Per-token colour needs an HPacker -- mathtext cannot colour parts
+        # of one string.
+        if col == 0:
+            # ORDER FOLLOWS FIGURE 3 (Dan, 2026-10-15), which writes the
+            # balance as Delta N_D - Delta GPE* + F_B on its own green curve.
+            # One ordering across both figures.
+            parts = [(r'$\Delta N_D$', 'k'),
+                     (r'$-$', '0.2'),
+                     (r'$\Delta\mathrm{GPE}^{*}$', 'b'),
+                     (r'$+$', '0.2'),
+                     (r'$F_B$', 'red'),
+                     (r'$\;=\;$', '0.2'),
+                     ('closure', 'g'),
+                     (r'$\;\approx\; 0$', '0.2')]
+            pack = HPacker(children=[TextArea(txt, textprops=dict(color=c, fontsize=13))
+                                     for txt, c in parts],
+                           align='baseline', pad=0, sep=5)
+            a0.add_artist(AnchoredOffsetbox(
+                loc='lower center', child=pack, frameon=False, borderpad=0,
+                bbox_to_anchor=(0.5, 0.015), bbox_transform=a0.transAxes))
         a0.set_title(f'({"ab"[col]})  {key}', fontsize=11)
         a0.grid(alpha=0.25, color=C_RULE, lw=0.6)
 

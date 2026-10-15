@@ -17,7 +17,7 @@ STD,delta_nd_trend_per_10Myr,0.592
 STD,delta_nd_residual_sd_TNm,0.3159
 STD,basal_traction_trend_per_10Myr,-0.194
 STD,basal_traction_residual_sd_TNm,0.3028
-STD,closure_trend_per_10Myr,-0.011
+STD,closure_trend_per_10Myr,0.011
 STD,closure_residual_sd_TNm,0.0188
 STD,corr_residual_nd_fb,-0.944
 STD,gpe_like_force_median_TNm,3.643
@@ -72,7 +72,7 @@ WAL,delta_nd_trend_per_10Myr,0.484
 WAL,delta_nd_residual_sd_TNm,0.3358
 WAL,basal_traction_trend_per_10Myr,-0.064
 WAL,basal_traction_residual_sd_TNm,0.2296
-WAL,closure_trend_per_10Myr,-0.004
+WAL,closure_trend_per_10Myr,0.004
 WAL,closure_residual_sd_TNm,0.0231
 WAL,corr_residual_nd_fb,-0.636
 WAL,gpe_like_force_median_TNm,3.246
