@@ -182,21 +182,23 @@ def main():
         a0.plot(t, fit(t, gpe), color='b', lw=1.0, alpha=0.9)
         a0.plot(t, fit(t, nd), color='k', lw=1.0, alpha=0.9)
         a0.plot(t, fit(t, fb), color='red', lw=1.0, alpha=0.9)
-        # The mirrored Delta N_D trend is gone. In this register the gap
-        # between the ordinary Delta GPE* and Delta N_D trends IS F_B, so
-        # the arrow spans those two directly and needs no reflected line.
-        a0.annotate('', xy=(t[-3], fit(t, nd)[-3]),
-                    xytext=(t[-3], fit(t, gpe)[-3]),
-                    arrowprops=dict(arrowstyle='<->', color='red', lw=1.2))
-        # Label ABOVE the arrow (Dan, 2026-09-24): centred on it and offset
-        # by 20 % of the arrow's own height, which puts it in the empty
-        # region between the mirrored trend and zero and leaves room for a
-        # readable size. Placing it beside the arrow cramped it against the
-        # right spine and forced an 8 pt label.
-        _lo, _hi = sorted((fit(t, nd)[-3], fit(t, gpe)[-3]))
-        a0.text(t[-3], _hi + 0.20 * (_hi - _lo),
-                f'$F_B$ trend\n{sl(fb):+.2f}', color='red', fontsize=10.5,
-                va='bottom', ha='center')
+        # THE F_B TREND ARROW AND ITS LABEL ARE GONE (Dan, 2026-10-16).
+        # A red double-headed arrow spanned the gap between the fitted
+        # Delta GPE* and Delta N_D trends -- that gap IS F_B in this
+        # register -- carrying the label 'F_B trend -0.19'. Two problems,
+        # and the second is the one that matters:
+        #   - it did not help. The three fitted lines already show their
+        #     own slopes, and a fourth annotation competing with them
+        #     added a reading rather than clarifying one;
+        #   - NEITHER THE ARROW NOR ITS NUMBER WAS EVER EXPLAINED IN THE
+        #     CAPTION OR THE TEXT. A prominent red numeric label on a
+        #     main-text figure, sourced nowhere a reader can follow, is a
+        #     fair thing for a reviewer to object to. Caught in a caption
+        #     audit after submission.
+        # The trends themselves are unchanged and still plotted; the values
+        # remain in tables/budget_time_detrended.csv as
+        # basal_traction_trend_per_10Myr (-0.194 STD / -0.064 WAL) and
+        # belong in the prose, not painted on the panel.
         # PANEL LETTERS (Dan, 2026-10-01). Without them the manuscript
         # cannot point a reader at one panel, which is what the results
         # prose has to do. Top row (a, b) levels, bottom row (c, d)
