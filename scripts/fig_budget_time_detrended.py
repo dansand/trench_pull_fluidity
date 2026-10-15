@@ -120,7 +120,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.offsetbox import TextArea, HPacker, AnchoredOffsetbox
+from matplotlib.offsetbox import TextArea, HPacker, VPacker, AnchoredOffsetbox
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import column_profiles_cache as cpc
@@ -211,19 +211,27 @@ def main():
             # ORDER FOLLOWS FIGURE 3 (Dan, 2026-10-15), which writes the
             # balance as Delta N_D - Delta GPE* + F_B on its own green curve.
             # One ordering across both figures.
-            parts = [(r'$\Delta N_D$', 'k'),
-                     (r'$-$', '0.2'),
-                     (r'$\Delta\mathrm{GPE}^{*}$', 'b'),
-                     (r'$+$', '0.2'),
-                     (r'$F_B$', 'red'),
-                     (r'$\;=\;$', '0.2'),
-                     ('closure', 'g'),
-                     (r'$\;\approx\; 0$', '0.2')]
-            pack = HPacker(children=[TextArea(txt, textprops=dict(color=c, fontsize=13))
-                                     for txt, c in parts],
-                           align='baseline', pad=0, sep=5)
+            # THE BALANCE ONLY. A first attempt also carried the
+            # closed-boundary form and the sigma_xx split; that is the
+            # paper's derivation, not the figure's job (Dan, 2026-10-15).
+            # What the figure owes the reader is the identity its own
+            # curves satisfy, in the order the paper writes it.
+            def _row(parts, size):
+                return HPacker(children=[TextArea(txt, textprops=dict(
+                    color=c, fontsize=size)) for txt, c in parts],
+                    align='baseline', pad=0, sep=4)
+            bot = _row([(r'$\Delta N_D$', 'k'),
+                        (r'$-$', '0.2'),
+                        (r'$\Delta\mathrm{GPE}^{*}$', 'b'),
+                        (r'$+$', '0.2'),
+                        (r'$F_B$', 'red'),
+                        (r'$\;=\;$', '0.2'),
+                        ('closure', 'g'),
+                        (r'$\;\approx\; 0$', '0.2')], 13)
             a0.add_artist(AnchoredOffsetbox(
-                loc='lower center', child=pack, frameon=False, borderpad=0,
+                loc='lower center',
+                child=bot,
+                frameon=False, borderpad=0,
                 bbox_to_anchor=(0.5, 0.015), bbox_transform=a0.transAxes))
         a0.set_title(f'({"ab"[col]})  {key}', fontsize=11)
         a0.grid(alpha=0.25, color=C_RULE, lw=0.6)
