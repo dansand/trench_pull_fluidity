@@ -199,7 +199,25 @@ def main():
         # (W31): seaward is -x, so this is x_T - x, not x - x_T.
         xkm = (xT - x) / 1e3
         xi_km, xr_km = (xT - iI_x) / 1e3, (xT - xR) / 1e3
-        vis = (xkm >= -50) & (xkm <= 3500)      # the displayed span
+        # ⚠ TRIM THE OVER-RIDING PLATE BEFORE PLOTTING (Dan, 2026-10-15).
+        # The arrays span the whole 8000 km box, so 4731 of 7999 samples
+        # lie LANDWARD of the trench -- and the sqrt x-scale's forward
+        # transform is sqrt(clip(x, 0, None)), which maps every one of them
+        # to exactly x = 0. They were drawn as a vertical stack on the left
+        # spine: N_D reaches -10.7 TN/m and dGPE* -6.3 over there, so each
+        # row grew a full-height vertical line at the trench that read as
+        # the curves blowing up. The window ran from -50 km, but `vis` only
+        # ever set the axis LIMITS; the plot calls took the untrimmed array.
+        # The figure's subject is the trailing plate and its x-limit starts
+        # at 0, so the landward half is simply not plotted.
+        sea = xkm >= 0
+        xkm, x = xkm[sea], x[sea]
+        fs_top, d_Sxx, d_gpe, d_Fd, FB, res_pin = (
+            fs_top[sea], d_Sxx[sea], d_gpe[sea], d_Fd[sea], FB[sea],
+            res_pin[sea])
+        r = dict(r, x=x, w=r['w'][sea], w_tau=r['w_tau'][sea],
+                 Fd=r['Fd'][sea])
+        vis = xkm <= 3500                       # the displayed span
 
         # topography: display-smoothed SEAWARD OF x_I ONLY — the
         # trailing-plate short-wavelength content otherwise dominates
@@ -211,17 +229,23 @@ def main():
         # reading is already smooth, so the blend that existed to tame the
         # z = 500 m row's spurious ~11 km wiggle has nothing to tame. A
         # 9 km median moves the trench value by 2 m.
-        topo_disp = r['w']          # zero at x_I
+        # KILOMETRES, not metres (Dan, 2026-10-15). The trench is 2 km
+        # deep, so a metre axis spends its widest tick on '2000' and
+        # shoulders the y-label out of the figure. Every other length axis
+        # in the repo -- depth, thickness, effective arm, crossing depth --
+        # is already in km; this row and its SI twin were the two that
+        # were not.
+        topo_disp = r['w'] / 1e3    # km, zero at x_I
 
         ax1 = axes[0, col]
         if SHOW_W_TAU:
-            ax1.plot(xkm, r['w_tau'], color='#E5007D', lw=1.3, ls='--',
+            ax1.plot(xkm, r['w_tau'] / 1e3, color='#E5007D', lw=1.3, ls='--',
                      label=r'$w_\tau = (dV/dx)/\rho_m g$')
         ax1.plot(xkm, topo_disp, color='k', lw=1.5, label='$w$')
         ax1.axhline(0, color='k', lw=0.5)
         for xc in (0, xi_km, xr_km):
             ax1.axvline(xc, color='k', lw=0.5)
-        lims[0] += ([topo_disp[vis], r['w_tau'][vis]] if SHOW_W_TAU
+        lims[0] += ([topo_disp[vis], r['w_tau'][vis] / 1e3] if SHOW_W_TAU
                     else [topo_disp[vis]])
         ax1.set_title(f'{key},  $t = {t_myr:.1f}$ Myr',
                       fontsize=12)
@@ -379,6 +403,12 @@ def main():
         for c in (0, 1):
             if row == 0:
                 axes[row, c].set_ylim(hi + pad, lo - pad)   # w positive down
+            elif row == 2:
+                # EXTRA FLOOR ROOM for the four-entry legend. Trimming the
+                # over-riding plate tightened this row's limits onto the
+                # curves, which left the legend sitting on F_B; the strip
+                # below zero is where it goes.
+                axes[row, c].set_ylim(lo - 2.6 * pad, hi + pad)
             elif row == 3:
                 # SYMMETRIC about zero (Dan, 2026-09-25): the panel is
                 # labelled tension-like above and compression-like below, so
@@ -391,7 +421,7 @@ def main():
     # TOPOGRAPHY, not "w (positive downward)". The legend in this row says
     # "surface topography", so one word links the axis to the curve and the
     # sign convention lives in the caption (Dan, 2026-10-15).
-    axes[0, 0].set_ylabel('Topography  $w$  [m]', fontsize=12)
+    axes[0, 0].set_ylabel('Topography  $w$  [km]', fontsize=12)
     # 'HORIZONTAL FORCE', not bare 'Force' (Dan, 2026-10-15): every term in
     # these two rows is a force per unit distance acting in x, and saying so
     # separates them from row 4 by direction as well as by what they act on.

@@ -77,7 +77,10 @@ def main():
         sI, sR = (xT - r['xI']) / 1e3, (xT - r['xR']) / 1e3
 
         a0 = axes[0, col]
-        a0.plot(s[vis], g(r['w'])[vis], 'k', lw=1.4)
+        # KILOMETRES (Dan, 2026-10-15), matching the main-text figure this
+        # one is the linear-axis twin of: a metre axis spends its widest
+        # tick on '2000' and pushes the y-label out.
+        a0.plot(s[vis], g(r['w'])[vis] / 1e3, 'k', lw=1.4)
         a0.set_title(f'({"ab"[col]})  {key},  $t$ = {t:.0f} Myr', fontsize=11,
                      loc='left')
         a0.invert_yaxis()
@@ -128,7 +131,7 @@ def main():
               f'F_B by {reach(s[vis], g(r["FB"])[vis], .5, eb):.0f}/'
               f'{reach(s[vis], g(r["FB"])[vis], .9, eb):.0f} km')
 
-    axes[0, 0].set_ylabel('$w$ [m]\n(positive down)', fontsize=9.5)
+    axes[0, 0].set_ylabel('Topography  $w$  [km]', fontsize=10)
     axes[1, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
     axes[2, 0].set_ylabel('$N_D$  [TN/m]', fontsize=10)
     axes[1, 0].legend(frameon=False, fontsize=9, ncol=2, loc='upper left')

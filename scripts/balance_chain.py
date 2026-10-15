@@ -118,8 +118,14 @@ def draw_direction_glyph(ax, terms, x0=0.365, y_top=1.0):
     # below it are placed relative to the same y_top, so they follow
     y_hdr = y_top - 0.10 / (ax.get_position().height
                             * ax.get_figure().get_figheight())
-    ax.text(x0, y_hdr, 'direction at this step',
-            transform=ax.transAxes, fontsize=11, style='italic',
+    # "PLATE-WIDE" (Dan, 2026-10-15): the arrows are drawn from the terms
+    # evaluated at the ridge, so they are the direction each term acts in
+    # across the WHOLE trailing plate, not at the x where the glyph sits.
+    # Sized to the TENSION-LIKE / COMPRESSION-LIKE pair in the bottom row,
+    # which is the other quiet in-panel annotation and reads larger at the
+    # same point size because it is set in capitals.
+    ax.text(x0, y_hdr, 'plate-wide direction at this step',
+            transform=ax.transAxes, fontsize=12, style='italic',
             color='0.25', ha='center', va='top', linespacing=1.3)
     # Header clearance and row spacing are set in INCHES and converted to
     # this axes' own fraction. The rows sit in different-height panels
@@ -127,7 +133,7 @@ def draw_direction_glyph(ax, terms, x0=0.365, y_top=1.0):
     # size, so a single hard-coded fraction that clears the header in the
     # tall panel runs straight through it in the short one.
     h_in = ax.get_position().height * ax.get_figure().get_figheight()
-    y0 = y_hdr - 0.24 / h_in                 # first row, below the header
+    y0 = y_hdr - 0.30 / h_in                 # first row, below the header
     ys = [y0 - (0.17 / h_in) * i for i in range(len(terms))]
     ax.plot([x0, x0], [min(ys) - 0.02, max(ys) + 0.02], color='0.5', lw=0.8,
             transform=ax.transAxes)
