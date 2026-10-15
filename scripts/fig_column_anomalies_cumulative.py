@@ -179,23 +179,38 @@ def main():
                 [[0.0], np.cumsum(rd) * float(np.diff(z)[0])])[:len(z)] * 9.8 / 1e6
             if col == 'T':
                 w = zkm <= 125.0
-                # VERTICAL REFERENCE at the surface value (Dan, 2026-09-30).
-                # The dashed curve leans right with depth and the lean is
-                # real, not a rendering artefact: the trench column runs
-                # ~2 kg/m3 denser than the first isostatic column through
-                # the plate, so the integral accumulates rho g dz ~ 2.5 MPa
-                # over 125 km. This hairline is what NO density contrast
-                # would look like, so the reader can see the lean against
-                # true vertical instead of guessing at it.
-                a0.plot([lith[0], lith[0]], [0.0, 125.0], '-', color=cc,
-                        lw=0.6, alpha=0.55)
+                # THE ZERO-DENSITY-CONTRAST COUNTERFACTUAL IS GONE, AND SO
+                # IS THE QUESTION MARK (Dan, 2026-10-15). A hairline at
+                # lith[0] was drawn so the reader could see the dashed
+                # curve lean against true vertical. At this scale the two
+                # are indistinguishable -- which is the finding, not a
+                # drafting failure: the curve departs from its own surface
+                # value by 2.6 MPa (STD) / 2.3 (WAL) over 125 km, 4 %,
+                # because the columns differ by only ~2 kg/m3. A number in
+                # the caption says that; a second line that plots on top of
+                # the first cannot.
+                #
+                # The '...?' is replaced by words. What it meant is the
+                # strongest point on this panel: under the lithostatic
+                # approximation the trench anomaly NEVER equilibrates, so
+                # the force it implies has no limit -- 4.9 TN/m at z_c,
+                # 7.7 at 125 km, 12.2 at 200 km (STD). That is the case
+                # against lithostatic trench pull and it was carried by a
+                # punctuation mark.
                 # NO label on the curve itself (Dan, 2026-09-30): there are
                 # TWO lithostatic curves, one per column, and labelling only
                 # this one put a blue handle in the legend against a phrase
                 # that covers both. A neutral grey proxy is added below.
                 a0.plot(lith[w], zkm[w], '--', color=cc, lw=1.5, alpha=0.85)
-                a0.text(lith[w][-1], 133.0, r'$\ldots$?', color=cc,
-                        fontsize=13, ha='center', va='top')
+                # the arrow CONTINUES the curve downward -- the claim is
+                # that it keeps going, so it must not point back up at the
+                # end of the line it is annotating
+                a0.annotate('', xy=(lith[w][-1], 150.0),
+                            xytext=(lith[w][-1], 127.0),
+                            arrowprops=dict(arrowstyle='-|>', color=cc,
+                                            lw=1.2, ls=':'))
+                a0.text(lith[w][-1], 156.0, 'never closes', color=cc,
+                        fontsize=10.5, ha='center', va='top')
             else:
                 a0.plot(lith, zkm, '--', color=cc, lw=1.5, alpha=0.85)
         # grey proxy: the dashed style belongs to both columns, so the
