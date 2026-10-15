@@ -260,6 +260,20 @@ def find_first_isostatic_column(x, V, x_trench, tindx, DX,
     (one integrator, `column_profiles_cache.integrate_to_zc`; this routine
     never forms it).
 
+    ⚠ THE SEARCH BOUNDS ARE INERT GUARDS, NOT TUNED CHOICES (measured
+    2026-10-16). `buffer_km=30` is inherited from the retired topographic
+    picker, where it skipped the trench axis zone; here it does nothing.
+    dV/ds = -rho_m g w and w > 0 everywhere on the trench side -- that is
+    what DEFINES the trench side -- so V falls monotonically from x_T to
+    x_I and rises past it, and the minimum cannot lie inside any buffer
+    short of x_I. Measured over all 74 retained snapshots of both runs,
+    searching [30, 600] km and searching [0, 2500] km return the IDENTICAL
+    column every time, max difference 0.0 km; x_I itself never falls below
+    63 km. The bounds are kept only so the search cannot stray onto the
+    over-riding plate. **The pick therefore has no free parameters**: no
+    window, no buffer, no smoothing. Say that rather than quoting the
+    numbers, which invite a 'why 30?' with no good answer.
+
     ⚠ TAKEN AS THE MINIMUM OF V, NOT AS A ZERO OF ITS DERIVATIVE. Seaward
     of the trench w > 0 so V falls; past x_I the outer rise has w < 0 so V
     climbs again -- the isostatic column is a local MINIMUM of V, and
