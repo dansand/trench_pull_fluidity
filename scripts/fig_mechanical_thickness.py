@@ -505,19 +505,25 @@ def main():
         print(f'   centroid of the deficit (a different quantity) '
               f'{np.nanmedian(r["arm"])/1e3:.1f} km')
 
-    ax_t.set_ylabel('Mechanical thickness $h_m$ [km]', fontsize=11)
-    ax_t.set_xlabel('Model time [Myr]', fontsize=11)
+    # TEXT SIZES RAISED (Dan, 2026-10-15). Panel (b) occupies two thirds
+    # of the figure and every label in it was set for a panel a third the
+    # size. Panel (a) is the constrained one: its y-label nearly spans the
+    # axes, so the symbol comes off it -- the legend directly below already
+    # carries $h_m$ -- which buys the larger type at the same width.
+    ax_t.set_ylabel('Mechanical thickness  [km]', fontsize=13)
+    ax_t.set_xlabel('Model time [Myr]', fontsize=13)
+    ax_t.tick_params(labelsize=12)
     # TITLES ARE NOUN PHRASES. These read '(a) mechanical thickness at the
     # trench column, and the 900 C isotherm for reference (navy STD, magenta
     # WAL)' and '(b) the effective arm against h_m/2' -- each one narrating
     # its own panel. The column, the window and the colour key belong in the
     # caption; the axes already say what is plotted (Dan, 2026-10-14).
-    ax_t.set_title('(a)  Mechanical thickness', fontsize=11, loc='left')
+    ax_t.set_title('(a)  Mechanical thickness', fontsize=13, loc='left')
     ax_t.grid(alpha=0.25, color=C_RULE, lw=0.6)
     ax_t.set_ylim(45, 90)
     for _, ls, lab in styles:
         ax_t.plot([], [], color='0.35', lw=1.6, ls=ls, label=lab)
-    ax_t.legend(frameon=False, fontsize=9, ncol=2, loc='upper left')
+    ax_t.legend(frameon=False, fontsize=12, ncol=2, loc='upper left')
 
     # (b) ONE SQUARE, both models. Identical reference lines to the retired
     # split version so the comparison is unchanged.
@@ -554,13 +560,20 @@ def main():
     # NO CRITERION IN THE AXIS LABEL (Dan, 2026-10-11) -- the 25 MPa
     # threshold is stated in the caption, and repeating it here spends
     # label width on something the reader has already been told.
-    ax_sc.set_xlabel('$h_m/2$  [km]', fontsize=11)
+    ax_sc.set_xlabel('Half the mechanical thickness,  $h_m/2$  [km]',
+                     fontsize=15)
     # THE EFFECTIVE ARM, a_eff = |Delta GPE*| / Delta P (budget.tex eq.; the
     # manuscript's own symbol). This axis read '$L$', which SYMBOLOGY §2
     # DEPRECATES for this quantity -- L is RESERVED for domain length --
     # and which the manuscript stopped using on 2026-10-08. Fixed 2026-10-11.
-    ax_sc.set_ylabel(r'$a_{\mathrm{eff}}$  [km]', fontsize=11)
-    ax_sc.set_title('(b)  Effective arm of trench pull', fontsize=11,
+    # THE AXIS NAMES THE QUANTITY (Dan, 2026-10-15). A bare
+    # $a_\mathrm{eff}$ means nothing to a reader who has not met it;
+    # 'effective arm' is the registered name (SYMBOLOGY §2) and there is
+    # room for it twice over.
+    ax_sc.set_ylabel(r'Effective arm,  $a_{\mathrm{eff}}$  [km]',
+                     fontsize=15)
+    ax_sc.tick_params(labelsize=13)
+    ax_sc.set_title('(b)  Effective arm of trench pull', fontsize=14,
                     loc='left')
     # WHAT IS MEASURED AND WHAT IS PREDICTED, said once on the panel
     # (Dan, 2026-10-14). Both axes are lengths, so without this the reader
@@ -572,11 +585,11 @@ def main():
                r'$a_{\mathrm{eff}} = |\Delta\mathrm{GPE}^{*}| / \Delta P_T$'
                '\npredicted     '
                r'$h_m/2$   (Sandiford 2026)',
-               transform=ax_sc.transAxes, va='top', fontsize=9.5, zorder=5)
+               transform=ax_sc.transAxes, va='top', fontsize=13, zorder=5)
     ax_sc.grid(alpha=0.25, color=C_RULE, lw=0.6, zorder=1)
     # LOWER RIGHT: the hit-rate text now owns the upper left, and the
     # scatter's own trend leaves that corner empty
-    ax_sc.legend(frameon=False, fontsize=9, loc='lower right')
+    ax_sc.legend(frameon=False, fontsize=13, loc='lower right')
     # align the two axes and square the lower one, in inches
     fig.canvas.draw()
     pt = ax_t.get_position()
