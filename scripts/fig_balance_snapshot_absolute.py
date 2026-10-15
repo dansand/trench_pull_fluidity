@@ -125,9 +125,13 @@ DRAFT CAPTION. The trailing-plate force balance at the reference
 snapshot (t = 40 Myr) for STD (left) and WAL (right). Distance from the
 trench is plotted on a square-root scale, which expands the non-isostatic
 domain between the trench and the first isostatic column; gradients are
-therefore not comparable along the axis. (a, b) Surface topography, read
-at the model's top boundary, with the trench, first isostatic and ridge
-columns marked. (c, d) The fundamental form of the vertically integrated
+therefore not comparable along the axis. (a, b) Surface topography w, read
+at the model's top boundary and positive downward (the axis is inverted,
+so the trench is at the bottom), with the trench, first isostatic and
+ridge columns marked. The first isostatic column x_I is the first column
+seaward of the trench at which the free surface has recovered to its
+far-field elevation; the zero of dV/dx is carried as a cross-check and
+agrees to about 2 km. (c, d) The fundamental form of the vertically integrated
 balance -- the change in the vertically integrated horizontal normal
 stress against the accumulated basal traction. (e, f) The decomposed
 form, Delta N_D - Delta GPE* + F_B = 0, every term referenced to zero at
@@ -136,7 +140,9 @@ Delta N_D is secondary. The residual (green dashed), with its
 trench-anchor constant removed over the declared mid-subducting-plate
 window, shows where extraction is imperfect, principally the trench zone.
 (g, h) The normal-stress-difference resultant as its own columnwise value
-N_D(x), rather than as a difference. The panel is labelled tension-like
+N_D(x), rather than as a difference -- the only row whose ordinate is a
+single column's resultant rather than a force on the plate segment
+between the trench and x. The panel is labelled tension-like
 above zero and compression-like below: N_D is a difference between normal
 stresses, so a positive value means the horizontal normal stress exceeds
 the vertical one rather than that the plate is in tension. This shows what the Delta forms
@@ -157,7 +163,6 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.transforms import blended_transform_factory
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from tables_io import write_table
@@ -220,16 +225,11 @@ def main():
                     else [topo_disp[vis]])
         ax1.set_title(f'{key},  $t = {t_myr:.1f}$ Myr',
                       fontsize=12)
-        # ANCHORED IN AXES FRACTION, not data. In data coordinates this sat
-        # at a fraction of the trench depth, but w = 0 is near the TOP of an
-        # inverted axis, so every value that reads as "lower down" in data
-        # put the block straight through the flat part of the curve. The
-        # empty region is the lower half of the panel, right of x_I, and
-        # that is a position in the axes, not in the data.
-        ax1.text(xi_km + 60, 0.45,
-                 'first isostatic\ncolumn (' + r'$x_I$' + ')\n' + r'$dV/dx = 0$',
-                 transform=blended_transform_factory(ax1.transData, ax1.transAxes),
-                 va='top', fontsize=10.5)
+        # THE x_I NOTE IS IN THE CAPTION, not on the panel (Dan,
+        # 2026-10-15). It read 'first isostatic column (x_I), dV/dx = 0',
+        # which named the cross-check rather than the extraction
+        # (conventions §3.2 — free-surface recovery), and the column is
+        # already marked by its rule and its x_I tick above it.
         # x_T now sits ON the left spine (the sqrt axis starts at 0), so its
         # label must go inside the axes, not to the left of the line
         for x_col, lab, c, side in [(0, r'$x_T$', '#002147', 'left'),
@@ -394,7 +394,10 @@ def main():
     axes[0, 0].set_ylabel('Topography  $w$  [m]', fontsize=12)
     axes[1, 0].set_ylabel('Force  [TN/m]', fontsize=12)
     axes[2, 0].set_ylabel('Force  [TN/m]', fontsize=12)
-    axes[3, 0].set_ylabel('Force  [TN/m]', fontsize=12)
+    # ROWS 2-3 ARE FORCES ON THE PLATE SEGMENT from x_T to x; ROW 4 IS A
+    # SINGLE COLUMN'S RESULTANT (Dan, 2026-10-15). All three were labelled
+    # 'Force [TN/m]', which read as one quantity in three panels.
+    axes[3, 0].set_ylabel('Column resultant  [TN/m]', fontsize=12)
     # The row-4 legend is NOT optional (Dan, 2026-09-25): the y label says
     # only 'Force per unit distance', so nothing else on the panel
     # identifies which resultant this is -- and the point of the row is
