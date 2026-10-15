@@ -185,7 +185,13 @@ def main():
             # the curve departs from its own surface value by 2.6 MPa (STD)
             # / 2.3 (WAL) over 125 km, 4 %, so a second line plotted on top
             # of the first showed nothing a caption number cannot.
-            a0.plot(lith, zkm, '--', color=cc, lw=1.5, alpha=0.85)
+            # TOP PANEL ONLY: the trench curve stops at 160 km so it does
+            # not run through the legend, which sits at the lower left of
+            # axes[0, 0] (Dan, 2026-10-15). Not a statement about the
+            # approximation -- it is still at its surface value where it
+            # stops, which is the point the panel makes.
+            wd = (zkm <= 160.0) if (r == 0 and col == 'T') else slice(None)
+            a0.plot(lith[wd], zkm[wd], '--', color=cc, lw=1.5, alpha=0.85)
         # grey proxy: the dashed style belongs to both columns, so the
         # legend key carries no column colour
         a0.plot([], [], '--', color='0.45', lw=1.5, label='lithostatic approx.')
