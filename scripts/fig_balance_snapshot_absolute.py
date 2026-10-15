@@ -157,6 +157,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.transforms import blended_transform_factory
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from tables_io import write_table
@@ -219,9 +220,16 @@ def main():
                     else [topo_disp[vis]])
         ax1.set_title(f'{key},  $t = {t_myr:.1f}$ Myr',
                       fontsize=12)
-        ax1.text(xi_km + 60, 0.75 * topo_disp[vis].max(),
+        # ANCHORED IN AXES FRACTION, not data. In data coordinates this sat
+        # at a fraction of the trench depth, but w = 0 is near the TOP of an
+        # inverted axis, so every value that reads as "lower down" in data
+        # put the block straight through the flat part of the curve. The
+        # empty region is the lower half of the panel, right of x_I, and
+        # that is a position in the axes, not in the data.
+        ax1.text(xi_km + 60, 0.45,
                  'first isostatic\ncolumn (' + r'$x_I$' + ')\n' + r'$dV/dx = 0$',
-                 fontsize=9)
+                 transform=blended_transform_factory(ax1.transData, ax1.transAxes),
+                 va='top', fontsize=10.5)
         # x_T now sits ON the left spine (the sqrt axis starts at 0), so its
         # label must go inside the axes, not to the left of the line
         for x_col, lab, c, side in [(0, r'$x_T$', '#002147', 'left'),
@@ -230,7 +238,7 @@ def main():
             ax1.annotate(lab, xy=(x_col, 1), xycoords=('data', 'axes fraction'),
                          xytext=(5 if side == 'left' else -5, -4),
                          textcoords='offset points',
-                         ha=side, va='top', color=c, fontsize=11,
+                         ha=side, va='top', color=c, fontsize=13,
                          fontweight='bold')
 
         ax2 = axes[1, col]
@@ -290,7 +298,7 @@ def main():
             ax4.axvline(xc, color='k', lw=0.5)
         lims[3] += [Fd[vis] * 1e-12]
         ax4.set_xlabel('Distance from trench [km]  ' + r'($\sqrt{x}$ scale)',
-                       fontsize=11)
+                       fontsize=12)
         ax4.set_xlim(0, 3500)
         print(f'   {key} row 4: N_D(x_T) {Fd_T*1e-12:+.2f} TN/m; N_D at x_R '
               f'{float(np.interp(xR, x, Fd))*1e-12:+.2f}; gap at x_R (= F_B) '
@@ -380,10 +388,13 @@ def main():
             else:
                 axes[row, c].set_ylim(lo - pad, hi + pad)
 
-    axes[0, 0].set_ylabel('$w$ [m] (positive downward)', fontsize=10)
-    axes[1, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
-    axes[2, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
-    axes[3, 0].set_ylabel('Force per unit distance [TN/m]', fontsize=10)
+    # TOPOGRAPHY, not "w (positive downward)". The legend in this row says
+    # "surface topography", so one word links the axis to the curve and the
+    # sign convention lives in the caption (Dan, 2026-10-15).
+    axes[0, 0].set_ylabel('Topography  $w$  [m]', fontsize=12)
+    axes[1, 0].set_ylabel('Force  [TN/m]', fontsize=12)
+    axes[2, 0].set_ylabel('Force  [TN/m]', fontsize=12)
+    axes[3, 0].set_ylabel('Force  [TN/m]', fontsize=12)
     # The row-4 legend is NOT optional (Dan, 2026-09-25): the y label says
     # only 'Force per unit distance', so nothing else on the panel
     # identifies which resultant this is -- and the point of the row is
@@ -395,18 +406,26 @@ def main():
     # that the plate is in tension, and the same caveat applies in reverse.
     # SYMBOLOGY §4.4 already locks "tension-like" for exactly this reason;
     # "compression-like" is its symmetric partner.
-    axes[3, 0].legend(loc='upper left', fontsize=9)
-    axes[3, 1].legend(loc='upper left', fontsize=9)
+    # LOWER RIGHT, not lower left: WAL's N_D dives to -1.9 TN/m at small x,
+    # which is exactly where a lower-left legend sits. Both panels are empty
+    # at the lower right.
+    axes[3, 0].legend(loc='lower right', fontsize=11)
+    axes[3, 1].legend(loc='lower right', fontsize=11)
     for c in (0, 1):
         for lab, dy, va in (('TENSION-LIKE', 0.94, 'top'),
                             ('COMPRESSION-LIKE', 0.06, 'bottom')):
             axes[3, c].text(0.5, dy, lab, transform=axes[3, c].transAxes,
-                            ha='center', va=va, fontsize=11.5,
-                            fontweight='bold', color='0.80', zorder=0)
+                            # NOT bold, and not a different size from every
+                            # other in-panel label. These were 11.5 pt bold at
+                            # 0.80 grey -- a second typographic register for
+                            # one more annotation, and too faint to read with
+                            # it (Dan, 2026-10-15).
+                            ha='center', va=va, fontsize=11,
+                            color='0.62', zorder=0)
     if SHOW_W_TAU:
-        axes[0, 0].legend(loc='lower right', fontsize=8, framealpha=0.9)
-    axes[1, 0].legend(loc='lower left', fontsize=8)
-    axes[2, 0].legend(loc='lower right', fontsize=7, ncol=2)
+        axes[0, 0].legend(loc='lower right', fontsize=10.5, framealpha=0.9)
+    axes[1, 0].legend(loc='lower left', fontsize=11)
+    axes[2, 0].legend(loc='lower right', fontsize=10, ncol=2)
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_balance_snapshot_absolute.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)

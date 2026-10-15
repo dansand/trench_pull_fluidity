@@ -119,7 +119,7 @@ def draw_direction_glyph(ax, terms, x0=0.365, y_top=1.0):
     y_hdr = y_top - 0.10 / (ax.get_position().height
                             * ax.get_figure().get_figheight())
     ax.text(x0, y_hdr, 'direction at this step',
-            transform=ax.transAxes, fontsize=9, style='italic',
+            transform=ax.transAxes, fontsize=11, style='italic',
             color='0.25', ha='center', va='top', linespacing=1.3)
     # Header clearance and row spacing are set in INCHES and converted to
     # this axes' own fraction. The rows sit in different-height panels
@@ -138,7 +138,7 @@ def draw_direction_glyph(ax, terms, x0=0.365, y_top=1.0):
                     arrowprops=dict(arrowstyle='-|>', color=c, lw=lw,
                                     mutation_scale=14))
         ax.text(x0 + s * (L + 0.015), y, lab, transform=ax.transAxes,
-                fontsize=9, color=c, va='center',
+                fontsize=10.5, color=c, va='center',
                 ha='right' if s < 0 else 'left')
 
 
