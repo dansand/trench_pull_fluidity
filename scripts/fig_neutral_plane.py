@@ -56,13 +56,13 @@ neutral plane as a mechanical thickness -- including the h/2 dipole
 scaling in fig_mechanical_thickness -- this correction applies.
 
   1, 2  the three quantities through time, one panel per model: the
-        thermal thickness, the raw neutral-plane estimate, and the
+        mechanical thickness $h_m$, the raw neutral-plane estimate, and the
         neutral-plane estimate with the axial term added back, which
-        should recover the thermal curve if the relation holds.
+        should recover the $h_m$ curve if the relation holds.
   3     the test: measured offset against beam prediction, with the
         one-to-one line.
 
-DRAFT CAPTION. (a, b) The thermal thickness of the plate (900 C isotherm),
+DRAFT CAPTION. (a, b) The mechanical thickness $h_m$ of the plate (900 C isotherm),
 twice the neutral-plane depth, and twice the neutral-plane depth corrected
 for the axial load by adding N h^2/(6 M), for STD and WAL. All three are
 evaluated at the column of maximum bending moment, with N the
@@ -70,7 +70,7 @@ normal-stress-difference resultant and M the bending moment there. The raw
 neutral-plane estimate grows by 0.5 and 1.1 km per 10 Myr while the
 thermal estimate grows by 3.5 and 3.7; the corrected estimate recovers the
 thermal trend. (c) The measured offset of the neutral-plane estimate from
-the thermal thickness against the offset predicted by beam theory for a
+the mechanical thickness $h_m$ against the offset predicted by beam theory for a
 plate under combined axial load and bending, one point per snapshot, with
 the one-to-one line. The axes are symmetric about zero and the $x = 0$
 line is drawn: the predicted offset is negative -- a compressional axial
@@ -114,7 +114,19 @@ def parts(d, key):
     nd = cpc.integrate_to_zc(d[f'{key}_sxx_M'] - d[f'{key}_szz_M'], z,
                              ZC, axis=1)
     mom = d[f'{key}_M_max']
-    h, np2 = r['thermal'], r['np2']
+    # h_m, NOT THE 900 C ISOTHERM (Dan, 2026-10-15). Beam theory's h is the
+    # thickness of the section that CARRIES the fibre stress: M = B h^3/12
+    # is an integral of sigma_xx - sigma_zz, so h must be the mechanically
+    # strong layer. Three reasons the isotherm was the wrong choice:
+    #   - h_m (25 MPa) is the paper's own adopted definition;
+    #   - the 900 C base is CALIBRATED to that cap at mid-run (conventions
+    #     5.2), so it is a PROXY for h_m, not an independent thickness --
+    #     it imports calibration error without buying independence;
+    #   - with h_m every quantity in the relation comes from the same
+    #     stress field at the same column, which is what the theory assumes.
+    # Measured: the corrected trend then recovers h_m to +0.01 km/10 Myr in
+    # STD (was -0.19 against the $h_m$ curve) and -0.34 in WAL (was -0.40).
+    h, np2 = r['yield_cap'], r['np2']
     pred = -nd * h ** 2 / (6.0 * mom)          # beam offset, 2h_np - h
     return dict(t=t, m=t >= T_MIN_MYR, h=h, np2=np2, nd=nd, mom=mom,
                 pred=pred, res=np2 - h, corr=np2 - pred)
@@ -133,7 +145,7 @@ def main():
         t, m = p['t'], p['m']
         ax = axes[col]
         ax.plot(t[m], p['h'][m] / 1e3, '-', color=C_TH, lw=2.0,
-                label='thermal, 900 $^\\circ$C')
+                label=r'$h_m$  (25 MPa)')
         ax.plot(t[m], p['np2'][m] / 1e3, '--', color=C_NP, lw=2.0,
                 label=r'$2\,h_{np}$ (raw)')
         ax.plot(t[m], p['corr'][m] / 1e3, ':', color=C_CORR, lw=2.2,
@@ -166,9 +178,11 @@ def main():
         s_pool = np.polyfit(pv, rs, 1)[0]
         s_small = np.polyfit(pv[lo_], rs[lo_], 1)[0]
         s_large = np.polyfit(pv[hi_], rs[hi_], 1)[0]
-        print(f'{key}: trends/10 Myr  thermal {sl(p["h"]):+.2f}, 2h_np raw '
+        # the printed axial term is `pred`, the same one the table carries
+        # and the same one that is added back -- NOT the h-frozen `pf`
+        print(f'{key}: trends/10 Myr  h_m {sl(p["h"]):+.2f}, 2h_np raw '
               f'{sl(p["np2"]):+.2f}, corrected {sl(p["corr"]):+.2f} km;  '
-              f'axial term {np.polyfit(t[m], pf, 1)[0]*10/1e3:+.2f};  '
+              f'axial term {sl(p["pred"]):+.2f};  '
               f'beam slope pooled {s_pool:.2f} (small {s_small:.2f}, large '
               f'{s_large:.2f});  h-frozen check: r(detrended) '
               f'{np.corrcoef(ld(rs), ld(pf))[0, 1]:+.2f}')
@@ -217,8 +231,14 @@ def main():
             (key, 'trend_thermal_km_per_10Myr', f'{sl(p["h"]):.2f}'),
                  (key, 'trend_2hnp_raw_km_per_10Myr', f'{sl(p["np2"]):.2f}'),
                  (key, 'trend_2hnp_corrected_km_per_10Myr', f'{sl(p["corr"]):.2f}'),
+                 # FROM `pred`, NOT `pf` (Dan, 2026-10-15). This was taken
+                 # from the h-FROZEN diagnostic while the corrected curve
+                 # uses per-snapshot h, so the three trends did not add:
+                 # the SI read 1.04 + 1.18 = 3.26 for WAL, which is false.
+                 # `pred` is the term actually added back, so raw - this
+                 # equals corrected exactly.
                  (key, 'trend_axial_term_km_per_10Myr',
-                  f'{np.polyfit(t[m], pf, 1)[0]*10/1e3:.2f}'),
+                  f'{sl(p["pred"]):.2f}'),
                  (key, 'nd_at_max_moment_median_TNm',
                   f'{np.median(p["nd"][m])/1e12:.3f}'),
                  (key, 'nd_at_max_moment_trend_TNm_per_10Myr',
