@@ -33,10 +33,13 @@ exactly the same rate — about 33 km, i.e. 1.07-1.08 GN/m per metre of
 relief — despite arising by completely different mechanisms.
 
 DRAFT CAPTION. The force delivered per unit of surface topography,
-expressed as a length scale, through the runs for STD (navy) and WAL
-(magenta): the trench (solid) and the ridge term that enters the force balance
-(dashed). A larger length scale means topography that converts to driving
-force more efficiently; the two track each other closely throughout.
+expressed as a length scale, through the runs for (a) STD and (b) WAL:
+the trench-side term (blue) and the ridge-side term that enters the force
+balance (orange), in the domain colours of the schematic. A larger length
+scale means topography that converts to driving force more efficiently.
+The two converge within the first ~30 Myr and track each other closely
+thereafter, at about 33 km -- 1.07-1.08 GN/m per metre of relief --
+despite arising by completely different mechanisms.
 """
 import os, sys
 import numpy as np
@@ -51,15 +54,25 @@ from tables_io import write_table
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 C = {'STD': '#002147', 'WAL': '#E5007D'}
+# DOMAIN COLOURS, not model colours (Dan, 2026-10-15). The repo carries two
+# conventions and they do not conflict: colour means MODEL where both models
+# share an axes (fig_mechanical_thickness, the preceding figure), and DOMAIN
+# where the panel is one model (fig_column_anomalies_cumulative,
+# fig_gpe_partition, fig_ridge_push_anatomy). This figure was the one trying
+# to do both at once -- model in the colour, domain in the line style -- so
+# it is split by model and the colour is freed for the domain.
+C_TRENCH = '#0072B2'        # non-isostatic / trench pull domain (schematic)
+C_RIDGE = '#D55E00'         # isostatic / ridge push domain (schematic)
 C_RULE = '#BFC3D1'
 RHO_G = 3300.0 * 9.8          # Delta rho g (no ocean in these models)
 
 def main():
     d = cpc.load()
-    fig, ax = plt.subplots(figsize=(9.5, 5.6))
+    fig, axes = plt.subplots(2, 1, figsize=(9.5, 7.8), sharex=True,
+                             sharey=True)
     rows = [('model', 'quantity', 'value')]
-    for key in ('STD', 'WAL'):
-        col = C[key]
+    for row, key in enumerate(('STD', 'WAL')):
+        ax = axes[row]
         c = cpc.derive(d, key)
         p = cpc.partition(d, key)
         z = c['z']
@@ -80,9 +93,22 @@ def main():
         L_Rd = p['measured'] / s_R / 1e3
         L_Rs = p['static'] / s_R / 1e3
         t = p['t']
-        ax.plot(t, L_T, '-o', color=col, lw=2.0, ms=4.5, markeredgecolor='white',
-                markeredgewidth=0.5, label=f'{key}  trench pull')
-        ax.plot(t, L_Rd, '--', color=col, lw=1.6, label=f'{key}  ridge push (measured)')
+        # BOTH SOLID, same weight: the colour carries the distinction, so
+        # styling them differently would say the comparison is not
+        # like-for-like when it is.
+        ax.plot(t, L_T, '-o', color=C_TRENCH, lw=2.0, ms=4.0,
+                markeredgecolor='white', markeredgewidth=0.5,
+                label='trench pull')
+        ax.plot(t, L_Rd, '-o', color=C_RIDGE, lw=2.0, ms=4.0,
+                markeredgecolor='white', markeredgewidth=0.5,
+                label='ridge push (measured)')
+        ax.set_title(f'({"ab"[row]})  {key}', fontsize=12, loc='left')
+        ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
+        ax.set_ylabel(r'Effective arm,  $a_{\mathrm{eff}}$  [km]',
+                      fontsize=12)
+        ax.tick_params(labelsize=11)
+        if row == 0:
+            ax.legend(frameon=False, fontsize=11, ncol=2, loc='lower right')
         # the static line is NOT plotted (Dan, 2026-09-16): it distracts from
         # the near-identity of the two measured conversions. Still tabulated.
         print(f'{key}: length scale [km] — trench {np.median(L_T):.1f} '
@@ -106,17 +132,13 @@ def main():
             rows += [(key, f'{name}_median', f'{np.median(arr):.2f}'),
                      (key, f'{name}_q1', f'{np.percentile(arr, 25):.2f}'),
                      (key, f'{name}_q3', f'{np.percentile(arr, 75):.2f}')]
-    ax.set_xlabel('Model time [Myr]', fontsize=12)
-    # SYMBOL-LED, matching the manuscript (eq. dipole_arm):
-    #   a_eff = |Delta GPE*| / Delta P
-    ax.set_ylabel(r'effective arm  $a_{\mathrm{eff}}$  [km]', fontsize=12)
-    ax.grid(alpha=0.25, color=C_RULE, lw=0.6)
-    ax.legend(frameon=False, fontsize=9, ncol=2)
+    axes[1].set_xlabel('Model time [Myr]', fontsize=12)
+    # The axis names the quantity (SYMBOLOGY §2, 'effective arm'); the
+    # manuscript defines it as a_eff = |Delta GPE*| / Delta P.
     # Minimal title naming the subject only; the interpretation ('how
     # efficiently topography converts...') and the domain parentheticals
     # were caption material and carried the retired domain wording.
-    ax.set_title('Effective arm',
-                 fontsize=11)
+    fig.suptitle('Effective arm', fontsize=13)
     fig.tight_layout()
     out = os.path.join(ROOT, 'figures', 'fig_force_length_scale.png')
     fig.savefig(out, bbox_inches='tight', dpi=220)
