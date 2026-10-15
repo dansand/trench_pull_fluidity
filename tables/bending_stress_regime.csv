@@ -4,7 +4,7 @@ STD,tau_zx_peak_depth_km,30
 STD,rho_hat_peak_kgm3_smooth10km,192
 STD,rho_hat_peak_depth_km,26
 STD,tau_zx_x_centre_of_mass_km,33.6
-STD,deficit_peak_MPa,62.6
+STD,deficit_peak_MPa,63.4
 STD,max_moment_offset_km,-21
 STD,x_smoothing_km,10
 STD,midrun_snapshots,5
@@ -13,7 +13,7 @@ WAL,tau_zx_peak_depth_km,28
 WAL,rho_hat_peak_kgm3_smooth10km,187
 WAL,rho_hat_peak_depth_km,22
 WAL,tau_zx_x_centre_of_mass_km,31.2
-WAL,deficit_peak_MPa,51.2
+WAL,deficit_peak_MPa,50.5
 WAL,max_moment_offset_km,-24
 WAL,x_smoothing_km,10
 WAL,midrun_snapshots,5

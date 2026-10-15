@@ -1,9 +1,9 @@
 model,quantity,value
-STD,untilted_vs_density_rms_MPa,2.68
-STD,signal_amplitude_MPa,51
+STD,untilted_vs_density_rms_MPa,2.71
+STD,signal_amplitude_MPa,50
 STD,misfit_pct_of_signal,5
-STD,deep_pressure_anomaly_MPa,-8.42
-WAL,untilted_vs_density_rms_MPa,2.13
-WAL,signal_amplitude_MPa,47
+STD,deep_pressure_anomaly_MPa,-8.41
+WAL,untilted_vs_density_rms_MPa,2.06
+WAL,signal_amplitude_MPa,48
 WAL,misfit_pct_of_signal,4
 WAL,deep_pressure_anomaly_MPa,-5

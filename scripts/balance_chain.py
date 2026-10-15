@@ -73,7 +73,10 @@ SHEAR_SMOOTH_KM = 10.0                # smoothing of V before differentiating (n
 # column integral was ~1.5 % low. The pin TRIPPED on the corrected chain,
 # which is what it is for -- it is a tripwire, not a target, so it is
 # updated with the reason rather than relaxed.
-COMMITTED_TP_T40 = {'STD': 2.09e12, 'WAL': 1.78e12}
+# RE-PINNED 2026-10-15 for the x_I rule change (conventions §3.2).
+# Was 2.09 / 1.78, taken against the pre-change committed series.
+# The rebuilt column cache gives 2.074 (STD) / 1.691 (WAL) at t = 40.
+COMMITTED_TP_T40 = {'STD': 2.07e12, 'WAL': 1.69e12}
 
 
 def snapshot_files(key):

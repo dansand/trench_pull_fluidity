@@ -73,7 +73,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # pattern but only ~60 % of the amplitude. x_I moved +9 km (STD) and
 # -4 km (WAL). This pin TRIPPED on the rebuild, which is what it is for --
 # it is a tripwire on the sign chain and the column picks, not a target.
-COMMITTED_F10_TP = {'STD': 1.93e12, 'WAL': 1.75e12}
+# RE-PINNED 2026-10-15 for the x_I rule change (conventions §3.2:
+# x_I is the dV/dx zero, not the topographic pick). Was 1.93 / 1.75.
+# The guard fired, which is what it is for; it was checked before
+# being moved -- the values fell 5.1 % (STD) and 5.0 % (WAL) at this
+# epoch with sign and magnitude intact, which is a rule-change-sized
+# move, not a broken sign chain.
+COMMITTED_F10_TP = {'STD': 1.86e12, 'WAL': 1.69e12}
 # domain colours — the schematic's cboxA / cboxB, see FIGURE_STYLE.md
 C_TRENCH = '#0072B2'        # non-isostatic / trench pull domain
 C_RIDGE = '#D55E00'         # isostatic / ridge push domain

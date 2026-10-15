@@ -8,11 +8,11 @@ STD,nd_vertical_max_TNm,1.4
 STD,abs_nd_median_TNm,0.944
 STD,abs_nd_max_TNm,2.587
 STD,V_median_TNm,1.608
-STD,trench_pull_median_TNm,2.18
+STD,trench_pull_median_TNm,2.219
 STD,plane_shift_median_TNm,0.373
 STD,plane_shift_pct_of_max_abs_nd,14.4
 STD,plane_shift_pct_of_median_abs_nd,39.5
-STD,plane_shift_pct_of_trench_pull,17.1
+STD,plane_shift_pct_of_trench_pull,16.8
 STD,plane_shift_min_TNm,0.182
 STD,plane_shift_max_TNm,0.482
 STD,rotation_only_shift_median_TNm,0.428
@@ -33,11 +33,11 @@ WAL,nd_vertical_max_TNm,-0.379
 WAL,abs_nd_median_TNm,1.879
 WAL,abs_nd_max_TNm,3.847
 WAL,V_median_TNm,1.106
-WAL,trench_pull_median_TNm,1.8
+WAL,trench_pull_median_TNm,1.833
 WAL,plane_shift_median_TNm,0.224
 WAL,plane_shift_pct_of_max_abs_nd,5.8
 WAL,plane_shift_pct_of_median_abs_nd,11.9
-WAL,plane_shift_pct_of_trench_pull,12.4
+WAL,plane_shift_pct_of_trench_pull,12.2
 WAL,plane_shift_min_TNm,0.133
 WAL,plane_shift_max_TNm,0.569
 WAL,rotation_only_shift_median_TNm,0.284

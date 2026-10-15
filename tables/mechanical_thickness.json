@@ -32,7 +32,7 @@
       0.45,
       0.55
     ],
-    "band_hits_both_runs": "72/74",
+    "band_hits_both_runs": "71/74",
     "band_upper_provenance": "0.55 h_m is the companion study's elasto-plastic fit; 0.45 is its mirror about 0.5, NOT a second published bound",
     "regression_slope": "NOT reported: the slope of a_eff on h_m/2 moves 0.90 -> 1.02 as the integration limit goes 80 -> 200 km with no plateau, while the median ratio is flat to 2 % over that range"
   }
