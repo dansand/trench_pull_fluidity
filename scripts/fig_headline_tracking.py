@@ -238,7 +238,7 @@ def render(cache_path, fig_path):
             # of the trench-to-ridge rise is already achieved by x_I
             ax.axhline(0.5, color='0.45', lw=0.7, zorder=3)
             ax.axvline(xi, color='0.2', lw=1.3, ls=(0, (4, 2)), zorder=5)
-            ax.text(xi + 0.012, 0.03, '$x_I$', fontsize=10.5,
+            ax.text(xi + 0.014, 0.03, '$x_I$', fontsize=14,
                     va='bottom', ha='left')
             # DOMAIN LABELS ON THE SQUARE-ROOT ROW ONLY. On the linear axis
             # the trench side is 3 % of the width; the label needs a leader,
@@ -263,16 +263,17 @@ def render(cache_path, fig_path):
                         fontweight='bold')
             if mode == 'sqrt':
                 ax.set_xticks(np.sqrt(TICKS_SQ))
-                ax.set_xticklabels([f'{v:g}' for v in TICKS_SQ], fontsize=9)
+                ax.set_xticklabels([f'{v:g}' for v in TICKS_SQ], fontsize=11)
             ax.set_xlim(0, 1); ax.set_ylim(-0.04, 1.14)
+            ax.tick_params(labelsize=11)
             ax.grid(alpha=0.22, color=C_RULE if 'C_RULE' in globals()
                     else '#BFC3D1', lw=0.6)
             ax.set_title(f'({"abcd"[i * 2 + j]})  {KEY} — '
                          f'{"linear" if mode == "linear" else "square-root"}'
-                         f' scale', fontsize=11, loc='left')
+                         f' scale', fontsize=12, loc='left')
             if i:
                 ax.set_xlabel(r'normalised trench–ridge distance  '
-                              r'$s\,/\,s_R$', fontsize=10.5)
+                              r'$s\,/\,s_R$', fontsize=12.5)
             if j:
                 ax.tick_params(labelleft=False)
 
@@ -303,8 +304,8 @@ def render(cache_path, fig_path):
                  (KEY, 's_R_km_max', f'{(xT - xR).max() / 1e3:.0f}')]
     for i in range(2):
         axes[i, 0].set_ylabel('normalised value\n(trench = 0, ridge = 1)',
-                              fontsize=10.5)
-    axes[0, 0].legend(frameon=False, fontsize=9.5, loc='lower right')
+                              fontsize=12.5)
+    axes[0, 0].legend(frameon=False, fontsize=12.5, loc='lower right')
     fig.tight_layout()
     fig.savefig(fig_path, dpi=200, bbox_inches='tight')
     print('wrote', fig_path)
