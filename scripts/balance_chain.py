@@ -207,7 +207,12 @@ def compute_from(v, t_myr, key, pin_committed=None, verbose=True):
     fs_top = surface_fs(v, x, mirror_x=False)
     xT, _ = pick_trench_3step(x, z, p, vx, subducting_side='left')
     ti = int(np.argmin(np.abs(x - xT)))
-    iI, _ = find_first_isostatic_column(x, fs_top, xT, ti, DX, seaward_sign=-1)
+    # THE COLUMN INTEGRATOR IS NEEDED BEFORE THE PICK (2026-10-15): x_I is
+    # now the dV/dx zero (conventions §3.2), so V has to exist first.
+    zc_ = z[:NZ_C]
+    col = lambda a: integrate_to_zc(a[:NZ_C, :].T, zc_, ZC, axis=1)
+    V = col(txz)
+    iI = find_first_isostatic_column(x, V, xT, ti, DX, seaward_sign=-1)
     # THE CANONICAL RIDGE PICKER (conventions §3.4): the maximum surface
     # divergence, refined to the local topographic crest within +/-20 km.
     # This called find_ridge_x, the retired GLOBAL topographic pick, so the
@@ -227,8 +232,6 @@ def compute_from(v, t_myr, key, pin_committed=None, verbose=True):
     # integrator and the defect it replaces are documented in
     # column_profiles_cache.integrate_to_zc). These were trapz over the
     # centres, i.e. 0.5..79.5 km under a 0..80 km label.
-    zc_ = z[:NZ_C]
-    col = lambda a: integrate_to_zc(a[:NZ_C, :].T, zc_, ZC, axis=1)
     Fd = col(txx - tzz)
     Sxx = col(-p + txx)
     gpe = -col(-p + tzz)
@@ -249,7 +252,6 @@ def compute_from(v, t_myr, key, pin_committed=None, verbose=True):
     # is int tau_zx dz in the model's own frame and carries the register's
     # sense, V(x_T) > 0. The ritual stays because an empirical pin is right
     # regardless, and it is what caught the frame change.)
-    V = col(txz)
     dVdx = np.gradient(gaussian_filter1d(V, SHEAR_SMOOTH_KM * 1e3 / DX,
                                          mode='nearest'), x)
     w_tau = dVdx / (RHO_M * G)

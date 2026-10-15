@@ -90,7 +90,13 @@ def compute():
             fs_top = surface_fs(v, x, mirror_x=False)
             xT, _ = pick_trench_3step(x, z, p, vx, subducting_side='left')
             ti = int(np.argmin(np.abs(x - xT)))
-            iI, _ = find_first_isostatic_column(x, fs_top, xT, ti, DX, seaward_sign=-1)
+            # x_I IS THE dV/dx ZERO (conventions §3.2, 2026-10-15):
+            # the local minimum of the vertical shear resultant, which is
+            # blind to compensated topography and so carries none of the
+            # cooling-plus-tilt bias the old topographic reference did.
+            V_pick = cpc.integrate_to_zc(txz[z <= ZC].T, z[z <= ZC], ZC, axis=1)
+            iI = find_first_isostatic_column(x, V_pick, xT, ti, DX,
+                                             seaward_sign=-1)
             # refined to the local topographic crest (conventions §3.4,
             # 2026-09-27). The min-max normalisation removed this figure's
             # dependence on the ridge column's VALUE but not on its

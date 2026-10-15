@@ -251,12 +251,77 @@ def pick_trench_3step(x, z, p, vx,
     return trench_x, info
 
 
-def find_first_isostatic_column(x, fs_top, x_trench, tindx, DX,
-                                buffer_km=30, window_km=500,
-                                regional_ref_km=500, seaward_sign=+1):
-    """Walk seaward of the trench (with a buffer) and return the first index
-    where the free-surface elevation has recovered to the regional reference
-    taken `regional_ref_km` seaward of the trench.
+def find_first_isostatic_column(x, V, x_trench, tindx, DX,
+                                buffer_km=30, window_km=600,
+                                smooth_km=0.0, seaward_sign=+1):
+    """First column seaward of the trench at which dV/dx = 0.
+
+    V is the vertical shear resultant int tau_zx dz to z_c, on the x grid
+    (one integrator, `column_profiles_cache.integrate_to_zc`; this routine
+    never forms it).
+
+    ⚠ TAKEN AS THE MINIMUM OF V, NOT AS A ZERO OF ITS DERIVATIVE. Seaward
+    of the trench w > 0 so V falls; past x_I the outer rise has w < 0 so V
+    climbs again -- the isostatic column is a local MINIMUM of V, and
+    finding an extremum is far better conditioned than finding a zero of a
+    numerical derivative. Measured at the reference epoch: the raw,
+    UNSMOOTHED field puts the minimum at 91.0 km (STD) / 94.0 km (WAL),
+    within 3 km of every smoothed answer, while the derivative of the same
+    raw field has 29 and 30 sign changes in the window. Smoothing is
+    therefore OFF by default and the pick carries no tuning knob; for the
+    record, a 10 km kernel moves it +3.0 / +1.0 km, 20 km +7 / +6 km and
+    40 km +21 / +19 km.
+
+    ⚠ WHY THIS IS THE CONDITION, AND WHY THE TOPOGRAPHY IS NOT
+    (Dan, 2026-10-15; conventions §3.2). Vertical equilibrium integrated
+    over the column gives dV/ds = -rho_m g w, so dV/dx = 0 says the column
+    carries no non-isostatic load -- which is what "first isostatic
+    column" means. COMPENSATED TOPOGRAPHY PRODUCES NO SHEAR GRADIENT, so
+    this criterion is blind to the plate's cooling subsidence and to the
+    basin-scale tilt, by construction.
+
+    The retired picker was not. It compared the topography at x against
+    the topography 500 km seaward and stopped where they were equal --
+    but those 500 km of plate carry real elevation change from cooling
+    AND from the tilt. Measured here: the regional topographic gradient
+    in flexure-free windows is +94 m / 100 km (STD) and +141 (WAL),
+    consistent over four windows between 600 and 2000 km, so the level
+    500 km out sits 38 m (STD) / 57 m (WAL) ABOVE where an undeflected
+    plate would sit at x_I. The pick therefore waited for the topography
+    to climb above its own isostatic level and landed 3-6 km too far
+    seaward, worth 2-3 % of the measured trench pull.
+
+    That the two picks agreed to ~2 km was never evidence the reference
+    was unbiased: the routine stops where the two elevations are equal,
+    so their equality at the pick is a tautology.
+
+    Returns the index of the first isostatic column.
+    """
+    buffer_grid = int(buffer_km * 1000.0 / DX)
+    window_grid = int(window_km * 1000.0 / DX)
+    i_start = max(0, min(len(x) - 1, tindx + seaward_sign * buffer_grid))
+    i_end   = max(0, min(len(x) - 1, tindx + seaward_sign * window_grid))
+    lo, hi = (i_start, i_end) if i_start < i_end else (i_end, i_start)
+    if hi - lo < 10:
+        raise RuntimeError('find_first_isostatic_column: search window is '
+                           f'{hi - lo} columns wide — check buffer_km, '
+                           'window_km and seaward_sign')
+    seg = np.nan_to_num(V[lo:hi + 1])
+    if smooth_km:
+        from scipy.ndimage import gaussian_filter1d
+        seg = gaussian_filter1d(seg, smooth_km * 1000.0 / DX, mode='nearest')
+    return lo + int(np.argmin(seg))
+
+
+def find_first_isostatic_column_topo(x, fs_top, x_trench, tindx, DX,
+                                     buffer_km=30, window_km=500,
+                                     regional_ref_km=500, seaward_sign=+1):
+    """RETIRED AS THE PICK, kept as the cross-check (conventions §3.2).
+
+    Walks seaward of the trench and returns the first index at which the
+    topography is back up to the topography `regional_ref_km` seaward.
+    Carries the cooling-plus-tilt bias documented above; use it only to
+    quote the offset against the dV/dx pick, never to pick a column.
 
     Returns (i_first_isostatic, i_far_reference).
     """

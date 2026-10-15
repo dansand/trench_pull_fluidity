@@ -63,7 +63,8 @@ OUT = os.path.join(ROOT, 'notebooks', 'outputs', 'trench_plane.npz')
 Y = 2_900_000.0
 DX_PICK = 1000.0          # grid for the trench / x_I pickers (as the suite)
 Z_PICK = 250e3
-from column_profiles_cache import T_MIN_MYR   # the only spin-up cut
+from column_profiles_cache import (T_MIN_MYR, ZC_KM,   # the only spin-up cut,
+                                   integrate_to_zc)  # z_c and integrator
 SPY = 31_557_600.0
 
 # the narrow patch: seaward is -x in the native frame, and the tilted plane
@@ -129,8 +130,15 @@ def build():
             # commit 804e28a); this copy survived it because its x_I feeds no
             # figure. Fixed anyway -- a stale extraction is a latent bug.
             fs_top = surface_fs(v, xg, mirror_x=False)
-            iI, _ = find_first_isostatic_column(xg, fs_top, xT, ti,
-                                                DX_PICK, seaward_sign=-1)
+            # x_I IS THE dV/dx ZERO (conventions §3.2, 2026-10-15):
+            # the local minimum of the vertical shear resultant, which is
+            # blind to compensated topography and so carries none of the
+            # cooling-plus-tilt bias the old topographic reference did.
+            _m = zg <= ZC_KM * 1e3
+            V_pick = integrate_to_zc(gf('txz')[_m].T, zg[_m],
+                                     ZC_KM * 1e3, axis=1)
+            iI = find_first_isostatic_column(xg, V_pick, xT, ti,
+                                             DX_PICK, seaward_sign=-1)
             xI = float(xg[iI])
             del g
 
