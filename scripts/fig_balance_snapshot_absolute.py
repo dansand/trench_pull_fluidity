@@ -392,8 +392,11 @@ def main():
     # "surface topography", so one word links the axis to the curve and the
     # sign convention lives in the caption (Dan, 2026-10-15).
     axes[0, 0].set_ylabel('Topography  $w$  [m]', fontsize=12)
-    axes[1, 0].set_ylabel('Force  [TN/m]', fontsize=12)
-    axes[2, 0].set_ylabel('Force  [TN/m]', fontsize=12)
+    # 'HORIZONTAL FORCE', not bare 'Force' (Dan, 2026-10-15): every term in
+    # these two rows is a force per unit distance acting in x, and saying so
+    # separates them from row 4 by direction as well as by what they act on.
+    axes[1, 0].set_ylabel('Horizontal force  [TN/m]', fontsize=12)
+    axes[2, 0].set_ylabel('Horizontal force  [TN/m]', fontsize=12)
     # ROWS 2-3 ARE FORCES ON THE PLATE SEGMENT from x_T to x; ROW 4 IS A
     # SINGLE COLUMN'S RESULTANT (Dan, 2026-10-15). All three were labelled
     # 'Force [TN/m]', which read as one quantity in three panels.
