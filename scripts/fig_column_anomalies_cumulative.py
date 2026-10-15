@@ -168,52 +168,24 @@ def main():
                         color=C_RIDGE, alpha=0.30, lw=0, zorder=1)
         # LITHOSTATIC APPROXIMATION per column, surface-referenced:
         #   Delta P(z) = Delta P(0) + g int_0^z (rho_X - rho_I) dz'
-        # The trench curve is terminated at 125 km: under this approximation
-        # the trench anomaly never equilibrates, so its integral grows
-        # without bound with the chosen depth and a curve drawn to the axis
-        # floor would imply a limit that does not exist.
+        # Both curves run the full depth of the panel.
         for col, rk, cc in (('T', 'rho_T', C_TRENCH), ('R', 'rho_R', C_RIDGE)):
             meas = (sm(c[f'p_{col}'])[m].mean(axis=0)) / 1e6
             rd = (d[f'{k}_{rk}'] - d[f'{k}_rho_I'])[m].mean(axis=0)
             lith = meas[0] + np.concatenate(
                 [[0.0], np.cumsum(rd) * float(np.diff(z)[0])])[:len(z)] * 9.8 / 1e6
-            if col == 'T':
-                w = zkm <= 125.0
-                # THE ZERO-DENSITY-CONTRAST COUNTERFACTUAL IS GONE, AND SO
-                # IS THE QUESTION MARK (Dan, 2026-10-15). A hairline at
-                # lith[0] was drawn so the reader could see the dashed
-                # curve lean against true vertical. At this scale the two
-                # are indistinguishable -- which is the finding, not a
-                # drafting failure: the curve departs from its own surface
-                # value by 2.6 MPa (STD) / 2.3 (WAL) over 125 km, 4 %,
-                # because the columns differ by only ~2 kg/m3. A number in
-                # the caption says that; a second line that plots on top of
-                # the first cannot.
-                #
-                # The '...?' is replaced by words. What it meant is the
-                # strongest point on this panel: under the lithostatic
-                # approximation the trench anomaly NEVER equilibrates, so
-                # the force it implies has no limit -- 4.9 TN/m at z_c,
-                # 7.7 at 125 km, 12.2 at 200 km (STD). That is the case
-                # against lithostatic trench pull and it was carried by a
-                # punctuation mark.
-                # NO label on the curve itself (Dan, 2026-09-30): there are
-                # TWO lithostatic curves, one per column, and labelling only
-                # this one put a blue handle in the legend against a phrase
-                # that covers both. A neutral grey proxy is added below.
-                a0.plot(lith[w], zkm[w], '--', color=cc, lw=1.5, alpha=0.85)
-                # THE CURVE JUST STOPS, AND A LABEL SAYS WHY (Dan,
-                # 2026-10-15). No dotted continuation and no arrowhead: a
-                # truncated line plus words is the whole statement, and the
-                # dots only ever gestured at it.
-                # TWO LINES: centred on the curve, a single line ran off
-                # the left spine (the curve sits at ~-61 MPa on a -80..80
-                # axis, and half the string is wider than the 19 MPa left).
-                a0.text(lith[w][-1], 134.0, "doesn't\nequilibrate", color=cc,
-                        fontsize=10.5, ha='center', va='top',
-                        linespacing=1.25)
-            else:
-                a0.plot(lith, zkm, '--', color=cc, lw=1.5, alpha=0.85)
+            # BOTH COLUMNS' LITHOSTATIC CURVES RUN THE FULL DEPTH (Dan,
+            # 2026-10-15). The trench one used to stop at 125 km, first
+            # with a '...?' and then with a label, on the reasoning that
+            # the approximation never equilibrates so a curve drawn to the
+            # floor would imply a limit that does not exist. Drawing it all
+            # the way down says the same thing better: it is still at its
+            # surface value at 200 km, and the reader can see that without
+            # being told. The zero-density-contrast hairline is gone too --
+            # the curve departs from its own surface value by 2.6 MPa (STD)
+            # / 2.3 (WAL) over 125 km, 4 %, so a second line plotted on top
+            # of the first showed nothing a caption number cannot.
+            a0.plot(lith, zkm, '--', color=cc, lw=1.5, alpha=0.85)
         # grey proxy: the dashed style belongs to both columns, so the
         # legend key carries no column colour
         a0.plot([], [], '--', color='0.45', lw=1.5, label='lithostatic approx.')
