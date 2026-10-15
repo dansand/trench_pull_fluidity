@@ -430,7 +430,12 @@ def main():
     # ROWS 2-3 ARE FORCES ON THE PLATE SEGMENT from x_T to x; ROW 4 IS A
     # SINGLE COLUMN'S RESULTANT (Dan, 2026-10-15). All three were labelled
     # 'Force [TN/m]', which read as one quantity in three panels.
-    axes[3, 0].set_ylabel('Column resultant  [TN/m]', fontsize=12)
+    # THE SYMBOL, not a words-phrase (Dan, 2026-10-15). Every other
+    # single-quantity force axis in the repo names its symbol -- $N_D$ in
+    # fig_balance_linear, $N_D(x_T)$ in fig_stress_state, $F_{tilt}$ in
+    # fig_tilt_velocity -- so 'Column resultant' was the odd one out. The
+    # rows above carry several terms at once and keep a words label.
+    axes[3, 0].set_ylabel(r'$N_D(x)$  [TN/m]', fontsize=12)
     # The row-4 legend is NOT optional (Dan, 2026-09-25): the y label says
     # only 'Force per unit distance', so nothing else on the panel
     # identifies which resultant this is -- and the point of the row is
